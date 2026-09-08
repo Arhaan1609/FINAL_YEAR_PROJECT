@@ -40,6 +40,7 @@ interface FleetStoreState {
   viewMode: ViewMode;
   vehicles: FleetVehicle[];
   selectedVehicleId: string;
+  selectedLiveTriage: "CRITICAL" | "WARNING" | "NOMINAL" | null;
   activeTab: DashboardTab;
   isMock: boolean;
   isLiveBackendConnected: boolean;
@@ -56,9 +57,10 @@ interface FleetStoreState {
   // Actions
   setTheme: (theme: ThemeMode) => void;
   toggleTheme: () => void;
-  setViewMode: (mode: ViewMode) => void;
+  setViewMode: (viewMode: ViewMode) => void;
   toggleViewMode: () => void;
   setSelectedVehicle: (id: string) => void;
+  setSelectedLiveTriage: (vehicleId: string, triage: "CRITICAL" | "WARNING" | "NOMINAL" | null) => void;
   setActiveTab: (tab: DashboardTab) => void;
   setIsMock: (mock: boolean) => void;
   setIsLiveBackendConnected: (connected: boolean) => void;
@@ -91,6 +93,7 @@ export const useFleetStore = create<FleetStoreState>((set, get) => ({
   viewMode: "operations", // Default is user-friendly Operations Mode!
   vehicles: MOCK_VEHICLES,
   selectedVehicleId: MOCK_VEHICLES[0]?.id || "DL1LAN0707",
+  selectedLiveTriage: null,
   activeTab: "fleet",
   isMock: false, // LIVE API Connected to port 8000
   isLiveBackendConnected: true,
@@ -141,6 +144,7 @@ export const useFleetStore = create<FleetStoreState>((set, get) => ({
     if (v) {
       set({
         selectedVehicleId: v.id,
+        selectedLiveTriage: null,
         telemetry: {
           voltage: v.voltage,
           current: v.current,
@@ -163,6 +167,14 @@ export const useFleetStore = create<FleetStoreState>((set, get) => ({
       });
     }
   },
+
+  setSelectedLiveTriage: (vehicleId, triage) =>
+    set((state) => {
+      if (vehicleId.toUpperCase() === state.selectedVehicleId.toUpperCase()) {
+        return { selectedLiveTriage: triage };
+      }
+      return {};
+    }),
 
   setActiveTab: (tab: DashboardTab) => set({ activeTab: tab }),
 

@@ -13,6 +13,7 @@ export const Header: React.FC = () => {
     vehicles,
     selectedVehicleId,
     setSelectedVehicle,
+    selectedLiveTriage,
     isMock,
     setIsMock,
     copilotOpen,
@@ -58,7 +59,9 @@ export const Header: React.FC = () => {
           className="bg-transparent text-xs font-mono font-bold text-slate-800 dark:text-slate-200 focus:outline-none cursor-pointer pr-1"
         >
           {vehicles.map((v) => {
-            const triage = getVehicleTriage(v);
+            const isSelected = v.id === selectedVehicleId;
+            const staticTriage = getVehicleTriage(v);
+            const triage = isSelected && selectedLiveTriage ? selectedLiveTriage : staticTriage;
             return (
               <option key={v.id} value={v.id} className="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-200">
                 {v.id} — {v.model.split(" ")[0]} ({triageLabel(triage)}) • {v.fleet.split(" ")[0]}
@@ -66,6 +69,14 @@ export const Header: React.FC = () => {
             );
           })}
         </select>
+        {selectedLiveTriage && selectedVehicle && selectedLiveTriage !== getVehicleTriage(selectedVehicle) && (
+          <span
+            className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 dark:bg-amber-950/80 dark:text-amber-300 border border-amber-300 dark:border-amber-800 whitespace-nowrap"
+            title={`Registry was '${triageLabel(getVehicleTriage(selectedVehicle))}', but live ML telemetry evaluated accelerated degradation and escalated to '${triageLabel(selectedLiveTriage)}'`}
+          >
+            Live ML: {triageLabel(selectedLiveTriage)}
+          </span>
+        )}
       </div>
 
       {/* Right: Controls & Copilot Button */}

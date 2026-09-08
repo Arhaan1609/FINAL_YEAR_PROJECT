@@ -2,20 +2,18 @@
  * Unified API Data Schemas & Types for EV Battery Intelligence Platform
  */
 
-// 1. Health
+// 1. Health — matches actual FastAPI /health response
 export interface HealthResponse {
-  status: string;
-  modules: {
-    module_a_fleet: {
-      SOC: boolean;
-      SOH: boolean;
-      RUL: boolean;
-      Mileage: boolean;
-    };
-    module_b_battery_iq: boolean;
-    module_c_babms: boolean;
+  status: "ok" | "degraded" | "unavailable" | string;
+  module_a_models: {
+    SOC: boolean;
+    SOH: boolean;
+    RUL: boolean;
+    Mileage: boolean;
   };
-  timestamp: string;
+  module_b_engine: boolean;
+  module_c_engine: boolean;
+  message: string;
 }
 
 // 2. Module A — Predictions
@@ -24,6 +22,8 @@ export interface ModelPredictionResponse {
   model_used: string;
   prediction: number;
   unit: string;
+  interpretation?: string;
+  confidence_margin?: number;
 }
 
 export interface SOCRequest {
@@ -241,8 +241,10 @@ export interface MetaEnsembleResponse {
   rul_to_knee_cycles: number;
   driver_aggressiveness_index: number;
   battery_stress_index: number;
+  health_status: string;
   unified_health_grade: string;
   executive_summary: string;
+  ensemble_architecture?: string;
 }
 
 // 5. Vehicle Entity for UI Selection

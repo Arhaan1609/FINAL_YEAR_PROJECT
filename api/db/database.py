@@ -6,7 +6,7 @@ Attempts to connect to MySQL (database 'EV') and gracefully falls back to SQLite
 import os
 import json
 from sqlalchemy import create_engine, text
-from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import declarative_base
 from sqlalchemy.orm import sessionmaker
 
 # Configurable MySQL Parameters

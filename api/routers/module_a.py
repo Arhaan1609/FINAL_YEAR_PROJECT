@@ -1,12 +1,15 @@
 """
 api/routers/module_a.py — REST endpoints for Module A predictions.
-Serves: SOC (Random Forest), SOH (Extra Trees), RUL (Random Forest), Mileage (XGBoost).
+Serves: SOC (XGBoost/GradientBoosting), SOH (Calibrated XGBoost/Ridge),
+        RUL (GradientBoosting/XGBoost), Mileage (XGBoost).
+Champion models are loaded dynamically from group-split pkl files at startup.
 """
 
 import os
 import sys
 import logging
 import numpy as np
+import pandas as pd
 import joblib
 from fastapi import APIRouter, HTTPException
 
@@ -21,6 +24,14 @@ import config as cfg
 from api.schemas import SOCRequest, SOHRequest, RULRequest, MileageRequest, PredictionResponse
 
 router = APIRouter(prefix="/predict", tags=["Module A — Fleet Predictions"])
+
+# Kilometres driven per one equivalent full charge cycle (fleet empirical constant)
+KM_PER_CYCLE: float = 58.0
+
+# Fleet odometer z-score constants for RUL model pre-normalization
+# (The groupsplit RUL model expects pre-z-scored odometer, matching features_rul.csv)
+_RUL_ODO_MEAN: float = 12824.284087473547   # mean raw odometer in km across training fleet
+_RUL_ODO_SCALE: float = 10243.910208921825  # std  raw odometer in km across training fleet
 
 # ──────────────────────────────────────────────
 #  Model Registry — loaded once at startup
@@ -45,6 +56,18 @@ try:
                 if "id" in v: _KNOWN_BASELINES[str(v["id"])] = float(v.get("soh", 95.0))
 except Exception as e:
     print(f"  [WARNING] Could not preload baseline SOH lookup table: {e}")
+
+_SCALER_SOH = None
+_SCALER_SOC = None
+try:
+    soh_scaler_path = os.path.join(cfg.MODELS_DIR, "module_a", "soh", "scaler_soh.pkl")
+    if os.path.exists(soh_scaler_path):
+        _SCALER_SOH = joblib.load(soh_scaler_path)
+    soc_scaler_path = os.path.join(cfg.MODELS_DIR, "module_a", "soc", "scaler_soc.pkl")
+    if os.path.exists(soc_scaler_path):
+        _SCALER_SOC = joblib.load(soc_scaler_path)
+except Exception as e:
+    print(f"  [WARNING] Could not preload feature scalers: {e}")
 
 
 def _patch_model_compatibility(model):
@@ -180,11 +203,17 @@ def _predict(task: str, feature_dict: dict) -> PredictionResponse:
     odo = _safe_float(feature_dict.get("odometer"), 0.0)
     passed_cycles = _safe_float(feature_dict.get("charge_cycle_count"), 0.0)
     if odo > 0 and passed_cycles == 0:
-        cycles = round(odo / 58.0, 1)
+        cycles = round(odo / KM_PER_CYCLE, 1)
     elif passed_cycles > 0:
         cycles = passed_cycles
     else:
         cycles = 0.0
+        if task == "RUL":
+            logger.warning(
+                f"[DATA SENTINEL WARNING] Task=RUL: Both 'odometer' and 'charge_cycle_count' "
+                f"are zero/missing. RUL will default to training-set averages — provide real "
+                f"odometer or cycle count for accurate prediction."
+            )
 
     v = _safe_float(feature_dict.get("battery_voltage"), 74.0)
     t = _safe_float(feature_dict.get("battery_temp"), 32.0)
@@ -213,7 +242,12 @@ def _predict(task: str, feature_dict: dict) -> PredictionResponse:
     synthesized["charge_cycle_count"] = cycles
     synthesized["charge_cycles"] = cycles
     synthesized["cycle_count"] = cycles
-    synthesized["odometer"] = odo
+    # For RUL model: the groupsplit model expects pre-z-scored odometer (matching training CSV)
+    # Pass the z-scored value; the pipeline's internal scaler will re-scale it correctly
+    if task == "RUL":
+        synthesized["odometer"] = (odo - _RUL_ODO_MEAN) / _RUL_ODO_SCALE
+    else:
+        synthesized["odometer"] = odo
     synthesized["soc_at_charge"] = soc
     synthesized["soc"] = soc
     synthesized["soh"] = init_soh
@@ -289,6 +323,15 @@ def _predict(task: str, feature_dict: dict) -> PredictionResponse:
     synthesized.setdefault("model_encoded", _safe_int(feature_dict.get("model_encoded"), 0))
     synthesized.setdefault("city_encoded", _safe_int(feature_dict.get("city_encoded"), 0))
 
+    if task == "SOH" and _SCALER_SOH is not None:
+        try:
+            raw_s_df = pd.DataFrame([{c: synthesized.get(c, 0.0) for c in _SCALER_SOH.feature_names_in_}])
+            scaled_v = _SCALER_SOH.transform(raw_s_df)[0]
+            for idx, c in enumerate(_SCALER_SOH.feature_names_in_):
+                synthesized[c] = float(scaled_v[idx])
+        except Exception:
+            pass
+
     # Extract expected feature names from model if available
     expected_cols = None
     if hasattr(model, "feature_names_in_"):
@@ -301,7 +344,6 @@ def _predict(task: str, feature_dict: dict) -> PredictionResponse:
 
     if expected_cols:
         row = {col: synthesized.get(col, 0.0) for col in expected_cols}
-        import pandas as pd
         X = pd.DataFrame([row])
     else:
         X = np.array([[synthesized.get(k, 0.0) for k in synthesized]], dtype=np.float64)
@@ -345,23 +387,23 @@ def _predict(task: str, feature_dict: dict) -> PredictionResponse:
 
 @router.post("/soc", response_model=PredictionResponse, summary="State of Charge Prediction")
 def predict_soc(req: SOCRequest):
-    """Predict current battery State of Charge (%) using the champion Random Forest model."""
+    """Predict current battery State of Charge (%) using the loaded champion model."""
     return _predict("SOC", req.model_dump())
 
 
 @router.post("/soh", response_model=PredictionResponse, summary="State of Health Prediction (Tabular)")
 def predict_soh(req: SOHRequest):
-    """Predict battery State of Health (%) using the champion Extra Trees model."""
+    """Predict battery State of Health (%) using the loaded champion model."""
     return _predict("SOH", req.model_dump())
 
 
 @router.post("/rul", response_model=PredictionResponse, summary="Remaining Useful Life Prediction")
 def predict_rul(req: RULRequest):
-    """Predict remaining charge cycles before battery end-of-life (Random Forest)."""
+    """Predict remaining charge cycles before battery end-of-life using the loaded champion model."""
     return _predict("RUL", req.model_dump())
 
 
 @router.post("/mileage", response_model=PredictionResponse, summary="Mileage per Charge Prediction")
 def predict_mileage(req: MileageRequest):
-    """Predict range (km) achievable on a full charge using champion XGBoost model."""
+    """Predict SOC-adjusted range (km) using the loaded champion model."""
     return _predict("Mileage", req.model_dump())

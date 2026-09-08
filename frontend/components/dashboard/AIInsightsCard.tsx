@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import { Sparkles, RefreshCw, AlertOctagon, AlertTriangle, CheckCircle2, Cpu, Wrench, Flame, HelpCircle } from "lucide-react";
 import { VehicleInsightResponse } from "../../lib/api/types";
 import { explainVehicle } from "../../lib/api/copilot";
+import { getVehicleTriage, resolveLiveTriage, triageLabel } from "../../lib/triage";
 
 interface AIInsightsCardProps {
   vehicle: any;
@@ -22,21 +23,31 @@ export const AIInsightsCard: React.FC<AIInsightsCardProps> = ({ vehicle, livePre
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
 
   const fetchInsight = async (force: boolean = false) => {
-    if (!vehicle?.id) return;
+    const targetVehicleId = vehicle?.id;
+    if (!targetVehicleId) return;
     if (force) setIsRefreshing(true);
     else setLoading(true);
 
     try {
-      const data = await explainVehicle(vehicle.id, vehicle, livePredictions, force);
-      setInsight(data);
-      if (onUrgencyChange && data?.urgency) {
-        onUrgencyChange(data.urgency);
+      const data = await explainVehicle(targetVehicleId, vehicle, livePredictions, force);
+      if (vehicle?.id === targetVehicleId) {
+        setInsight(data);
+        if (onUrgencyChange) {
+          const resolved = resolveLiveTriage(
+            data?.urgency ?? null,
+            livePredictions?.soh ?? vehicle?.soh,
+            livePredictions?.soc ?? vehicle?.soc,
+            vehicle?.battery_temp,
+            vehicle?.status
+          );
+          onUrgencyChange(resolved);
+        }
       }
     } catch (e) {
       console.error("[AIInsightsCard] Failed to fetch diagnostic:", e);
     } finally {
-      setLoading(false);
       setIsRefreshing(false);
+      setLoading(false);
     }
   };
 
@@ -60,8 +71,15 @@ export const AIInsightsCard: React.FC<AIInsightsCardProps> = ({ vehicle, livePre
 
   if (!insight) return null;
 
-  const isCritical = insight.urgency === "CRITICAL";
-  const isWarning = insight.urgency === "WARNING";
+  const resolvedTriage = resolveLiveTriage(
+    insight.urgency,
+    livePredictions?.soh ?? vehicle?.soh,
+    livePredictions?.soc ?? vehicle?.soc,
+    vehicle?.battery_temp,
+    vehicle?.status
+  );
+  const isCritical = resolvedTriage === "CRITICAL";
+  const isWarning = resolvedTriage === "WARNING";
 
   return (
     <div className={`p-5 rounded-2xl border shadow-sm transition-all duration-300 ${
@@ -84,7 +102,7 @@ export const AIInsightsCard: React.FC<AIInsightsCardProps> = ({ vehicle, livePre
             <Sparkles className="w-4 h-4" />
           </div>
           <div>
-            <h3 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+            <h3 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2 flex-wrap">
               <span>AI Powertrain Diagnostic & Root Cause</span>
               <span className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase tracking-wider ${
                 isCritical
@@ -93,9 +111,13 @@ export const AIInsightsCard: React.FC<AIInsightsCardProps> = ({ vehicle, livePre
                   ? "bg-amber-100 dark:bg-amber-900/60 text-amber-700 dark:text-amber-300 border border-amber-300 dark:border-amber-800"
                   : "bg-emerald-100 dark:bg-emerald-900/60 text-emerald-700 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800"
               }`}>
-                {isCritical ? "SERVICE HOLD" : isWarning ? "ROUTE ADVISORY" : "APPROVED FOR DISPATCH"}
+                {triageLabel(resolvedTriage)}
               </span>
-
+              {vehicle?.status && triageLabel(getVehicleTriage(vehicle)) !== triageLabel(resolvedTriage) && (
+                <span className="text-[10px] font-mono font-medium text-amber-700 dark:text-amber-300 bg-amber-100 dark:bg-amber-950/60 border border-amber-300 dark:border-amber-800 px-1.5 py-0.5 rounded">
+                  Registry: {triageLabel(getVehicleTriage(vehicle))} → Live ML Escalated
+                </span>
+              )}
             </h3>
           </div>
         </div>

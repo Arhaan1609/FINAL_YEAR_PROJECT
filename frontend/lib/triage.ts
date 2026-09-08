@@ -76,6 +76,28 @@ export function getLiveTriage(
   return base;
 }
 
+// ─── 3. RESOLVED TRIAGE (Single Owner Precedence) ────────────────────────────
+// Resolves final live triage by evaluating raw ML model triage and reconciling
+// with AI Copilot urgency under strict highest-severity precedence.
+export function resolveLiveTriage(
+  aiUrgency: TriageLevel | null | undefined,
+  soh: number,
+  soc: number,
+  temp: number,
+  rawStatus: string
+): TriageLevel {
+  const modelTriage = getLiveTriage(soh, soc, temp, rawStatus);
+  if (!aiUrgency) return modelTriage;
+
+  const severityRank: Record<TriageLevel, number> = {
+    CRITICAL: 3,
+    WARNING: 2,
+    NOMINAL: 1,
+  };
+
+  return severityRank[aiUrgency] >= severityRank[modelTriage] ? aiUrgency : modelTriage;
+}
+
 // ─── Backwards-compat alias ───────────────────────────────────────────────────
 export function getVehicleTriage(v: { status: string }): TriageLevel {
   return getStaticTriage(v.status);
@@ -86,7 +108,7 @@ export function getVehicleTriage(v: { status: string }): TriageLevel {
 export function triageLabel(level: TriageLevel): string {
   if (level === "CRITICAL") return "SERVICE HOLD";
   if (level === "WARNING")  return "ROUTE ADVISORY";
-  return "ACTIVE";
+  return "APPROVED FOR DISPATCH";
 }
 
 export function triageBadgeClass(level: TriageLevel): string {

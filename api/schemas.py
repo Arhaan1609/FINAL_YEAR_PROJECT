@@ -187,6 +187,7 @@ class MetaEnsembleRequest(BaseSchema):
     battery_temp: float = Field(..., ge=-20, le=120)
     battery_current: float = Field(...)
     soc: float = Field(..., ge=0, le=100)
+    initial_soh: Optional[float] = Field(None, gt=0, le=100, description="Vehicle's current/baseline SOH % (from Module A or DB). If provided, used as degraded baseline instead of linear heuristic.")
     harsh_accel_count: float = Field(0.0, ge=0)
     speed_variance: float = Field(5.0, ge=0)
 

@@ -120,9 +120,21 @@ def predict_meta_ensemble(req: MetaEnsembleRequest):
         'soc': req.soc,
     })
 
+
     # 3. Estimated SOH incorporating behavioral degradation
-    base_soh = max(0.0, min(100.0, 100.0 - (req.charge_cycle_count / 1500.0) * 20.0))
-    beh_adjusted_soh = round(max(0.0, base_soh - beh["annual_soh_penalty_percent"]), 2)
+    # Prioritize caller-provided real SOH (from Module A XGBoost or DB), else use physics-informed LFP model
+    if req.initial_soh is not None and req.initial_soh > 0:
+        # Use the verified degraded SOH directly (from Module A or vehicle DB record)
+        base_soh = float(req.initial_soh)
+    else:
+        # Physics-informed LFP capacity fade: Euler HiLoad LFP degrades ~0.015%/cycle at nominal temp (30°C)
+        # Thermal acceleration: +0.4% fade per 1°C above 35°C baseline
+        temp_accel = max(0.0, req.battery_temp - 35.0) * 0.004
+        cycle_fade_pct = req.charge_cycle_count * (0.015 + temp_accel)
+        # Cap total fade to realistic 30% max at 2000+ cycles (LFP end-of-life)
+        base_soh = max(70.0, min(100.0, 100.0 - cycle_fade_pct))
+    beh_adjusted_soh = round(max(0.0, base_soh - beh["annual_soh_penalty_percent"] * 0.2), 2)
+
 
     if beh_adjusted_soh >= 90 and knee["rul_to_knee_cycles"] > 300:
         grade = "Grade A (Optimal)"

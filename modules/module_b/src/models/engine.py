@@ -142,6 +142,13 @@ class BatteryIQEngine:
     def predict_soh_sequence(self, input_seq: SOHSequenceInput) -> SOHPredictionOutput:
         """Direct SOH evaluation for chronological charge cycle sequences."""
         matrix = np.array(input_seq.sequence, dtype=np.float32)
+        win = self.preprocessor.window_length
+        if len(matrix) < win:
+            pad_count = win - len(matrix)
+            padding = np.repeat(matrix[:1], pad_count, axis=0)
+            matrix = np.vstack([padding, matrix])
+        elif len(matrix) > win:
+            matrix = matrix[-win:]
         norm_matrix = self.preprocessor.normalize_soh_matrix(matrix)
         return self.soh_model.predict_soh(norm_matrix)
 

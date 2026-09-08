@@ -73,12 +73,10 @@ function jitter(base: number, percent: number = 2): number {
 export function getMockHealth(): HealthResponse {
   return {
     status: "ok",
-    modules: {
-      module_a_fleet: { SOC: true, SOH: true, RUL: true, Mileage: true },
-      module_b_battery_iq: true,
-      module_c_babms: true,
-    },
-    timestamp: new Date().toISOString(),
+    module_a_models: { SOC: true, SOH: true, RUL: true, Mileage: true },
+    module_b_engine: true,
+    module_c_engine: true,
+    message: "EV Battery Intelligence API Operational (Mock Mode)",
   };
 }
 
@@ -300,13 +298,33 @@ export function getMockMetaEnsemble(req: MetaEnsembleRequest): MetaEnsembleRespo
     max_discharge_current: 35.0,
   });
 
+  const estimatedSoh = jitter(94.5, 1);
+  const healthStatus: "Optimal" | "Nominal" | "Warning" | "Critical" =
+    estimatedSoh >= 90 && knee.rul_to_knee_cycles > 300
+      ? "Optimal"
+      : estimatedSoh >= 82 && knee.rul_to_knee_cycles > 100
+      ? "Nominal"
+      : estimatedSoh >= 75 || knee.rul_to_knee_cycles > 0
+      ? "Warning"
+      : "Critical";
+
+  const grade =
+    healthStatus === "Optimal"
+      ? "Grade A (Optimal)"
+      : healthStatus === "Nominal"
+      ? "Grade B (Nominal Fleet Standard)"
+      : healthStatus === "Warning"
+      ? "Grade C (Knee Proximity / High Wear)"
+      : "Grade D (Post-Knee Accelerated Degradation)";
+
   return {
     vehicle_id: req.vehicle_id,
-    estimated_soh: jitter(94.5, 1),
+    estimated_soh: estimatedSoh,
     rul_to_knee_cycles: knee.rul_to_knee_cycles,
     driver_aggressiveness_index: behavior.aggressiveness_index,
     battery_stress_index: behavior.battery_stress_index,
-    unified_health_grade: knee.is_post_knee ? "Grade C (Aging Risk)" : behavior.aggressiveness_index > 0.6 ? "Grade B (Wear Alert)" : "Grade A (Optimal)",
+    health_status: healthStatus,
+    unified_health_grade: grade,
     executive_summary: `Vehicle ${req.vehicle_id} operating in ${knee.knee_risk_state}. Driver classified as ${behavior.driver_classification} with ${knee.rul_to_knee_cycles} cycles remaining to degradation knee.`,
   };
 }

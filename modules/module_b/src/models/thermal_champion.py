@@ -74,7 +74,11 @@ class MultiZoneThermalRandomForest:
             probs = self.model.predict_proba(feature_vector)[0]
             # Class 1 is Critical
             prob_critical = float(probs[1]) if len(probs) > 1 else float(probs[0])
-            is_critical = bool(prob_critical >= 0.50)
+            # Fail-safe physics guard: If physical thresholds are violated (vbt>=50°C, vmt>=88°C, vct>=68°C, or deep discharge), force critical flag
+            physics_critical = bool(vbt >= 50.0 or vmt >= 88.0 or vct >= 68.0 or (soc < 10.0 and vbv < 48.0))
+            if physics_critical:
+                prob_critical = max(prob_critical, 0.95)
+            is_critical = bool(prob_critical >= 0.50 or physics_critical)
 
         # Determine active thermal hotspot & primary threat
         if vbt >= 50.0:

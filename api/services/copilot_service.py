@@ -9,9 +9,11 @@ Features in-memory caching and zero-crash deterministic fallback.
 import os
 import json
 import time
+import threading
 import requests
 from typing import Dict, Any, List, Optional
 from dotenv import load_dotenv
+from cachetools import TTLCache
 
 load_dotenv()
 
@@ -22,9 +24,13 @@ GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions"
 PRIMARY_MODEL = "openai/gpt-oss-120b"
 FAST_FALLBACK_MODEL = "openai/gpt-oss-20b"
 
-# In-memory diagnostic cache: { vehicle_id: { "timestamp": float, "data": dict } }
-_INSIGHTS_CACHE: Dict[str, Dict[str, Any]] = {}
-CACHE_TTL_SECONDS = 300  # 5 minutes cache per vehicle
+# Kilometres driven per one equivalent full charge cycle (shared fleet constant)
+KM_PER_CYCLE: float = 58.0
+
+# Thread-safe in-memory diagnostic cache: auto-expires after CACHE_TTL_SECONDS
+CACHE_TTL_SECONDS = 300  # 5 minutes
+_CACHE_LOCK = threading.Lock()
+_INSIGHTS_CACHE: TTLCache = TTLCache(maxsize=1000, ttl=CACHE_TTL_SECONDS)
 
 
 def _call_groq(messages: List[Dict[str, str]], response_format_json: bool = False, max_tokens: int = 1200) -> Optional[str]:
@@ -164,11 +170,12 @@ def _extract_json(text: str) -> Optional[Dict[str, Any]]:
 
 def explain_vehicle_performance(vehicle_id: str, telemetry: Dict[str, Any], predictions: Dict[str, Any], force_refresh: bool = False) -> Dict[str, Any]:
     """Generate structured 3-part diagnostic using GPT-OSS 120B or fallback."""
-    # Check cache
-    if not force_refresh and vehicle_id in _INSIGHTS_CACHE:
-        entry = _INSIGHTS_CACHE[vehicle_id]
-        if time.time() - entry["timestamp"] < CACHE_TTL_SECONDS:
-            res = dict(entry["data"])
+    # Check thread-safe TTL cache
+    if not force_refresh:
+        with _CACHE_LOCK:
+            cached = _INSIGHTS_CACHE.get(vehicle_id)
+        if cached:
+            res = dict(cached)
             res["cached"] = True
             return res
 
@@ -220,7 +227,7 @@ def explain_vehicle_performance(vehicle_id: str, telemetry: Dict[str, Any], pred
         f"Live ML Range per Charge: {range_km:.1f} km\n"
         f"Pack Voltage: {voltage:.1f}V | Pack Current: {current:.1f}A | Speed: {speed:.1f} km/h\n"
         f"Thermals -> Pack Core: {temp:.1f}°C | Controller: {controller_temp:.1f}°C | Motor: {motor_temp:.1f}°C\n"
-        f"Cumulative Cycles: {cycles} EFC | Odometer: {cycles * 58} km\n"
+        f"Cumulative Cycles: {cycles} EFC | Odometer: {cycles * KM_PER_CYCLE:.0f} km\n"
     )
 
     messages = [
@@ -243,13 +250,15 @@ def explain_vehicle_performance(vehicle_id: str, telemetry: Dict[str, Any], pred
                 "model_used": "GPT-OSS 120B (Groq)",
                 "cached": False
             }
-            _INSIGHTS_CACHE[vehicle_id] = {"timestamp": time.time(), "data": result}
+            with _CACHE_LOCK:
+                _INSIGHTS_CACHE[vehicle_id] = result
             return result
 
     # Fallback if LLM unavailable
     fallback_res = generate_deterministic_insight(vehicle_id, telemetry, predictions)
     fallback_res["urgency"] = official_urgency
-    _INSIGHTS_CACHE[vehicle_id] = {"timestamp": time.time(), "data": fallback_res}
+    with _CACHE_LOCK:
+        _INSIGHTS_CACHE[vehicle_id] = fallback_res
     return fallback_res
 
 

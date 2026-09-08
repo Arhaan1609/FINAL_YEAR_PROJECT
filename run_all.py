@@ -135,6 +135,11 @@ def _start_api(host: str = "0.0.0.0", port: int = 8000, reload: bool = False):
 
 def _start_cli():
     """Launch the interactive CLI prediction system."""
+    cli_script = os.path.join(_PROJECT_ROOT, "cli.py")
+    print(f"  Launching Interactive Terminal CLI ...\n")
+    subprocess.run([sys.executable, cli_script], cwd=_PROJECT_ROOT)
+
+
 def _retrain_all():
     """Run master autonomous retraining pipeline across all 3 modules."""
     script = os.path.join(_PROJECT_ROOT, "retrain_all.py")

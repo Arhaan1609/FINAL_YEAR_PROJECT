@@ -30,7 +30,7 @@ import {
 } from "lucide-react";
 import { AIInsightsCard } from "./AIInsightsCard";
 import { MetricExplainer } from "../ui/MetricExplainer";
-import { getLiveTriage, getVehicleTriage } from "../../lib/triage";
+import { getLiveTriage, getVehicleTriage, resolveLiveTriage, triageLabel, TriageLevel } from "../../lib/triage";
 
 
 
@@ -47,6 +47,7 @@ export const OperationsView: React.FC = () => {
     searchQuery,
     setSearchQuery,
     getFilteredVehicles,
+    setSelectedLiveTriage,
   } = useFleetStore();
 
   const vehicle = getSelectedVehicle();
@@ -59,11 +60,13 @@ export const OperationsView: React.FC = () => {
   const [thermalSafe, setThermalSafe] = useState<boolean>(true);
   const [driverScore, setDriverScore] = useState<string>("Smooth (Eco)");
   const [loading, setLoading] = useState<boolean>(false);
-  const [aiUrgency, setAiUrgency] = useState<"CRITICAL" | "WARNING" | "NOMINAL" | null>(null);
+  const [aiUrgency, setAiUrgency] = useState<TriageLevel | null>(null);
+  const [predictionsVehicleId, setPredictionsVehicleId] = useState<string>(vehicle.id);
 
   // Sync and fetch whenever selectedVehicleId changes
   useEffect(() => {
     let active = true;
+    const targetVehicleId = vehicle.id;
     setLoading(true);
     setAiUrgency(null);
 
@@ -162,7 +165,10 @@ export const OperationsView: React.FC = () => {
         else if (ai > 0.35) setDriverScore("Moderate (Normal)");
         else setDriverScore("Smooth (Eco-Pro)");
       }
-      setLoading(false);
+      if (active && targetVehicleId === vehicle.id) {
+        setPredictionsVehicleId(targetVehicleId);
+        setLoading(false);
+      }
     });
 
     return () => {
@@ -176,14 +182,21 @@ export const OperationsView: React.FC = () => {
   const warningCount = vehicles.filter((v) => v.status === "warning").length;
   const criticalCount = vehicles.filter((v) => v.status === "critical").length;
 
-  // Live triage for the selected vehicle (uses ML-predicted soh/soc/temp).
-  // AI copilot urgency takes highest priority if available.
-  // getLiveTriage only escalates from base status — never de-escalates.
-  const liveTriage = aiUrgency === "CRITICAL"
-    ? "CRITICAL"
-    : aiUrgency === "WARNING"
-    ? "WARNING"
-    : getLiveTriage(soh, soc, vehicle.battery_temp, vehicle.status);
+  // Live triage for the selected vehicle resolved via single-owner precedence
+  const liveTriage = resolveLiveTriage(
+    aiUrgency,
+    soh,
+    soc,
+    vehicle.battery_temp,
+    vehicle.status
+  );
+
+  // Publish triage only after matching predictions load for the currently selected vehicle
+  useEffect(() => {
+    if (predictionsVehicleId === vehicle.id && !loading) {
+      setSelectedLiveTriage(vehicle.id, liveTriage);
+    }
+  }, [predictionsVehicleId, vehicle.id, loading, liveTriage, setSelectedLiveTriage]);
 
   const isCritical = liveTriage === "CRITICAL";
   const isWarning  = liveTriage === "WARNING";
@@ -296,7 +309,7 @@ export const OperationsView: React.FC = () => {
                     : "bg-emerald-100 text-emerald-700 dark:bg-emerald-950/80 dark:text-emerald-300 border border-emerald-400"
                 }`}
               >
-                {isCritical ? "SERVICE HOLD" : isWarning ? "ROUTE ADVISORY" : "APPROVED FOR DISPATCH"}
+                {triageLabel(liveTriage)}
               </span>
             </div>
             <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
@@ -516,7 +529,7 @@ export const OperationsView: React.FC = () => {
                 <div className="text-right">
                   <div className="font-bold">{v.soc.toFixed(0)}% SOC</div>
                   <div className={`text-[10px] ${getVehicleTriage(v) === 'CRITICAL' ? 'text-rose-500' : getVehicleTriage(v) === 'WARNING' ? 'text-amber-500' : 'text-emerald-500'}`}>
-                    {v.soh.toFixed(0)}% SOH
+                    {v.soh.toFixed(0)}% SOH • {triageLabel(getVehicleTriage(v))}
                   </div>
                 </div>
               </button>

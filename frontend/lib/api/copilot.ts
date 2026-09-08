@@ -5,7 +5,7 @@
 import { CopilotMessage, CopilotResponse, VehicleInsightResponse } from "./types";
 import { isMockMode } from "./client";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000";
 
 /**
  * Ask the Fleet Copilot a natural language question with active vehicle context.
@@ -91,8 +91,11 @@ export async function explainVehicle(
   const rul = predictions?.rul ?? telemetry?.rul ?? 1000;
   const temp = telemetry?.battery_temp ?? 30.0;
   const cycles = telemetry?.charge_cycle_count ?? 300;
-  const isCrit = telemetry?.status === "critical" || soh < 75;
-  const isWarn = !isCrit && (telemetry?.status === "warning" || soh < 85 || soc < 30);
+  // Match canonical triage.ts thresholds exactly:
+  // CRITICAL: soh < 74  OR status === "critical"
+  // WARNING:  soh < 79  OR soc < 20  OR status === "warning"
+  const isCrit = telemetry?.status === "critical" || soh < 74;
+  const isWarn = !isCrit && (telemetry?.status === "warning" || soh < 79 || soc < 20);
 
   return {
     vehicle_id: vehicleId,

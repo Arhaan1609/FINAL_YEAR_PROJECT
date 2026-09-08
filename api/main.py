@@ -14,9 +14,14 @@ Usage:
 
 import os
 import sys
+import time
+import logging
 from contextlib import asynccontextmanager
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+
+logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(name)s: %(message)s")
+logger = logging.getLogger("api.telemetry")
 
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
@@ -111,6 +116,22 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+@app.middleware("http")
+async def audit_request_logging_middleware(request: Request, call_next):
+    """Log incoming API calls, timing, and response status codes."""
+    start_time = time.perf_counter()
+    try:
+        response = await call_next(request)
+        duration_ms = (time.perf_counter() - start_time) * 1000
+        # Avoid log noise from frequent health pollers
+        if request.url.path not in ("/health", "/"):
+            logger.info(f"{request.method} {request.url.path} -> {response.status_code} ({duration_ms:.1f}ms)")
+        return response
+    except Exception as exc:
+        duration_ms = (time.perf_counter() - start_time) * 1000
+        logger.error(f"{request.method} {request.url.path} -> 500 ERROR ({duration_ms:.1f}ms): {exc}", exc_info=True)
+        raise exc
 
 
 # ──────────────────────────────────────────────

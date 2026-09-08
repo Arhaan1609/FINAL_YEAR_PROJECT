@@ -20,7 +20,15 @@ import {
 } from "lucide-react";
 import { MetricExplainer } from "../ui/MetricExplainer";
 import { AIInsightsCard } from "../dashboard/AIInsightsCard";
-import { getLiveTriage, getVehicleTriage, triageLabel, triageBadgeClass, triageDotClass } from "../../lib/triage";
+import {
+  getLiveTriage,
+  getVehicleTriage,
+  resolveLiveTriage,
+  triageLabel,
+  triageBadgeClass,
+  triageDotClass,
+  TriageLevel,
+} from "../../lib/triage";
 
 
 
@@ -41,24 +49,43 @@ export const FleetOverviewTab: React.FC = () => {
     statusFilter,
     setStatusFilter,
     getFilteredVehicles,
+    selectedLiveTriage,
+    setSelectedLiveTriage,
   } = useFleetStore();
 
   const vehicle = getSelectedVehicle();
   const [currentPage, setCurrentPage] = useState(1);
 
-  // Dynamic live predictions state for active vehicle
-  const [livePredictions, setLivePredictions] = useState<{
+  // Dynamic live predictions state keyed by vehicle ID to prevent cross-vehicle state retention
+  const [predictionState, setPredictionState] = useState<{
+    vehicleId: string;
     soc?: number;
     soh?: number;
     rul?: number;
     mileage?: number;
     isLoading: boolean;
-  }>({ isLoading: false });
+  }>({
+    vehicleId: vehicle.id,
+    isLoading: false,
+  });
+
+  const [aiUrgency, setAiUrgency] = useState<TriageLevel | null>(null);
 
   // Query live model endpoints whenever selected vehicle changes
   useEffect(() => {
     let isMounted = true;
-    setLivePredictions((prev) => ({ ...prev, isLoading: true }));
+    const targetVehicleId = vehicle.id;
+
+    // Clear stale predictions from prior vehicle immediately upon vehicle change
+    setPredictionState({
+      vehicleId: targetVehicleId,
+      soc: undefined,
+      soh: undefined,
+      rul: undefined,
+      mileage: undefined,
+      isLoading: true,
+    });
+    setAiUrgency(null);
 
     Promise.allSettled([
       predictSOC({
@@ -89,15 +116,21 @@ export const FleetOverviewTab: React.FC = () => {
         max_speed: (vehicle.speed || 34) + 20,
       }),
     ]).then(([socRes, sohRes, rulRes, mileageRes]) => {
-      if (!isMounted) return;
-      setLivePredictions({
-        soc: socRes.status === "fulfilled" ? socRes.value.prediction : vehicle.soc,
-        soh: sohRes.status === "fulfilled" ? sohRes.value.prediction : vehicle.soh,
-        rul: rulRes.status === "fulfilled" ? Math.round(rulRes.value.prediction) : vehicle.rul,
-        mileage:
-          mileageRes.status === "fulfilled"
-            ? Math.round(mileageRes.value.prediction * 10) / 10
-            : vehicle.mileage,
+      if (!isMounted || targetVehicleId !== vehicle.id) return;
+      const predSoc = socRes.status === "fulfilled" ? socRes.value.prediction : vehicle.soc;
+      const predSoh = sohRes.status === "fulfilled" ? sohRes.value.prediction : vehicle.soh;
+      const predRul = rulRes.status === "fulfilled" ? Math.round(rulRes.value.prediction) : vehicle.rul;
+      const predMileage =
+        mileageRes.status === "fulfilled"
+          ? Math.round(mileageRes.value.prediction * 10) / 10
+          : vehicle.mileage;
+
+      setPredictionState({
+        vehicleId: targetVehicleId,
+        soc: predSoc,
+        soh: predSoh,
+        rul: predRul,
+        mileage: predMileage,
         isLoading: false,
       });
     });
@@ -105,7 +138,7 @@ export const FleetOverviewTab: React.FC = () => {
     return () => {
       isMounted = false;
     };
-  }, [vehicle]);
+  }, [vehicle.id]);
 
   const filteredVehicles = getFilteredVehicles();
   const totalPages = Math.ceil(filteredVehicles.length / PAGE_SIZE) || 1;
@@ -114,10 +147,32 @@ export const FleetOverviewTab: React.FC = () => {
     return filteredVehicles.slice(start, start + PAGE_SIZE);
   }, [filteredVehicles, currentPage]);
 
-  const socDisplay = (livePredictions.soc ?? vehicle.soc).toFixed(1);
-  const sohDisplay = (livePredictions.soh ?? vehicle.soh).toFixed(1);
-  const rulDisplay = livePredictions.rul ?? vehicle.rul;
-  const mileageDisplay = (livePredictions.mileage ?? vehicle.mileage).toFixed(1);
+  const isMatching = predictionState.vehicleId === vehicle.id && !predictionState.isLoading;
+  const currentSoc = isMatching && predictionState.soc !== undefined ? predictionState.soc : vehicle.soc;
+  const currentSoh = isMatching && predictionState.soh !== undefined ? predictionState.soh : vehicle.soh;
+  const currentRul = isMatching && predictionState.rul !== undefined ? predictionState.rul : vehicle.rul;
+  const currentMileage = isMatching && predictionState.mileage !== undefined ? predictionState.mileage : vehicle.mileage;
+
+  const socDisplay = currentSoc.toFixed(1);
+  const sohDisplay = currentSoh.toFixed(1);
+  const rulDisplay = currentRul;
+  const mileageDisplay = currentMileage.toFixed(1);
+
+  // Single Owner: Precedence-resolved triage combining live model inference & AI copilot urgency
+  const resolvedTriage = resolveLiveTriage(
+    aiUrgency,
+    currentSoh,
+    currentSoc,
+    vehicle.battery_temp,
+    vehicle.status
+  );
+
+  // Publish resolved triage once matching predictions for the current vehicle have loaded
+  useEffect(() => {
+    if (predictionState.vehicleId === vehicle.id && !predictionState.isLoading) {
+      setSelectedLiveTriage(vehicle.id, resolvedTriage);
+    }
+  }, [vehicle.id, predictionState.vehicleId, predictionState.isLoading, resolvedTriage, setSelectedLiveTriage]);
 
   return (
     <div className="space-y-5">
@@ -133,20 +188,19 @@ export const FleetOverviewTab: React.FC = () => {
                 Commercial Telematics Active
               </h2>
               {(() => {
-                const liveTriage = getLiveTriage(
-                  livePredictions.soh ?? vehicle.soh,
-                  livePredictions.soc ?? vehicle.soc,
-                  vehicle.battery_temp,
-                  vehicle.status
-                );
+                const staticTriage = getVehicleTriage(vehicle);
+                const isEscalated = resolvedTriage !== staticTriage;
                 return (
-                  <span className={`px-2 py-0.5 rounded text-[10px] font-mono font-semibold ${triageBadgeClass(liveTriage)}`}>
-                    {liveTriage === "CRITICAL"
-                      ? "SERVICE HOLD"
-                      : liveTriage === "WARNING"
-                      ? "ROUTE ADVISORY"
-                      : "APPROVED FOR DISPATCH"}
-                  </span>
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <span className={`px-2 py-0.5 rounded text-[10px] font-mono font-semibold ${triageBadgeClass(resolvedTriage)}`}>
+                      {triageLabel(resolvedTriage)}
+                    </span>
+                    {isEscalated && (
+                      <span className="text-[10px] font-mono font-medium text-amber-700 dark:text-amber-300 bg-amber-100 dark:bg-amber-950/60 border border-amber-300 dark:border-amber-800 px-1.5 py-0.5 rounded">
+                        Registry: {triageLabel(staticTriage)} → Live ML Escalated
+                      </span>
+                    )}
+                  </div>
                 );
               })()}
 
@@ -260,7 +314,16 @@ export const FleetOverviewTab: React.FC = () => {
       </div>
 
       {/* AI Powertrain Diagnostic & Root Cause Breakdown (GPT-OSS 120B) */}
-      <AIInsightsCard vehicle={vehicle} livePredictions={livePredictions} />
+      <AIInsightsCard
+        vehicle={vehicle}
+        livePredictions={{
+          soc: currentSoc,
+          soh: currentSoh,
+          rul: currentRul,
+          mileage: currentMileage,
+        }}
+        onUrgencyChange={(urgency) => setAiUrgency(urgency)}
+      />
 
       {/* 3. Center Dual Stage: 3D Digital Twin + CAN Oscilloscope */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
@@ -271,10 +334,10 @@ export const FleetOverviewTab: React.FC = () => {
             batteryTemp={vehicle.battery_temp}
             controllerTemp={vehicle.controller_temp || vehicle.battery_temp + 5.2}
             motorTemp={vehicle.motor_temp || vehicle.battery_temp + 8.4}
-            soc={livePredictions.soc ?? vehicle.soc}
-            soh={livePredictions.soh ?? vehicle.soh}
+            soc={currentSoc}
+            soh={currentSoh}
             status={vehicle.status}
-            isCritical={vehicle.status === "critical" || (livePredictions.soh ?? vehicle.soh) < 75}
+            isCritical={resolvedTriage === "CRITICAL"}
           />
         </div>
 
@@ -403,26 +466,34 @@ export const FleetOverviewTab: React.FC = () => {
                     </td>
                     <td className="py-2.5 px-3">
                       {(() => {
-                        const triage = getVehicleTriage(v);
+                        const staticTriage = getVehicleTriage(v);
+                        const triage = isSelected && selectedLiveTriage ? selectedLiveTriage : staticTriage;
                         return (
-                          <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] uppercase font-semibold ${triageBadgeClass(triage)}`}>
-                            <span className={`w-1.5 h-1.5 rounded-full ${triageDotClass(triage)}`} />
-                            {triageLabel(triage)}
-                          </span>
+                          <div className="flex items-center gap-1">
+                            <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] uppercase font-semibold ${triageBadgeClass(triage)}`}>
+                              <span className={`w-1.5 h-1.5 rounded-full ${triageDotClass(triage)}`} />
+                              {triageLabel(triage)}
+                            </span>
+                            {isSelected && selectedLiveTriage && selectedLiveTriage !== staticTriage && (
+                              <span className="text-[8px] font-mono font-bold text-amber-700 dark:text-amber-300 bg-amber-100 dark:bg-amber-950/80 px-1 py-0.5 rounded border border-amber-300 dark:border-amber-800">
+                                LIVE ML
+                              </span>
+                            )}
+                          </div>
                         );
                       })()}
                     </td>
                     <td className="py-2.5 px-3">
-                      {isSelected && livePredictions.soc !== undefined ? (
-                        <span className="font-bold text-cyan-600 dark:text-cyan-400">{livePredictions.soc.toFixed(1)}%</span>
+                      {isSelected && isMatching && currentSoc !== undefined ? (
+                        <span className="font-bold text-cyan-600 dark:text-cyan-400">{currentSoc.toFixed(1)}%</span>
                       ) : (
                         <span>{v.soc.toFixed(1)}%</span>
                       )}
                     </td>
                     <td className="py-2.5 px-3">
-                      {isSelected && livePredictions.soh !== undefined ? (
+                      {isSelected && isMatching && currentSoh !== undefined ? (
                         <div className="flex items-center gap-1.5">
-                          <span className="font-bold text-emerald-600 dark:text-emerald-400">{livePredictions.soh.toFixed(1)}%</span>
+                          <span className="font-bold text-emerald-600 dark:text-emerald-400">{currentSoh.toFixed(1)}%</span>
                           <span className="text-[9px] text-slate-400 font-normal">({v.soh.toFixed(1)}% SOH₀)</span>
                         </div>
                       ) : (

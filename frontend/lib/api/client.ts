@@ -101,7 +101,13 @@ export async function getSystemHealth(): Promise<HealthResponse> {
     return MockData.getMockHealth();
   }
   try {
-    const res = await fetch(`${API_BASE_URL}/health`, { cache: "no-store" });
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000);
+    const res = await fetch(`${API_BASE_URL}/health`, {
+      cache: "no-store",
+      signal: controller.signal,
+    });
+    clearTimeout(timeoutId);
     if (!res.ok) throw new Error("Health check failed");
     const data = await res.json();
     updateConnectionStatus(true);

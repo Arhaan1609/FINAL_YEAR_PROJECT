@@ -7,7 +7,7 @@ from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from sqlalchemy import func, or_
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 from api.db.database import get_db, DB_ENGINE_TYPE
 from api.db.models import Vehicle, TelemetryLog, MaintenanceAlert
@@ -42,6 +42,8 @@ def get_vehicles_with_sequence() -> list:
     return sorted(_SEQ_IDS)
 
 class VehicleOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: str
     model: str
     fleet: str
@@ -59,9 +61,6 @@ class VehicleOut(BaseModel):
     charge_cycle_count: int
     status: str
     lastPing: Optional[str] = None
-
-    class Config:
-        from_attributes = True
 
 class FleetSummaryOut(BaseModel):
     db_engine: str
