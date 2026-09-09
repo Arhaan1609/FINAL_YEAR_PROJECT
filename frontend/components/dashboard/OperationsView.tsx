@@ -386,11 +386,15 @@ export const OperationsView: React.FC = () => {
                     No matching trucks
                   </option>
                 ) : (
-                  filteredVehicles.map((v) => (
-                    <option key={v.id} value={v.id} className="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">
-                      {v.id} — {v.model.split(" ")[0]} ({v.fleet.split(" ")[0]}) • {v.soc.toFixed(0)}%
-                    </option>
-                  ))
+                  filteredVehicles.map((v) => {
+                    const isSelected = v.id.toUpperCase() === vehicle.id.toUpperCase();
+                    const displaySoc = isSelected ? soc : v.soc;
+                    return (
+                      <option key={v.id} value={v.id} className="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">
+                        {v.id} — {v.model.split(" ")[0]} ({v.fleet.split(" ")[0]}) • {displaySoc.toFixed(1)}% SOC
+                      </option>
+                    );
+                  })
                 )}
               </select>
               <span className="text-[10px] font-semibold text-cyan-700 dark:text-cyan-300 bg-cyan-50 dark:bg-cyan-950/60 border border-cyan-200 dark:border-cyan-800/80 px-1.5 py-0.5 rounded">
@@ -468,7 +472,7 @@ export const OperationsView: React.FC = () => {
                   : !thermalSafe
                   ? `Drivetrain thermal gradient detected (Motor: ${(vehicle.motor_temp || 45.0).toFixed(1)}°C vs Pack: ${vehicle.battery_temp.toFixed(1)}°C). Monitor cooling airflow under heavy load.`
                   : `Operating under thermal advisory (${vehicle.battery_temp.toFixed(1)}°C). Monitor thermal cooling during peak load.`
-                : `Battery level is at ${soc.toFixed(0)}% with ${range.toFixed(0)} km delivery range. Temperatures and cell health are in Grade-A condition.`}
+                : `Battery level is at ${soc.toFixed(1)}% with ${range.toFixed(0)} km delivery range. Temperatures and cell health are in Grade-A condition.`}
             </p>
           </div>
         </div>
@@ -646,7 +650,7 @@ export const OperationsView: React.FC = () => {
                 <span>Select Vehicle from Fleet (Click to Evaluate ML Models)</span>
               </h3>
               <p className="text-[11px] text-slate-500 dark:text-slate-400 font-sans mt-0.5">
-                Cards show raw CAN telemetry snapshot. Selecting a truck executes multi-zone AI inference engines above.
+                Active vehicle displays synchronized multi-zone AI telemetry. Click any truck to inspect.
               </p>
             </div>
             <span className="text-xs font-mono text-slate-400 shrink-0">
@@ -655,28 +659,33 @@ export const OperationsView: React.FC = () => {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
-            {getFilteredVehicles().slice(0, 8).map((v) => (
-              <button
-                key={v.id}
-                onClick={() => setSelectedVehicle(v.id)}
-                className={`p-3 rounded-xl border text-left transition-all font-mono text-xs flex justify-between items-center ${
-                  v.id === selectedVehicleId
-                    ? "bg-cyan-50 dark:bg-cyan-950/60 border-cyan-500 text-cyan-900 dark:text-cyan-200 ring-2 ring-cyan-500/30"
-                    : "bg-slate-50 dark:bg-slate-800/40 border-slate-200 dark:border-slate-700/60 hover:bg-slate-100 dark:hover:bg-slate-800"
-                }`}
-              >
-                <div>
-                  <div className="font-bold">{v.id}</div>
-                  <div className="text-[10px] text-slate-400 font-sans">{v.driver}</div>
-                </div>
-                <div className="text-right">
-                  <div className="font-bold">{v.soc.toFixed(0)}% SOC <span className="text-[9px] font-sans font-normal text-slate-400">(Fuel)</span></div>
-                  <div className={`text-[10px] ${getVehicleTriage(v) === 'CRITICAL' ? 'text-rose-500' : getVehicleTriage(v) === 'WARNING' ? 'text-amber-500' : 'text-emerald-500'}`}>
-                    {v.soh.toFixed(0)}% SOH <span className="text-[9px] font-sans font-normal text-slate-400">(Life)</span> • {triageLabel(getVehicleTriage(v))}
+            {getFilteredVehicles().slice(0, 8).map((v) => {
+              const isSelected = v.id.toUpperCase() === vehicle.id.toUpperCase();
+              const displaySoc = isSelected ? soc : v.soc;
+              const displaySoh = isSelected ? soh : v.soh;
+              return (
+                <button
+                  key={v.id}
+                  onClick={() => setSelectedVehicle(v.id)}
+                  className={`p-3 rounded-xl border text-left transition-all font-mono text-xs flex justify-between items-center ${
+                    isSelected
+                      ? "bg-cyan-50 dark:bg-cyan-950/60 border-cyan-500 text-cyan-900 dark:text-cyan-200 ring-2 ring-cyan-500/30"
+                      : "bg-slate-50 dark:bg-slate-800/40 border-slate-200 dark:border-slate-700/60 hover:bg-slate-100 dark:hover:bg-slate-800"
+                  }`}
+                >
+                  <div>
+                    <div className="font-bold">{v.id}</div>
+                    <div className="text-[10px] text-slate-400 font-sans">{v.driver}</div>
                   </div>
-                </div>
-              </button>
-            ))}
+                  <div className="text-right">
+                    <div className="font-bold">{displaySoc.toFixed(1)}% SOC <span className="text-[9px] font-sans font-normal text-slate-400">(Fuel)</span></div>
+                    <div className={`text-[10px] ${getVehicleTriage(v) === 'CRITICAL' ? 'text-rose-500' : getVehicleTriage(v) === 'WARNING' ? 'text-amber-500' : 'text-emerald-500'}`}>
+                      {displaySoh.toFixed(1)}% SOH <span className="text-[9px] font-sans font-normal text-slate-400">(Life)</span> • {triageLabel(getVehicleTriage(v))}
+                    </div>
+                  </div>
+                </button>
+              );
+            })}
           </div>
         </div>
       </div>
