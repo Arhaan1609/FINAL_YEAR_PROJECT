@@ -10,51 +10,78 @@
 
 ---
 
-## 🗂️ Project Structure & Module Overview
+## 🗂️ Project Structure & Architecture
 
 ```
 Final_Year_Project_1/
 │
-├── run_all.py                       ← Master Launcher (API, CLI, Check, Retrain)
+├── run_all.py                       ← Master Launcher (FastAPI API, CLI, Status, Retrain)
 ├── retrain_all.py                   ← Autonomous Master Retraining Pipeline (All 3 Modules)
 ├── cli.py                           ← Interactive Terminal Prediction CLI
-├── requirements.txt                 ← Consolidated Dependencies
-├── README.md                        ← Project Overview & Quickstart
+├── requirements.txt                 ← Consolidated Production Dependencies
+├── fleet_intelligence.db            ← Fleet Telemetry & Copilot SQLite Database
+├── README.md                        ← Project Overview & Architecture Guide
 │
-├── docs/                            ← [CONSOLIDATED] ALL DOCUMENTATION
-│   ├── INTEGRATION_REPORT.md        ← Master 74-Model Report & Architecture Reference
-│   ├── architecture.md              ← High-Level System Architecture
-│   ├── module_a/                    ← Module A Pipeline Documentation
-│   ├── module_b/                    ← Module B Documentation (ARCHITECTURE, INTEGRATION_GUIDE, etc.)
-│   └── module_c/                    ← Module C Documentation (DATA_SPECIFICATIONS, PROJECT_REPORT, etc.)
+├── docs/                            ← [AUTHORITATIVE] MASTER DOCUMENTATION
+│   ├── FACULTY_PROJECT_REPORT.md    ← Complete 7-Page Faculty & Operational Specification
+│   ├── images/                      ← 14 Before/After High-Resolution Simulation Screenshots
+│   ├── INTEGRATION_REPORT.md        ← Master 74-Model Report & Cross-Module Architecture
+│   ├── PROJECT_MASTER_OVERVIEW.md   ← Commercial System Overview & Business Impact
+│   ├── RESEARCH_PAPER.md            ← Academic Journal & Conference Paper Draft
+│   ├── architecture.md              ← Cyber-Physical System Architecture Diagrams
+│   ├── EVALUATION_METHODOLOGY.md    ← Cross-Validation & Benchmark Methodology
+│   └── FRONTEND_HANDOVER_SPECIFICATION.md ← UI/UX Technical Handover Spec
 │
-├── models/                          ← [STRUCTURED] 8 TASK-SPECIFIC SUBFOLDERS
-│   ├── soc/                         ← SOC Models (SOC_KNN.pkl, SOC_ANN_best.keras, scaler_soc.pkl)
-│   ├── soh/                         ← Tabular SOH Models (SOH_XGBoost.pkl, SOH_ANN_best.keras, scaler_soh.pkl)
-│   ├── rul/                         ← Global RUL Models (RUL_GradientBoosting.pkl, RUL_ANN_best.keras, scaler_rul.pkl)
-│   ├── mileage/                     ← Mileage Models (Mileage_XGBoost.pkl, Mileage_ANN_best.keras, scaler_mileage.pkl)
-│   ├── thermal/                     ← Multi-Zone Thermal Safety RF & Scalers (thermal_rf_multizone.joblib)
-│   ├── soh_deep/                    ← Spatial-Temporal SOH Hybrid CNN-LSTM (soh_hybrid_cnn_lstm.pt)
-│   ├── knee_prognostics/            ← Knee-Point XGBoost Booster (best_xgboost_model.json, feature_scaler.pkl)
-│   └── driver_behavior/             ← Behavioral parameters, metadata, rule configurations
+├── frontend/                        ← [NEXT.JS 14 APP ROUTER FRONTEND]
+│   ├── app/                         ← App Router Pages (/ and /dashboard)
+│   ├── components/
+│   │   ├── dashboard/               ← OperationsView, AIInsightsCard
+│   │   ├── digital-twin/            ← 3D WebGL Three.js Battery Pack Twin
+│   │   ├── landing/                 ← HeroScrollStory, BentoArchitectureGrid, ROI Simulator
+│   │   ├── layout/                  ← ClientLayout, Sidebar, Header
+│   │   ├── tabs/                    ← 6 ML Engineering Tabs (Fleet, State, Thermal, Driver, Knee, Meta)
+│   │   ├── telemetry/               ← CanOscilloscope live waveform renderer
+│   │   ├── copilot/                 ← AI Copilot Drawer & Telemetry Assistant
+│   │   └── ui/                      ← Reusable Design System Components (Badges, Gauges, Cards)
+│   ├── lib/
+│   │   ├── api/                     ← REST API client, Mock fallbacks, Type definitions
+│   │   ├── store/                   ← Zustand useFleetStore with URL Sync
+│   │   └── triage.ts                ← Deterministic Cyber-Physical Dispatch Triage Hierarchy
+│   └── public/                      ← Next.js Static Assets (300-frame sequence, logo, fonts)
 │
-├── data/                            ← [UNIFIED] ALL FLEET DATA
-│   ├── raw/                         ← Raw Excel & JSON Telematics files
-│   ├── processed/                   ← Cleaned CSV feature tables & feature matrices
-│   └── splits/                      ← Train/Test benchmark splits and manifests
+├── api/                             ← [FASTAPI REST BACKEND — PORT 8000]
+│   ├── main.py                      ← FastAPI Application & CORS Configuration
+│   ├── schemas.py                   ← Pydantic Request & Response Validation Schemas
+│   ├── db/                          ← SQLAlchemy ORM Database & Models (MySQL/SQLite)
+│   ├── routers/                     ← Modular Routers (Module A, B, C, DB, Copilot)
+│   └── services/                    ← Background Intelligence & Copilot Services
 │
-├── modules/                         ← [CLEAN PYTHON CODE ONLY]
-│   ├── module_a/                    ← Fleet Analytics Code (01 to 07, config.py, utils.py)
-│   ├── module_b/                    ← BatteryIQ Core Engine (src/, config/, tests/)
-│   └── module_c/                    ← BA-BMS & Knee Detection (engine.py, knee_detection.py, tests/)
+├── modules/                         ← [TRI-PILLAR MACHINE LEARNING CODEBASES]
+│   ├── module_a/                    ← Fleet Analytics ML (SOC, SOH, RUL, Mileage — 56 Models)
+│   ├── module_b/                    ← BatteryIQ Core Engine (Thermal Twin & SOH-Deep PyTorch)
+│   └── module_c/                    ← Behavior-Aware BMS (Driver AI, BSI, Knee Prognostics)
 │
-├── api/                             ← Unified REST API Layer (FastAPI)
-│   ├── main.py                         FastAPI app registering all 11 endpoints
-│   ├── schemas.py                      Unified Pydantic request/response models
-│   └── routers/                        Routers for Module A, Module B, and Module C
+├── models/                          ← [TRAINED MODEL SERIALIZATION WEIGHTS]
+│   ├── module_a/                    ← Scikit-Learn / XGBoost regression weights & scalers
+│   ├── module_a_groupsplit/         ← Group-split leakage-free trained production models
+│   ├── module_a_soh_calibrated/     ← Temperature-calibrated SOH regression models
+│   ├── module_b/                    ← Multi-Zone Thermal RF & PyTorch SOH CNN-LSTM weights
+│   └── module_c/                    ← Knee-Point XGBoost Booster & BSI scalers
 │
-├── results/                         ← Plots & Comparison Reports (plots/, reports/)
-└── logs/                            ← System Execution Logs
+├── data/                            ← [TELEMATICS DATASETS & FEATURES]
+│   ├── raw/                         ← Commercial Indian EV Fleet Raw Data (Excel & JSON)
+│   └── processed/                   ← Normalized feature sets & engineered matrices
+│
+├── results/                         ← [EVALUATION ARTIFACTS]
+│   ├── plots/                       ← Cross-model R², RMSE, Heatmap, and Radar charts
+│   └── reports/                     ← SHAP explainability matrices & model benchmark tables
+│
+├── scripts/                         ← [PRODUCTION UTILITIES]
+│   ├── export_all_vehicles.py       ← 778 Real Vehicle Data Extractor
+│   └── capture_all_documentation_screens.py ← Automated Headless Doc Screenshot Capture
+│
+├── logs/                            ← System Execution & Pipeline Logs
+└── USELESS/                         ← [ARCHIVE] Quarantined Deprecated Scripts & Legacy Artifacts
 ```
 
 ---

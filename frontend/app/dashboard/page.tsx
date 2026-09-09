@@ -1,7 +1,8 @@
 "use client";
 
-import React from "react";
-import { useFleetStore } from "../../lib/store/useFleetStore";
+import React, { useEffect, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
+import { useFleetStore, DashboardTab, ViewMode } from "../../lib/store/useFleetStore";
 import { OperationsView } from "../../components/dashboard/OperationsView";
 import { FleetOverviewTab } from "../../components/tabs/FleetOverviewTab";
 import { StateEstimationTab } from "../../components/tabs/StateEstimationTab";
@@ -23,6 +24,87 @@ import {
   Compass,
 } from "lucide-react";
 
+/**
+ * Syncs the Zustand store with URL parameters (?tab=..., ?view=..., ?vehicle=...)
+ * Enables deep linking, bookmarking, and native browser Back/Forward navigation.
+ */
+function DashboardUrlSync() {
+  const searchParams = useSearchParams();
+  const {
+    activeTab,
+    viewMode,
+    selectedVehicleId,
+    setActiveTab,
+    setViewMode,
+    setSelectedVehicle,
+  } = useFleetStore();
+
+  // 1. Sync from URL on Mount or when URL changes (direct link, browser back/forward)
+  useEffect(() => {
+    if (!searchParams) return;
+    const tabParam = searchParams.get("tab") as DashboardTab | null;
+    const viewParam = searchParams.get("view") as ViewMode | null;
+    const vehicleParam = searchParams.get("vehicle");
+
+    const validTabs: DashboardTab[] = [
+      "fleet",
+      "state-est",
+      "thermal",
+      "behavior",
+      "knee",
+      "meta-ensemble",
+    ];
+
+    if (viewParam === "operations") {
+      setViewMode("operations");
+    } else if (viewParam === "engineering" || (tabParam && validTabs.includes(tabParam))) {
+      setViewMode("engineering");
+      if (tabParam && validTabs.includes(tabParam)) {
+        setActiveTab(tabParam);
+      }
+    }
+
+    if (vehicleParam && vehicleParam.trim()) {
+      setSelectedVehicle(vehicleParam.trim());
+    }
+  }, [searchParams, setActiveTab, setViewMode, setSelectedVehicle]);
+
+  // 2. Keep browser URL in sync when user changes tab, view, or vehicle in the UI
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const url = new URL(window.location.href);
+    let changed = false;
+
+    if (viewMode === "operations") {
+      if (url.searchParams.get("view") !== "operations") {
+        url.searchParams.set("view", "operations");
+        url.searchParams.delete("tab");
+        changed = true;
+      }
+    } else {
+      if (url.searchParams.get("view") === "operations") {
+        url.searchParams.delete("view");
+        changed = true;
+      }
+      if (url.searchParams.get("tab") !== activeTab) {
+        url.searchParams.set("tab", activeTab);
+        changed = true;
+      }
+    }
+
+    if (selectedVehicleId && url.searchParams.get("vehicle") !== selectedVehicleId) {
+      url.searchParams.set("vehicle", selectedVehicleId);
+      changed = true;
+    }
+
+    if (changed) {
+      window.history.replaceState(null, "", url.pathname + url.search);
+    }
+  }, [viewMode, activeTab, selectedVehicleId]);
+
+  return null;
+}
+
 export default function DashboardPage() {
   const { activeTab, setActiveTab, viewMode, setViewMode, openBriefing, navigateToPage } = useFleetStore();
 
@@ -37,6 +119,11 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-6">
+      {/* ─── URL SEARCH PARAMS & ROUTE DEEP-LINK SYNCHRONIZER ─── */}
+      <Suspense fallback={null}>
+        <DashboardUrlSync />
+      </Suspense>
+
       {/* ─── ROLE-BASED MODE SWITCHER HEADER ─── */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm print:hidden">
         <div className="flex items-center gap-3">

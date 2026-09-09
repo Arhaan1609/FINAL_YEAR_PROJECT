@@ -34,3 +34,5 @@ ENV/
 .vscode/
 *.log
 *.tsbuildinfo
+**/chrome_temp/
+*.pma

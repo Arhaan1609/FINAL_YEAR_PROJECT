@@ -84,7 +84,7 @@ export const BentoArchitectureGrid: React.FC = () => {
 
               <div className="mt-8 pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
                 <Link
-                  href="/dashboard"
+                  href="/dashboard?tab=state-est"
                   className="inline-flex items-center gap-1.5 text-xs font-bold text-cyan-600 dark:text-cyan-400 group-hover:underline"
                 >
                   <span>Explore State Estimation Suite</span>
@@ -131,7 +131,7 @@ export const BentoArchitectureGrid: React.FC = () => {
 
               <div className="mt-8 pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
                 <Link
-                  href="/dashboard"
+                  href="/dashboard?tab=thermal"
                   className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-600 dark:text-emerald-400 group-hover:underline"
                 >
                   <span>View Thermal Twin Monitor</span>
@@ -178,7 +178,7 @@ export const BentoArchitectureGrid: React.FC = () => {
 
               <div className="mt-8 pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
                 <Link
-                  href="/dashboard"
+                  href="/dashboard?tab=knee"
                   className="inline-flex items-center gap-1.5 text-xs font-bold text-purple-600 dark:text-purple-400 group-hover:underline"
                 >
                   <span>Analyze Degradation Knee</span>
@@ -229,7 +229,7 @@ export const BentoArchitectureGrid: React.FC = () => {
 
               <div className="mt-8 pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
                 <Link
-                  href="/dashboard"
+                  href="/dashboard?tab=fleet"
                   className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-600 dark:text-amber-400 group-hover:underline"
                 >
                   <span>Inspect 778 Vehicle Registry</span>
