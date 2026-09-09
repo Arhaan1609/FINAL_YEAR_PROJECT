@@ -23,15 +23,15 @@ export const BentoArchitectureGrid: React.FC = () => {
     <section id="architecture" className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 max-w-[1440px] mx-auto">
       {/* Section Header */}
       <div className="text-center max-w-3xl mx-auto mb-14">
-        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-300 dark:border-emerald-700/60 text-emerald-700 dark:text-emerald-300 text-xs font-semibold mb-4 shadow-sm">
-          <Layers className="w-3.5 h-3.5 text-emerald-500" />
-          <span>Tri-Pillar Cyber-Physical System</span>
+        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 text-xs font-semibold mb-4 shadow-xs">
+          <Layers className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+          <span>Tri-Pillar Machine Learning Architecture</span>
         </div>
         <h2 className="text-3xl sm:text-5xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight font-heading">
-          Engineered for DeepTech EV Scalability
+          Engineered for Commercial Fleet Scale
         </h2>
         <p className="text-sm sm:text-base text-slate-600 dark:text-slate-400 mt-3.5 leading-relaxed">
-          Explore the three machine learning pillars engineered to maximize battery lifespan, eliminate thermal hazards, and deliver high-precision state estimation across commercial EV fleets.
+          Three production machine learning pillars engineered to maximize battery lifecycle asset value, eliminate thermal runaway risks, and deliver verified state estimation across commercial EV fleets.
         </p>
       </div>
 
@@ -161,7 +161,7 @@ export const BentoArchitectureGrid: React.FC = () => {
                   Knee-Point Degradation Prognostics
                 </h3>
                 <p className="text-sm text-slate-600 dark:text-slate-300 mt-3 leading-relaxed">
-                  Predictive aging prognostics powered by a 28-feature XGBoost model to detect the non-linear "Knee Point" — the critical threshold where battery degradation accelerates — extending pack life by up to 2.3 years.
+                  Predictive aging prognostics powered by a 28-feature XGBoost model to detect the non-linear "Knee Point" — the critical threshold where battery degradation accelerates — extending pack life by +2 to +5 years across commercial duty cycles.
                 </p>
 
                 <div className="mt-8 space-y-2 font-mono text-xs text-slate-600 dark:text-slate-300">

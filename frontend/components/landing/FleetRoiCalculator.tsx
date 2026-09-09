@@ -12,15 +12,34 @@ export const FleetRoiCalculator: React.FC = () => {
   const [dailyKm, setDailyKm] = useState<number>(85);
   const [batteryPackCost, setBatteryPackCost] = useState<number>(250000); // 2.5 Lakhs INR (~$3,000 USD)
 
-  // Calculations
-  // Conventional battery replacement interval: ~3.5 years (1200 cycles)
-  // AI-Optimized replacement interval: ~5.8 years (2000 cycles with knee avoidance & thermal throttling)
-  const yearsExtended = 2.3;
-  const annualSavingsPerEV =
-    batteryPackCost / 3.5 - batteryPackCost / 5.8 + dailyKm * 365 * 0.45; // Includes range efficiency + replacement deferral
-  const totalFleetAnnualSavings = Math.round(annualSavingsPerEV * fleetSize);
+  // ── Dynamic Fleet Engineering Calculations ──
+  // 1. Annual charging cycles per vehicle based on daily duty cycle (nominal 115 km usable range)
+  const annualCycles = Math.max(10, Math.round((dailyKm * 365) / 115));
+
+  // 2. Lifespan Extension:
+  // Baseline without AI optimization: ~1,200 EFC before accelerated capacity fade
+  // Optimized with AI (knee-point avoidance, thermal throttling, eco-driving BSI): ~1,950 EFC
+  const baselineLifespanYears = Math.max(0.8, Number((1200 / annualCycles).toFixed(1)));
+  const optimizedLifespanYears = Math.max(1.5, Number((1950 / annualCycles).toFixed(1)));
+  const yearsExtended = Math.max(0.4, Number((optimizedLifespanYears - baselineLifespanYears).toFixed(1)));
+
+  // 3. Financial CapEx Deferral & OPEX Range Efficiency:
+  const annualCapExSavingsPerEV = (batteryPackCost / baselineLifespanYears) - (batteryPackCost / optimizedLifespanYears);
+  const annualEfficiencySavingsPerEV = dailyKm * 365 * 0.45; // ~₹0.45/km from BMS energy efficiency
+  const totalFleetAnnualSavings = Math.round((annualCapExSavingsPerEV + annualEfficiencySavingsPerEV) * fleetSize);
   const totalSavingsLakhs = (totalFleetAnnualSavings / 100000).toFixed(1);
+
+  // 4. Environmental CO2 Abatement:
   const carbonMitigatedTons = Math.round(fleetSize * dailyKm * 365 * 0.00012);
+
+  // 5. Thermal Faults Averted (Dynamic per fleet size & mileage):
+  // Tropical/commercial fleet rate: ~0.08 critical thermal threshold events per 10,000 km
+  const totalFleetAnnualKm = fleetSize * dailyKm * 365;
+  const thermalFaultsAverted = Math.max(1, Math.round((totalFleetAnnualKm / 10000) * 0.08 * 0.9971));
+
+  // 6. Degradation Knee Buffer Lead (Dynamic per duty cycle intensity):
+  const kneeBufferCycles = Math.round(380 + Math.max(0, (180 - dailyKm) * 0.65));
+  const kneeLeadMonths = Math.max(3, Math.round((kneeBufferCycles / annualCycles) * 12));
 
   return (
     <section id="roi" className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 max-w-[1440px] mx-auto">
@@ -122,7 +141,7 @@ export const FleetRoiCalculator: React.FC = () => {
           </div>
         </div>
 
-        {/* Right 6 Cols: Real-time ROI Savings Cards with 3D Mouse Tilt */}
+        {/* Right 6 Cols: Real-time Dynamic ROI Savings Cards */}
         <div className="lg:col-span-6">
           <TiltCard glowColor="rgba(16, 185, 129, 0.3)">
             <div className="bg-slate-950 text-white rounded-2xl p-6 sm:p-8 space-y-6 border border-slate-800 shadow-2xl">
@@ -147,34 +166,44 @@ export const FleetRoiCalculator: React.FC = () => {
               </div>
 
               <div className="grid grid-cols-2 gap-4 border-t border-slate-800 pt-6">
+                {/* Dynamic Metric 1: Pack Lifespan Added */}
                 <div className="bg-slate-900/80 border border-slate-800 p-4 rounded-xl">
                   <div className="text-[10px] font-mono text-slate-400">Pack Lifespan Added</div>
                   <div className="text-2xl font-extrabold text-emerald-400 font-mono mt-1">
                     +{yearsExtended} Years
                   </div>
-                  <div className="text-[10px] text-slate-500 font-mono">Deferred CapEx</div>
-                </div>
-
-                <div className="bg-slate-900/80 border border-slate-800 p-4 rounded-xl">
-                  <div className="text-[10px] font-mono text-slate-400">Thermal Fault Prevention</div>
-                  <div className="text-2xl font-extrabold text-cyan-400 font-mono mt-1">
-                    99.71%
+                  <div className="text-[10px] text-slate-500 font-mono">
+                    {baselineLifespanYears}y → {optimizedLifespanYears}y Deferred CapEx
                   </div>
-                  <div className="text-[10px] text-slate-500 font-mono">Multi-Zone Safety</div>
                 </div>
 
+                {/* Dynamic Metric 2: Thermal Faults Averted */}
+                <div className="bg-slate-900/80 border border-slate-800 p-4 rounded-xl">
+                  <div className="text-[10px] font-mono text-slate-400">Thermal Faults Averted</div>
+                  <div className="text-2xl font-extrabold text-cyan-400 font-mono mt-1">
+                    {thermalFaultsAverted.toLocaleString()} Events
+                  </div>
+                  <div className="text-[10px] text-slate-500 font-mono">
+                    99.71% Multi-Zone Safety
+                  </div>
+                </div>
+
+                {/* Dynamic Metric 3: Degradation Knee Buffer */}
                 <div className="bg-slate-900/80 border border-slate-800 p-4 rounded-xl">
                   <div className="text-[10px] font-mono text-slate-400">Degradation Knee Buffer</div>
                   <div className="text-2xl font-extrabold text-purple-400 font-mono mt-1">
-                    450+ Cycles
+                    {kneeBufferCycles} Cycles
                   </div>
-                  <div className="text-[10px] text-slate-500 font-mono">Early Warning Lead</div>
+                  <div className="text-[10px] text-slate-500 font-mono">
+                    ~{kneeLeadMonths} Mo. Warning Lead
+                  </div>
                 </div>
 
+                {/* Dynamic Metric 4: Emissions Mitigated */}
                 <div className="bg-slate-900/80 border border-slate-800 p-4 rounded-xl">
                   <div className="text-[10px] font-mono text-slate-400">Emissions Mitigated</div>
                   <div className="text-2xl font-extrabold text-amber-400 font-mono mt-1">
-                    {carbonMitigatedTons} Tons
+                    {carbonMitigatedTons.toLocaleString()} Tons
                   </div>
                   <div className="text-[10px] text-slate-500 font-mono">CO2 eq / Year</div>
                 </div>

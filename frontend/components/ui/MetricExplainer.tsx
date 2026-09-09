@@ -48,7 +48,7 @@ export const MetricExplainer: React.FC<MetricExplainerProps> = ({
           className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-slate-100 hover:bg-cyan-50 dark:bg-slate-800 dark:hover:bg-cyan-950/60 border border-slate-200 dark:border-slate-700 text-[10px] font-mono text-slate-500 hover:text-cyan-600 dark:text-slate-400 dark:hover:text-cyan-300 transition-all cursor-pointer print:hidden ${className}`}
           title="Click to view Plain English explainer and Mathematical Proof of Concept"
         >
-          <Sparkles className="w-2.5 h-2.5 text-cyan-500" />
+          <Info className="w-2.5 h-2.5 text-slate-400 group-hover:text-cyan-500" />
           <span>{label}</span>
         </button>
       )}

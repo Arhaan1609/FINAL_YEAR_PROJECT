@@ -36,3 +36,4 @@ ENV/
 *.tsbuildinfo
 **/chrome_temp/
 *.pma
+docs/*Comprehensive*

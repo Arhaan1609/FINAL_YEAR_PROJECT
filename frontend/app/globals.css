@@ -243,15 +243,20 @@ body {
 @media print {
   @page {
     size: A4 portrait;
-    margin: 12mm 15mm;
+    margin: 15mm 15mm;
   }
 
-  body {
+  html, body {
     background: #FFFFFF !important;
     color: #0F172A !important;
-    font-size: 10.5pt;
+    font-size: 10.5pt !important;
+    line-height: 1.5 !important;
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    height: auto !important;
+    overflow: visible !important;
   }
 
   /* Completely suppress website navigation chrome, headers, sidebars, banners, buttons, and popovers */
@@ -262,7 +267,9 @@ body {
   [role="button"],
   .print\:hidden,
   [data-print-hide="true"],
-  #offline-banner {
+  #offline-banner,
+  .offline-banner,
+  [role="dialog"] {
     display: none !important;
     visibility: hidden !important;
   }
@@ -274,20 +281,24 @@ body {
     max-width: 100% !important;
     width: 100% !important;
     overflow: visible !important;
+    min-height: 0 !important;
   }
 
-  /* Crisp high-contrast paper cards for printed executive audit */
+  /* Ensure individual sections never get awkwardly sliced across page boundaries */
+  .print-section {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+
+  /* Crisp cards on paper */
   .glass-card,
   .app-card {
     background: #FFFFFF !important;
     border: 1px solid #CBD5E1 !important;
     box-shadow: none !important;
-    break-inside: avoid !important;
-    page-break-inside: avoid !important;
     border-radius: 8px !important;
   }
 
-  /* Ensure text colors, borders, and badge fills render sharp and crisp */
   * {
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;

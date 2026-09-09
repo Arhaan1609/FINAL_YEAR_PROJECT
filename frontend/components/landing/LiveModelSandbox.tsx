@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   predictSOC,
   predictSOH,
@@ -41,6 +41,11 @@ export const LiveModelSandbox: React.FC = () => {
   const [kneeCycles, setKneeCycles] = useState<number>(850);
   const [isInferencing, setIsInferencing] = useState<boolean>(false);
 
+  const socValRef = useRef(socVal);
+  socValRef.current = socVal;
+  const sohValRef = useRef(sohVal);
+  sohValRef.current = sohVal;
+
   // Trigger live ML inference whenever slider inputs change
   useEffect(() => {
     let active = true;
@@ -63,8 +68,8 @@ export const LiveModelSandbox: React.FC = () => {
           battery_current: current,
           charge_cycle_count: cycleCount,
           odometer: cycleCount * 58,
-          initial_soh: sohVal,
-          soh: sohVal,
+          initial_soh: sohValRef.current,
+          soh: sohValRef.current,
         }),
         // 3. Thermal Safety via Random Forest (200T)
         predictThermal({
@@ -73,7 +78,7 @@ export const LiveModelSandbox: React.FC = () => {
           vmt: temp + 8.2,
           vbv: voltage,
           vbc: current,
-          soc: socVal,
+          soc: socValRef.current,
           speed: 34,
         }),
         // 4. Driver AI & BSI via BA-BMS Engine
@@ -93,7 +98,7 @@ export const LiveModelSandbox: React.FC = () => {
         // 5. Knee Prognostics via XGBoost Booster
         predictKneePoint({
           charge_cycle_count: cycleCount,
-          soh: sohVal,
+          soh: sohValRef.current,
           internal_resistance: 0.035 + cycleCount * 0.00003,
           capacity_loss_rate: 0.02 + harshEvents * 0.002,
           coulombic_efficiency: 0.99,
@@ -143,7 +148,7 @@ export const LiveModelSandbox: React.FC = () => {
       active = false;
       clearTimeout(debounceTimer);
     };
-  }, [voltage, temp, current, harshEvents, cycleCount, socVal, sohVal]);
+  }, [voltage, temp, current, harshEvents, cycleCount]);
 
   const loadScenario = (scenario: "nominal" | "thermal" | "knee") => {
     setActiveScenario(scenario);
@@ -174,53 +179,53 @@ export const LiveModelSandbox: React.FC = () => {
     <section id="sandbox" className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 max-w-[1440px] mx-auto">
       {/* Section Header */}
       <div className="text-center max-w-3xl mx-auto mb-10">
-        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-cyan-50 dark:bg-cyan-950/60 border border-cyan-300 dark:border-cyan-700/60 text-cyan-700 dark:text-cyan-300 text-xs font-semibold mb-3 shadow-sm">
-          <Sparkles className="w-3.5 h-3.5 text-cyan-500" />
-          <span>Interactive Telemetry &amp; 3D Model Sandbox</span>
+        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 text-xs font-semibold mb-3 shadow-xs">
+          <Sliders className="w-3.5 h-3.5 text-cyan-600 dark:text-cyan-400" />
+          <span>CAN Telemetry &amp; Model Evaluation Workbench</span>
         </div>
         <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight font-heading">
-          Test Live Models in Real Time
+          Live Model Inference &amp; Telematics Test Bench
         </h2>
         <p className="text-sm sm:text-base text-slate-600 dark:text-slate-400 mt-3 leading-relaxed">
-          Simulate live operational conditions or adjust CAN telemetry sliders below. Experience debounced live inference powered by 74 production AI models coupled with real-time 3D thermal pack visualization.
+          Simulate operating conditions by adjusting CAN telemetry parameters below. Live inference evaluates electrochemical states, thermal runaway probabilities, and knee-point degradation across physical models in real time.
         </p>
 
         {/* Unified 3-Pill Scenario Segmented Control */}
-        <div className="mt-7 inline-flex items-center justify-center p-1.5 rounded-2xl bg-slate-100 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 shadow-sm gap-1 overflow-x-auto max-w-full">
+        <div className="mt-7 inline-flex items-center justify-center p-1 rounded-xl bg-slate-100 dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700 shadow-xs gap-1 overflow-x-auto max-w-full">
           <button
             onClick={() => loadScenario("nominal")}
-            className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-mono font-bold transition-all whitespace-nowrap ${
+            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-mono font-semibold transition-all whitespace-nowrap ${
               activeScenario === "nominal"
-                ? "bg-emerald-600 text-white shadow-md shadow-emerald-500/20"
+                ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs border border-slate-200 dark:border-slate-700"
                 : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
             }`}
           >
-            <CheckCircle2 className="w-3.5 h-3.5" />
+            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
             <span>Scenario 1: Nominal (28°C)</span>
           </button>
 
           <button
             onClick={() => loadScenario("thermal")}
-            className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-mono font-bold transition-all whitespace-nowrap ${
+            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-mono font-semibold transition-all whitespace-nowrap ${
               activeScenario === "thermal"
-                ? "bg-amber-600 text-white shadow-md shadow-amber-500/20"
+                ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs border border-slate-200 dark:border-slate-700"
                 : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
             }`}
           >
-            <FlameKindling className="w-3.5 h-3.5" />
+            <FlameKindling className="w-3.5 h-3.5 text-amber-500" />
             <span>Scenario 2: Thermal Stress (53.5°C)</span>
           </button>
 
           <button
             onClick={() => loadScenario("knee")}
-            className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-mono font-bold transition-all whitespace-nowrap ${
+            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-mono font-semibold transition-all whitespace-nowrap ${
               activeScenario === "knee"
-                ? "bg-purple-600 text-white shadow-md shadow-purple-500/20"
+                ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs border border-slate-200 dark:border-slate-700"
                 : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
             }`}
           >
-            <AlertTriangle className="w-3.5 h-3.5" />
-            <span>Scenario 3: Knee Degradation</span>
+            <Sliders className="w-3.5 h-3.5 text-purple-500" />
+            <span>Scenario 3: Knee Inflection (1280 Cyc)</span>
           </button>
         </div>
       </div>
