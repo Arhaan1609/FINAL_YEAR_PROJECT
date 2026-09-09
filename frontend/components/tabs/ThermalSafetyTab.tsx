@@ -7,7 +7,7 @@ import { ThermalResponse, SOHDeepResponse } from "../../lib/api/types";
 import { Flame, ShieldAlert, Thermometer, ShieldCheck, AlertCircle, RefreshCw, Cpu, Activity, Info, Database } from "lucide-react";
 import { MetricExplainer } from "../ui/MetricExplainer";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://127.0.0.1:8000";
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
 
 
 export const ThermalSafetyTab: React.FC = () => {
