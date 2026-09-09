@@ -30,6 +30,7 @@ import {
  */
 function DashboardUrlSync() {
   const searchParams = useSearchParams();
+  const isInitialized = React.useRef(false);
   const {
     activeTab,
     viewMode,
@@ -67,11 +68,14 @@ function DashboardUrlSync() {
     if (vehicleParam && vehicleParam.trim()) {
       setSelectedVehicle(vehicleParam.trim());
     }
+
+    // Mark as initialized so store-to-URL sync only runs on deliberate user interaction
+    isInitialized.current = true;
   }, [searchParams, setActiveTab, setViewMode, setSelectedVehicle]);
 
-  // 2. Keep browser URL in sync when user changes tab, view, or vehicle in the UI
+  // 2. Keep browser URL in sync when user deliberately changes tab, view, or vehicle in the UI
   useEffect(() => {
-    if (typeof window === "undefined") return;
+    if (typeof window === "undefined" || !isInitialized.current) return;
     const url = new URL(window.location.href);
     let changed = false;
 
