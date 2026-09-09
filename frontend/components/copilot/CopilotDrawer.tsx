@@ -15,6 +15,8 @@ import {
   Trash2,
 } from "lucide-react";
 
+import { CopilotMarkdown } from "./CopilotMarkdown";
+
 export const CopilotDrawer: React.FC = () => {
   const { copilotOpen, setCopilotOpen, copilotMessages, addCopilotMessage, clearCopilot, getSelectedVehicle } =
     useFleetStore();
@@ -100,9 +102,6 @@ export const CopilotDrawer: React.FC = () => {
                 <div>
                   <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
                     Fleet Telemetry Copilot
-                    <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800">
-                      GPT-OSS 120B
-                    </span>
                   </h3>
                   <p className="text-[11px] text-slate-500 dark:text-slate-400">
                     {activeVehicle ? `Ground truth context: ${activeVehicle.id}` : "Fleet-wide situational context"}
@@ -138,13 +137,17 @@ export const CopilotDrawer: React.FC = () => {
                   }`}
                 >
                   <div
-                    className={`max-w-[88%] rounded-2xl p-3.5 text-xs leading-relaxed ${
+                    className={`max-w-[92%] rounded-2xl p-3.5 text-xs leading-relaxed ${
                       msg.sender === "user"
                         ? "bg-cyan-600 text-white rounded-br-none shadow-sm"
-                        : "bg-slate-100 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 rounded-bl-none"
+                        : "bg-slate-50 dark:bg-slate-900/95 border border-slate-200/90 dark:border-slate-800 text-slate-800 dark:text-slate-200 rounded-bl-none shadow-sm"
                     }`}
                   >
-                    <div className="whitespace-pre-line font-sans">{msg.text}</div>
+                    {msg.sender === "assistant" ? (
+                      <CopilotMarkdown content={msg.text} />
+                    ) : (
+                      <div className="whitespace-pre-line font-sans">{msg.text}</div>
+                    )}
 
                     {/* Tool Call Chips for Assistant */}
                     {msg.toolCalls && msg.toolCalls.length > 0 && (
@@ -163,7 +166,7 @@ export const CopilotDrawer: React.FC = () => {
                               >
                                 <span className="flex items-center gap-1.5">
                                   <Cpu className="w-3 h-3 text-cyan-600 dark:text-cyan-400" />
-                                  Used Live Model: <strong>{tc.tool}()</strong>
+                                  Verified Telemetry: <strong>{tc.tool}</strong>
                                 </span>
                                 {isOpen ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
                               </div>
