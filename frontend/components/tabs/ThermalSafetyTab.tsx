@@ -167,7 +167,7 @@ export const ThermalSafetyTab: React.FC = () => {
                 <div className="space-y-3">
                   <div>
                     <div className="flex justify-between text-xs font-mono mb-1 text-slate-600 dark:text-slate-300">
-                      <span>Module A Avg</span>
+                      <span>Sub-Pack Module A (Inlet)</span>
                       <span>{(batteryTemp - 1.2).toFixed(1)}°C</span>
                     </div>
                     <div className="h-2 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
@@ -177,12 +177,17 @@ export const ThermalSafetyTab: React.FC = () => {
 
                   <div>
                     <div className="flex justify-between text-xs font-mono mb-1 text-slate-600 dark:text-slate-300">
-                      <span>Module B Avg</span>
+                      <span>Sub-Pack Module B (Core)</span>
                       <span className="text-amber-600 dark:text-amber-400">{(batteryTemp + 1.6).toFixed(1)}°C</span>
                     </div>
                     <div className="h-2 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
                       <div className="h-full bg-amber-500 w-[78%] rounded-full shadow-sm" />
                     </div>
+                  </div>
+
+                  <div className="flex justify-between text-[11px] font-mono text-slate-400 pt-0.5">
+                    <span>Thermal Delta (ΔT):</span>
+                    <span className="font-semibold text-cyan-600 dark:text-cyan-400">2.8°C (Safe &lt; 5.0°C)</span>
                   </div>
                 </div>
 
