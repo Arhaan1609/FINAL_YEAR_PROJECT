@@ -579,6 +579,20 @@ export const StateEstimationTab: React.FC = () => {
       {/* ─── RIGHT SECTION: 4 HERO METRIC CARDS & 24H TREND (Stitch Section) ─── */}
       <section className="col-span-1 lg:col-span-8 xl:col-span-9 flex flex-col gap-6">
         
+        {/* Engineering Distinction: SOC (Dynamic Tank) vs. SOH (Cyclic Capacity Degradation) */}
+        <div className="p-3.5 rounded-xl bg-slate-100 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
+          <div className="flex items-center gap-2">
+            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-cyan-100 dark:bg-cyan-950 text-cyan-600 dark:text-cyan-400 font-mono font-bold text-[10px]">
+              i
+            </span>
+            <div className="text-slate-600 dark:text-slate-300">
+              <strong className="text-cyan-600 dark:text-cyan-400">SOC (State of Charge):</strong> Reversible instantaneous fuel level (0-100% daily tank).{" "}
+              <strong className="text-emerald-600 dark:text-emerald-400 ml-1">SOH (State of Health):</strong> Irreversible cumulative capacity fade (5-8 yr pack health).
+            </div>
+          </div>
+          <MetricExplainer metricKey="soc_vs_soh" label="Why do these differ?" variant="badge" className="shrink-0" />
+        </div>
+
         {/* 4 Hero Cards Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           
@@ -590,10 +604,13 @@ export const StateEstimationTab: React.FC = () => {
             <div className="flex justify-between items-start mb-2 relative z-10">
               <div>
                 <div className="text-xs font-bold text-cyan-600 dark:text-cyan-400 uppercase tracking-widest mb-1 flex items-center gap-2">
-                  State of Charge
+                  State of Charge (Fuel / SOC)
                   <span className="bg-cyan-100 dark:bg-cyan-950/60 text-cyan-700 dark:text-cyan-300 px-1.5 py-0.5 rounded text-[9px] font-mono truncate max-w-[140px]">
                     {socRes?.model_used || "XGBoost (R²=0.996)"}
                   </span>
+                </div>
+                <div className="text-[10px] text-slate-500 dark:text-slate-400 mb-1 font-mono">
+                  Current tank energy • Reversible (Drains & Recharges)
                 </div>
                 <div className="text-4xl font-extrabold text-slate-900 dark:text-slate-100 flex items-baseline gap-1 font-mono">
                   {socVal.toFixed(1)}<span className="text-xl text-slate-400 font-normal">%</span>
@@ -650,10 +667,13 @@ export const StateEstimationTab: React.FC = () => {
             <div className="flex justify-between items-start mb-2 relative z-10">
               <div>
                 <div className="text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-widest mb-1 flex items-center gap-2">
-                  State of Health
+                  State of Health (Lifespan / SOH)
                   <span className="bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 px-1.5 py-0.5 rounded text-[9px] font-mono truncate max-w-[140px]">
                     {sohRes?.model_used || "Calibrated XGBoost"}
                   </span>
+                </div>
+                <div className="text-[10px] text-slate-500 dark:text-slate-400 mb-1 font-mono">
+                  Permanent pack health • Irreversible (5-8 yr capacity retention)
                 </div>
                 <div className="text-4xl font-extrabold text-slate-900 dark:text-slate-100 flex items-baseline gap-1 font-mono">
                   {sohVal.toFixed(1)}<span className="text-xl text-slate-400 font-normal">%</span>

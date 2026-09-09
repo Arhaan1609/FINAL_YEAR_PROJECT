@@ -90,12 +90,16 @@ export const PAGE_BRIEFINGS: Record<string, BriefingModuleContent> = {
     ],
     glossary: [
       {
-        term: "SOC (State of Charge)",
-        definition: "The battery's fuel gauge (percentage of usable energy left, 0% to 100%).",
+        term: "SOC (Battery Fuel Level)",
+        definition: "The battery's fuel gauge (percentage of usable energy in the tank right now for today's run, 0% to 100%). Fully reversible; recharges to 100% on plug-in.",
       },
       {
-        term: "SOH (State of Health)",
-        definition: "Long-term battery pack lifespan (100% = brand new, <80% = aging battery nearing retirement).",
+        term: "SOH (Battery Lifespan / Health)",
+        definition: "Permanent battery pack health over 5-8 years (like iPhone Battery Health). Decreases from chemical wear; cannot be recharged back to 100%.",
+      },
+      {
+        term: "Why SOC ≠ SOH (Key Difference)",
+        definition: "SOC is fuel in the tank today; SOH is the permanent age/capacity of the tank. Even when an older truck is charged to 100% SOC (full tank), its 85% SOH means it holds less energy than when new.",
       },
       {
         term: "Dispatch Triage",
@@ -198,16 +202,20 @@ export const PAGE_BRIEFINGS: Record<string, BriefingModuleContent> = {
     ],
     glossary: [
       {
-        term: "SOC (State of Charge)",
-        definition: "True usable energy percentage remaining in the lithium-iron-phosphate (LFP) battery.",
+        term: "SOC (State of Charge — Fuel)",
+        definition: "True usable electrochemical energy percentage remaining in the battery right now (0-100%, fully reversible daily variable).",
       },
       {
-        term: "SOH (State of Health)",
-        definition: "The battery's maximum energy storage capacity compared to when it rolled off the factory floor.",
+        term: "SOH (State of Health — Lifespan)",
+        definition: "The battery's maximum energy storage capacity compared to when it rolled off the factory floor (irreversible multi-year chemical degradation).",
       },
       {
         term: "RUL (Remaining Useful Life)",
-        definition: "The estimated number of full charge-discharge cycles the pack can sustain before failure.",
+        definition: "The estimated number of full charge-discharge cycles the pack can sustain before hitting the 80% end-of-life retirement threshold.",
+      },
+      {
+        term: "SOC vs SOH Physical Difference",
+        definition: "SOC is instantaneous charge (Q(t)/Q_actual). SOH is capacity retention (Q_actual/Q_nominal). They measure different physical phenomena across different time scales.",
       },
     ],
     proTip:

@@ -73,12 +73,75 @@ export interface PoCDetails {
 }
 
 export const POC_KNOWLEDGE_BASE: Record<string, PoCDetails> = {
+  soc_vs_soh: {
+    id: "soc_vs_soh",
+    title: "Battery Level (Fuel / SOC) vs. Battery Lifespan (Health / SOH)",
+    subtitle: "The Fundamental Distinction: Daily Dispatch Energy vs. 8-Year Capital Asset Health",
+    plainEnglishSummary: {
+      whatIsIt:
+        "Battery Level (SOC = State of Charge, e.g. 91.9%) tells you how full the battery's energy tank is TODAY for current delivery driving (reversible, recharges back to 100% tonight). Battery Lifespan (SOH = State of Health, e.g. 93.9%) tells you the irreversible physical health and age of the battery pack over its 8-year commercial lifespan (cannot be recharged back to 100%).",
+      whyItMatters:
+        "Non-technical operators frequently confuse daily charge percentage with battery health. A delivery truck can be charged to 100% SOC (completely full fuel tank), but if its battery has aged to 80% SOH, that 'full tank' holds 20% less energy than when new. Confusing these leads to unexpected mid-shift breakdowns or premature battery replacements.",
+      actionDirective:
+        "Use Battery Level (SOC) to approve today's 58 km delivery dispatch. Use Battery Lifespan (SOH) and RUL to manage multi-year fleet maintenance, lease contracts, and warranty claims.",
+    },
+    empiricalProof: {
+      algorithmName: "Dual-Horizon Multi-Model Estimator (Module A & Module B Fusion)",
+      framework: "KNN Distance Weighting (SOC) + 300-Tree XGBoost & PyTorch CNN-LSTM (SOH)",
+      hyperparameters: "SOC: k=7 Manhattan Distance; SOH: Subsample 0.85, Depth 6, Learning Rate 0.04",
+      metrics: [
+        { label: "SOC Daily Fuel Accuracy", value: "R² = 0.9958 (MAE 0.42%)", benchmark: "Raw CAN Drift: ±12%" },
+        { label: "SOH Lifetime Health Accuracy", value: "R² = 0.9672 (RMSE 1.2%)", benchmark: "Coulomb Drift: ±8.4%" },
+        { label: "Operational Time Horizon", value: "Minutes vs. 8 Years", benchmark: "Daily Fuel vs Capital Asset" },
+      ],
+    },
+    mathematicalDerivation: {
+      formula:
+        "\\text{SOC}(t) = \\frac{Q(t)}{Q_{\\text{actual}}} \\times 100\\% \\quad \\text{vs.} \\quad \\text{SOH} = \\frac{Q_{\\text{actual}}}{Q_{\\text{nominal (rated)}}} \\times 100\\%",
+      variables: [
+        { symbol: "SOC(t)", meaning: "State of Charge: instantaneous available charge in cell right now (reversible daily variable, 0% to 100%)" },
+        { symbol: "SOH", meaning: "State of Health: ratio of current maximum discharge capacity to initial factory rated capacity (irreversible wear)" },
+        { symbol: "Q(t) / Q_actual", meaning: "Instantaneous coulombs currently stored vs current maximum capacity of the aged cell" },
+        { symbol: "Q_actual / Q_nominal", meaning: "Actual full capacity after N cycles vs brand new 150Ah factory capacity" },
+      ],
+      physicsIntuition:
+        "Imagine an 8-litre water bucket. As the bucket ages over 5 years, sediment buildup permanently reduces its maximum capacity to 7.5 litres (SOH = 93.9%). If you fill this bucket 92% full today, you have 6.9 litres of water (SOC = 91.9%). Both percentages are correct: SOC is how full the bucket is right now, while SOH is how much the bucket has aged!",
+    },
+    datasetEvidence: {
+      chassisTested: "778 Commercial Delivery Vehicles (Euler HiLoad, Tata Ace EV, Mahindra Zor)",
+      telemetryVolume: "50M+ Data Points across 3,800+ Full Charge-Discharge Cycles",
+      samplingFrequency: "10 Hz Live CAN High-Frequency Ingestion",
+      temperatureExtremes: "-5°C (Winter) to +48°C (Peak Summer)",
+      validationMethod: "Stratified Vehicle-Grouped Cross-Validation (Zero Data Leakage)",
+    },
+    legacyVsAiComparison: [
+      {
+        dimension: "Metric Interpretation",
+        legacyBMS: "Displays single battery % without distinguishing fuel vs cell wear",
+        ourPlatform: "Separate Dual-Horizon Display: Battery Fuel (SOC) & Pack Lifespan (SOH)",
+        advantage: "Eliminates operator confusion",
+      },
+      {
+        dimension: "Phone / Car Analogy",
+        legacyBMS: "No guidance for non-technical dispatchers",
+        ourPlatform: "Clear explanation: Fuel Level (Fuel in tank today) vs. Engine Lifespan (Total age)",
+        advantage: "Empowers non-tech dispatchers",
+      },
+      {
+        dimension: "Charging Behavior",
+        legacyBMS: "Operators wonder why 100% SOC gives shorter range after 3 years",
+        ourPlatform: "Dynamic Range prediction: Combines SOC × SOH × Temperature",
+        advantage: "Accurate real-world range",
+      },
+    ],
+  },
+
   soc: {
     id: "soc",
-    title: "State of Charge (SOC) Intelligence",
+    title: "State of Charge (SOC) Intelligence — Daily Fuel Level",
     subtitle: "Module A • KNN Distance-Weighted Dynamic OCV-Coulomb Fusion",
     plainEnglishSummary: {
-      whatIsIt: "Think of SOC as the exact 'fuel gauge' of your battery, telling you what percentage of usable electrochemical energy remains in the cells right now.",
+      whatIsIt: "Think of SOC as the exact 'fuel gauge' of your battery, telling you what percentage of usable electrical energy remains in the cells right now for today's trip (reversible, charges back to 100%).",
       whyItMatters: "Traditional EV battery gauges often 'drift' or jump suddenly by 10-15% because of temperature changes or sudden acceleration, stranding delivery drivers.",
       actionDirective: "Use SOC to schedule precise delivery route drops and dispatch vehicles without range anxiety.",
     },
@@ -132,10 +195,10 @@ export const POC_KNOWLEDGE_BASE: Record<string, PoCDetails> = {
 
   soh: {
     id: "soh",
-    title: "State of Health (SOH) Capacity Fade",
+    title: "State of Health (SOH) — Permanent Battery Lifespan",
     subtitle: "Module A • 300-Tree Gradient Boosted Cyclic Degradation Estimator",
     plainEnglishSummary: {
-      whatIsIt: "SOH measures how much maximum battery capacity remains compared to when the truck rolled out of the factory. 100% means brand new; 80% means it has lost 20% total range.",
+      whatIsIt: "SOH measures how much maximum battery capacity remains compared to when the truck rolled out of the factory (like iPhone Battery Health). 100% means brand new; 80% means it has lost 20% total range over years of driving (irreversible wear).",
       whyItMatters: "Batteries lose health imperceptibly over hundreds of delivery cycles. Without AI SOH tracking, fleets cannot predict when a battery needs warranty replacement or resale.",
       actionDirective: "Grade batteries into Tier 1 (Active Delivery), Tier 2 (Intra-city backup), and Tier 3 (2nd-life stationary energy storage).",
     },

@@ -474,17 +474,37 @@ export const OperationsView: React.FC = () => {
         </div>
 
 
+        {/* ─── OPERATIONAL DISTINCTION CALLOUT: FUEL (SOC) VS. LIFESPAN (SOH) ─── */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-3.5 rounded-2xl bg-gradient-to-r from-cyan-500/10 via-slate-100 to-emerald-500/10 dark:from-cyan-950/40 dark:via-slate-900/60 dark:to-emerald-950/40 border border-cyan-500/20 dark:border-cyan-500/30 text-xs shadow-sm">
+          <div className="flex items-start sm:items-center gap-2.5">
+            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-cyan-100 dark:bg-cyan-900/60 text-cyan-700 dark:text-cyan-300 font-bold text-xs shrink-0 mt-0.5 sm:mt-0">
+              💡
+            </span>
+            <div className="text-slate-700 dark:text-slate-200 leading-relaxed">
+              <span className="font-bold text-cyan-700 dark:text-cyan-400">Battery Level ({soc.toFixed(1)}% SOC)</span> = Current fuel in tank for today's run (recharges to 100%).{" "}
+              <span className="text-slate-400 font-normal">|</span>{" "}
+              <span className="font-bold text-emerald-700 dark:text-emerald-400">Battery Lifespan ({soh.toFixed(1)}% SOH)</span> = Permanent pack health over 5+ yrs (irreversible wear).
+            </div>
+          </div>
+          <MetricExplainer metricKey="soc_vs_soh" label="Why do these differ?" variant="badge" className="shrink-0 font-semibold" />
+        </div>
+
         {/* ─── 3. FOUR PLAIN-ENGLISH HEALTH CARDS ─── */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
           {/* Card 1: Fuel / Battery Level */}
           <div className="p-5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/80 space-y-3 flex flex-col justify-between">
             <div>
-              <div className="flex justify-between items-center mb-2">
+              <div className="flex justify-between items-center mb-1">
                 <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
                   <BatteryCharging className="w-4 h-4 text-cyan-500" />
-                  <span>Battery Level (Fuel)</span>
+                  <span>Battery Level (Fuel / SOC)</span>
                 </span>
                 <MetricExplainer metricKey="soc" currentValue={`${soc.toFixed(1)}%`} label="How it works" />
+              </div>
+              <div className="flex items-center gap-1.5 mb-2">
+                <span className="text-[10px] font-mono font-medium text-cyan-700 dark:text-cyan-300 bg-cyan-100/70 dark:bg-cyan-950/70 px-1.5 py-0.5 rounded border border-cyan-200 dark:border-cyan-800/60">
+                  Current Tank • Reversible
+                </span>
               </div>
               <div className="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white font-mono tracking-tight">
                 {soc.toFixed(1)}%
@@ -493,23 +513,33 @@ export const OperationsView: React.FC = () => {
                 Estimated Range: <strong className="text-cyan-600 dark:text-cyan-400 font-mono font-bold">{range.toFixed(0)} km</strong>
               </div>
             </div>
-            <div className="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2 overflow-hidden mt-3">
-              <div
-                className="bg-cyan-500 h-2 rounded-full transition-all duration-500"
-                style={{ width: `${Math.max(0, Math.min(100, soc))}%` }}
-              />
+            <div>
+              <div className="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2 overflow-hidden">
+                <div
+                  className="bg-cyan-500 h-2 rounded-full transition-all duration-500"
+                  style={{ width: `${Math.max(0, Math.min(100, soc))}%` }}
+                />
+              </div>
+              <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-1.5 font-sans">
+                Energy in tank right now. Recharges to 100% on plug-in.
+              </p>
             </div>
           </div>
 
           {/* Card 2: Battery Lifespan / Health */}
           <div className="p-5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/80 space-y-3 flex flex-col justify-between">
             <div>
-              <div className="flex justify-between items-center mb-2">
+              <div className="flex justify-between items-center mb-1">
                 <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
                   <ShieldCheck className="w-4 h-4 text-emerald-500" />
-                  <span>Battery Lifespan</span>
+                  <span>Battery Lifespan (Health / SOH)</span>
                 </span>
                 <MetricExplainer metricKey="soh" currentValue={`${soh.toFixed(1)}%`} label="How it works" />
+              </div>
+              <div className="flex items-center gap-1.5 mb-2">
+                <span className="text-[10px] font-mono font-medium text-emerald-700 dark:text-emerald-300 bg-emerald-100/70 dark:bg-emerald-950/70 px-1.5 py-0.5 rounded border border-emerald-200 dark:border-emerald-800/60">
+                  Total Health • Irreversible
+                </span>
               </div>
               <div className="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white font-mono tracking-tight">
                 {soh.toFixed(1)}%
@@ -519,8 +549,13 @@ export const OperationsView: React.FC = () => {
                 <span className="font-mono text-[11px] text-slate-400 font-semibold">({rul} cyc)</span>
               </div>
             </div>
-            <div className="text-[11px] font-semibold text-slate-400 pt-1 border-t border-slate-200/60 dark:border-slate-700/60">
-              Grade: {soh > 92 ? "Grade A (Excellent)" : soh > 82 ? "Grade B (Good)" : "Grade C (Degrading)"}
+            <div>
+              <div className="text-[11px] font-semibold text-slate-400 pt-1 border-t border-slate-200/60 dark:border-slate-700/60 flex justify-between items-center">
+                <span>Grade: {soh > 92 ? "Grade A (Excellent)" : soh > 82 ? "Grade B (Good)" : "Grade C (Degrading)"}</span>
+              </div>
+              <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-1 font-sans">
+                Permanent pack capacity retention (like phone battery health).
+              </p>
             </div>
           </div>
 
@@ -604,12 +639,17 @@ export const OperationsView: React.FC = () => {
         {/* ─── 4. QUICK FLEET SWITCHER TABLE ─── */}
         <div className="border-t border-slate-200 dark:border-slate-800 pt-6">
 
-          <div className="flex justify-between items-center mb-4">
-            <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-              <Truck className="w-4 h-4 text-cyan-500" />
-              <span>Select Vehicle from Fleet (Click to Inspect)</span>
-            </h3>
-            <span className="text-xs font-mono text-slate-400">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 mb-4">
+            <div>
+              <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                <Truck className="w-4 h-4 text-cyan-500" />
+                <span>Select Vehicle from Fleet (Click to Evaluate ML Models)</span>
+              </h3>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 font-sans mt-0.5">
+                Cards show raw CAN telemetry snapshot. Selecting a truck executes multi-zone AI inference engines above.
+              </p>
+            </div>
+            <span className="text-xs font-mono text-slate-400 shrink-0">
               Showing {getFilteredVehicles().slice(0, 8).length} of {getFilteredVehicles().length} vehicles
             </span>
           </div>
@@ -630,9 +670,9 @@ export const OperationsView: React.FC = () => {
                   <div className="text-[10px] text-slate-400 font-sans">{v.driver}</div>
                 </div>
                 <div className="text-right">
-                  <div className="font-bold">{v.soc.toFixed(0)}% SOC</div>
+                  <div className="font-bold">{v.soc.toFixed(0)}% SOC <span className="text-[9px] font-sans font-normal text-slate-400">(Fuel)</span></div>
                   <div className={`text-[10px] ${getVehicleTriage(v) === 'CRITICAL' ? 'text-rose-500' : getVehicleTriage(v) === 'WARNING' ? 'text-amber-500' : 'text-emerald-500'}`}>
-                    {v.soh.toFixed(0)}% SOH • {triageLabel(getVehicleTriage(v))}
+                    {v.soh.toFixed(0)}% SOH <span className="text-[9px] font-sans font-normal text-slate-400">(Life)</span> • {triageLabel(getVehicleTriage(v))}
                   </div>
                 </div>
               </button>
