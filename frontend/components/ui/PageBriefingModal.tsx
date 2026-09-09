@@ -448,11 +448,19 @@ export const PageBriefingModal: React.FC = () => {
       if (typeof window !== "undefined") {
         const saved = localStorage.getItem("ev_auto_show_page_briefing");
         if (saved !== null) {
-          setAutoShowBriefing(saved === "true");
+          const isEnabled = saved === "true";
+          setAutoShowBriefing(isEnabled);
+          if (!isEnabled) {
+            closeBriefing();
+          }
+        } else {
+          // Default to false so it does not intrusively auto-popup on every page
+          setAutoShowBriefing(false);
+          closeBriefing();
         }
       }
     } catch {}
-  }, [setAutoShowBriefing]);
+  }, [setAutoShowBriefing, closeBriefing]);
 
   // Close on Escape key
   useEffect(() => {

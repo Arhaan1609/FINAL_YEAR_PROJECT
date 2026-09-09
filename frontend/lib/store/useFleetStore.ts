@@ -120,10 +120,10 @@ export const useFleetStore = create<FleetStoreState>((set, get) => ({
   stateFilter: "all",
   manufacturerFilter: "all",
 
-  // Page Orientation Briefing defaults
-  briefingOpen: true,
+  // Page Orientation Briefing defaults — starts closed by default and respects saved user preference
+  briefingOpen: false,
   activeBriefingKey: "operations",
-  autoShowBriefing: true,
+  autoShowBriefing: typeof window !== "undefined" ? localStorage.getItem("ev_auto_show_page_briefing") === "true" : false,
 
   telemetry: {
     voltage: MOCK_VEHICLES[0]?.voltage || 73.6,
@@ -160,25 +160,29 @@ export const useFleetStore = create<FleetStoreState>((set, get) => ({
         localStorage.setItem("ev_auto_show_page_briefing", enabled ? "true" : "false");
       }
     } catch {}
-    set({ autoShowBriefing: enabled });
+    set({
+      autoShowBriefing: enabled,
+      ...(enabled ? {} : { briefingOpen: false }),
+    });
   },
 
   navigateToPage: (target: "operations" | DashboardTab) =>
     set((state) => {
+      const updates: Partial<FleetStoreState> = {
+        activeBriefingKey: target,
+      };
       if (target === "operations") {
-        return {
-          viewMode: "operations",
-          briefingOpen: true,
-          activeBriefingKey: "operations",
-        };
+        updates.viewMode = "operations";
       } else {
-        return {
-          viewMode: "engineering",
-          activeTab: target,
-          briefingOpen: true,
-          activeBriefingKey: target,
-        };
+        updates.viewMode = "engineering";
+        updates.activeTab = target;
       }
+      if (state.autoShowBriefing) {
+        updates.briefingOpen = true;
+      } else {
+        updates.briefingOpen = false;
+      }
+      return updates;
     }),
 
   setViewMode: (viewMode: ViewMode) =>
@@ -187,6 +191,8 @@ export const useFleetStore = create<FleetStoreState>((set, get) => ({
       if (state.autoShowBriefing) {
         updates.briefingOpen = true;
         updates.activeBriefingKey = viewMode === "operations" ? "operations" : state.activeTab;
+      } else {
+        updates.briefingOpen = false;
       }
       return updates;
     }),
@@ -197,6 +203,8 @@ export const useFleetStore = create<FleetStoreState>((set, get) => ({
       if (state.autoShowBriefing) {
         updates.briefingOpen = true;
         updates.activeBriefingKey = nextMode === "operations" ? "operations" : state.activeTab;
+      } else {
+        updates.briefingOpen = false;
       }
       return updates;
     }),
@@ -249,6 +257,8 @@ export const useFleetStore = create<FleetStoreState>((set, get) => ({
       if (state.autoShowBriefing) {
         updates.briefingOpen = true;
         updates.activeBriefingKey = tab;
+      } else {
+        updates.briefingOpen = false;
       }
       return updates;
     }),
