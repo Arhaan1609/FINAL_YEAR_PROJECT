@@ -21,8 +21,16 @@ export const Header: React.FC = () => {
     viewMode,
     activeTab,
     openBriefing,
+    getFilteredVehicles,
+    stateFilter,
+    manufacturerFilter,
+    statusFilter,
+    searchQuery,
   } = useFleetStore();
 
+  const filteredVehicles = getFilteredVehicles();
+  const isFiltered = stateFilter !== "all" || manufacturerFilter !== "all" || statusFilter !== "all" || searchQuery.trim().length > 0;
+  const displayVehicles = isFiltered && filteredVehicles.length > 0 ? filteredVehicles : vehicles;
   const selectedVehicle = vehicles.find((v) => v.id === selectedVehicleId) || vehicles[0];
 
   return (
@@ -53,15 +61,17 @@ export const Header: React.FC = () => {
         </div>
       </div>
 
-      {/* Center: Clean Minimalist VIN Selector */}
+      {/* Center: Clean Minimalist VIN Selector (Synced with Active Filters) */}
       <div className="hidden md:flex items-center gap-2 bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 px-3 py-1 rounded-lg">
-        <span className="text-[10px] font-mono uppercase font-semibold text-slate-400">VIN:</span>
+        <span className="text-[10px] font-mono uppercase font-semibold text-slate-400">
+          VIN{isFiltered ? ` (${displayVehicles.length})` : ""}:
+        </span>
         <select
           value={selectedVehicleId}
           onChange={(e) => setSelectedVehicle(e.target.value)}
           className="bg-transparent text-xs font-mono font-bold text-slate-800 dark:text-slate-200 focus:outline-none cursor-pointer pr-1"
         >
-          {vehicles.map((v) => {
+          {displayVehicles.map((v) => {
             const isSelected = v.id === selectedVehicleId;
             const staticTriage = getVehicleTriage(v);
             const triage = isSelected && selectedLiveTriage ? selectedLiveTriage : staticTriage;

@@ -213,7 +213,7 @@ export const FleetOverviewTab: React.FC = () => {
             </div>
             <p className="text-[11px] text-slate-500 font-mono mt-0.5">
               Live sub-second inference:{" "}
-              <strong className="text-slate-800 dark:text-slate-200 font-bold font-mono">{vehicle.id}</strong> (Euler HiLoad 12.4 kWh LFP)
+              <strong className="text-slate-800 dark:text-slate-200 font-bold font-mono">{vehicle.id}</strong> ({vehicle.model} • {vehicle.fleet})
             </p>
           </div>
         </div>
@@ -225,6 +225,111 @@ export const FleetOverviewTab: React.FC = () => {
           <Sparkles className="w-3.5 h-3.5 text-emerald-400 dark:text-emerald-600" />
           <span>Ask AI Copilot</span>
         </button>
+      </div>
+
+      {/* ─── 1.5 ENGINEERING FLEET FILTERS & ACTIVE ASSET SELECTOR ─── */}
+      <div className="p-3.5 rounded-xl bg-white dark:bg-[#0D111A] border border-slate-200 dark:border-slate-800 shadow-xs flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-wrap items-center gap-2.5 w-full xl:w-auto">
+          {/* Quick Search */}
+          <div className="relative flex-1 sm:w-56">
+            <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
+            <input
+              type="text"
+              placeholder="Search VIN, chassis, hub..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-8 pr-3 py-1.5 rounded-lg text-xs font-mono bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none focus:border-cyan-500"
+            />
+          </div>
+
+          {/* Status Filter Buttons */}
+          <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-900 p-0.5 rounded-lg border border-slate-200 dark:border-slate-800 text-xs font-mono">
+            {(["all", "active", "warning", "critical"] as const).map((st) => (
+              <button
+                key={st}
+                onClick={() => {
+                  setStatusFilter(st);
+                  setCurrentPage(1);
+                }}
+                className={`px-2 py-1 rounded capitalize text-[11px] font-semibold transition-all ${
+                  statusFilter === st
+                    ? "bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 shadow-xs"
+                    : "text-slate-500 hover:text-slate-900 dark:hover:text-slate-200"
+                }`}
+              >
+                {st}
+              </button>
+            ))}
+          </div>
+
+          {/* Manufacturer Filter */}
+          <div className="flex items-center gap-1.5 bg-slate-50 dark:bg-slate-900 px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 text-xs font-mono">
+            <Building2 className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+            <select
+              value={manufacturerFilter}
+              onChange={(e) => {
+                setManufacturerFilter(e.target.value);
+                setCurrentPage(1);
+              }}
+              className="bg-transparent text-[11px] font-semibold text-slate-700 dark:text-slate-300 focus:outline-none cursor-pointer pr-1"
+              title="Filter by Vehicle Manufacturer"
+            >
+              <option value="all" className="bg-white dark:bg-slate-900">All Manufacturers</option>
+              <option value="euler" className="bg-white dark:bg-slate-900">Euler Motors (HiLoad)</option>
+              <option value="tata" className="bg-white dark:bg-slate-900">Tata Motors (Ace EV)</option>
+              <option value="mahindra" className="bg-white dark:bg-slate-900">Mahindra Electric</option>
+            </select>
+          </div>
+
+          {/* State Filter */}
+          <div className="flex items-center gap-1.5 bg-slate-50 dark:bg-slate-900 px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 text-xs font-mono">
+            <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+            <select
+              value={stateFilter}
+              onChange={(e) => {
+                setStateFilter(e.target.value);
+                setCurrentPage(1);
+              }}
+              className="bg-transparent text-[11px] font-semibold text-slate-700 dark:text-slate-300 focus:outline-none cursor-pointer pr-1"
+              title="Filter by State / RTO Region"
+            >
+              <option value="all" className="bg-white dark:bg-slate-900">All States</option>
+              <option value="DL" className="bg-white dark:bg-slate-900">Delhi (DL)</option>
+              <option value="GJ" className="bg-white dark:bg-slate-900">Gujarat (GJ)</option>
+              <option value="KA" className="bg-white dark:bg-slate-900">Karnataka (KA)</option>
+              <option value="MH" className="bg-white dark:bg-slate-900">Maharashtra (MH)</option>
+              <option value="TN" className="bg-white dark:bg-slate-900">Tamil Nadu (TN)</option>
+              <option value="UP" className="bg-white dark:bg-slate-900">Uttar Pradesh (UP)</option>
+            </select>
+          </div>
+        </div>
+
+        {/* Active Asset Selector among filtered vehicles */}
+        <div className="flex items-center gap-2 w-full xl:w-auto justify-end">
+          <span className="text-[11px] font-mono text-slate-400 font-bold uppercase tracking-wider whitespace-nowrap">
+            Active Asset:
+          </span>
+          <select
+            value={vehicle.id}
+            onChange={(e) => setSelectedVehicle(e.target.value)}
+            className="bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 px-3 py-1.5 rounded-lg text-xs font-mono font-bold text-cyan-700 dark:text-cyan-400 focus:outline-none cursor-pointer max-w-[240px] truncate"
+          >
+            {filteredVehicles.length === 0 ? (
+              <option value="" disabled className="bg-white dark:bg-slate-900">
+                No matching vehicles
+              </option>
+            ) : (
+              filteredVehicles.map((v) => (
+                <option key={v.id} value={v.id} className="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">
+                  {v.id} — {v.model.split(" ")[0]} ({v.fleet.split(" ")[0]}) • {v.soc.toFixed(0)}%
+                </option>
+              ))
+            )}
+          </select>
+          <span className="text-[10px] font-mono font-bold px-2 py-1 rounded-md bg-cyan-50 dark:bg-cyan-950/60 border border-cyan-200 dark:border-cyan-800 text-cyan-700 dark:text-cyan-300 whitespace-nowrap">
+            {filteredVehicles.length} of {vehicles.length}
+          </span>
+        </div>
       </div>
 
       {/* 2. HUD Telemetry Strip: 4 Precision Metric Cards */}

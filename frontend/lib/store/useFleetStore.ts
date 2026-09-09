@@ -285,17 +285,63 @@ export const useFleetStore = create<FleetStoreState>((set, get) => ({
 
   getSelectedVehicle: () => {
     const { vehicles, selectedVehicleId } = get();
+    const filtered = get().getFilteredVehicles();
+    // If the currently selected vehicle is in the filtered list, use it
+    const inFiltered = filtered.find((v) => v.id.toUpperCase() === selectedVehicleId.toUpperCase());
+    if (inFiltered) return inFiltered;
+    // If not, and there are filtered vehicles, return the first filtered vehicle
+    if (filtered.length > 0) return filtered[0];
+    // Fallback
     return (
       vehicles.find((v) => v.id.toUpperCase() === selectedVehicleId.toUpperCase()) ||
       vehicles[0]
     );
   },
 
-  setSearchQuery: (q: string) => set({ searchQuery: q }),
-  setStatusFilter: (s: VehicleStatusFilter) => set({ statusFilter: s }),
-  setHubFilter: (h: string) => set({ hubFilter: h }),
-  setStateFilter: (s: string) => set({ stateFilter: s }),
-  setManufacturerFilter: (m: string) => set({ manufacturerFilter: m }),
+  setSearchQuery: (q: string) => {
+    set({ searchQuery: q });
+    const filtered = get().getFilteredVehicles();
+    const currentMatches = filtered.some((v) => v.id === get().selectedVehicleId);
+    if (!currentMatches && filtered.length > 0 && q.trim().length > 1) {
+      get().setSelectedVehicle(filtered[0].id);
+    }
+  },
+
+  setStatusFilter: (s: VehicleStatusFilter) => {
+    set({ statusFilter: s });
+    const filtered = get().getFilteredVehicles();
+    const currentMatches = filtered.some((v) => v.id === get().selectedVehicleId);
+    if (!currentMatches && filtered.length > 0) {
+      get().setSelectedVehicle(filtered[0].id);
+    }
+  },
+
+  setHubFilter: (h: string) => {
+    set({ hubFilter: h });
+    const filtered = get().getFilteredVehicles();
+    const currentMatches = filtered.some((v) => v.id === get().selectedVehicleId);
+    if (!currentMatches && filtered.length > 0) {
+      get().setSelectedVehicle(filtered[0].id);
+    }
+  },
+
+  setStateFilter: (s: string) => {
+    set({ stateFilter: s });
+    const filtered = get().getFilteredVehicles();
+    const currentMatches = filtered.some((v) => v.id === get().selectedVehicleId);
+    if (!currentMatches && filtered.length > 0) {
+      get().setSelectedVehicle(filtered[0].id);
+    }
+  },
+
+  setManufacturerFilter: (m: string) => {
+    set({ manufacturerFilter: m });
+    const filtered = get().getFilteredVehicles();
+    const currentMatches = filtered.some((v) => v.id === get().selectedVehicleId);
+    if (!currentMatches && filtered.length > 0) {
+      get().setSelectedVehicle(filtered[0].id);
+    }
+  },
 
   lookupOrAddVehicle: (id: string) => {
     const vehicle = getOrCreateCustomVehicle(id);
@@ -342,8 +388,8 @@ export const useFleetStore = create<FleetStoreState>((set, get) => ({
           (sf === "GJ" && (fleetLower.includes("ahmedabad") || fleetLower.includes("surat") || fleetLower.includes("gujarat") || idPrefix === "GJ")) ||
           (sf === "KA" && (fleetLower.includes("bengaluru") || fleetLower.includes("bangalore") || fleetLower.includes("karnataka") || idPrefix === "KA")) ||
           (sf === "MH" && (fleetLower.includes("mumbai") || fleetLower.includes("pune") || fleetLower.includes("maharashtra") || idPrefix === "MH")) ||
-          (sf === "TN" && (fleetLower.includes("chennai") || fleetLower.includes("tamil") || idPrefix === "TN")) ||
-          (sf === "UP" && (fleetLower.includes("lucknow") || fleetLower.includes("pradesh") || idPrefix === "UP"));
+          (sf === "TN" && (fleetLower.includes("chennai") || fleetLower.includes("coimbatore") || fleetLower.includes("tamil") || idPrefix === "TN")) ||
+          (sf === "UP" && (fleetLower.includes("lucknow") || fleetLower.includes("noida") || fleetLower.includes("pradesh") || idPrefix === "UP"));
         if (!matchesState) return false;
       }
 

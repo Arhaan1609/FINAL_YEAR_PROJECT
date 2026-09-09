@@ -57,6 +57,7 @@ export const OperationsView: React.FC = () => {
   } = useFleetStore();
 
   const vehicle = getSelectedVehicle();
+  const filteredVehicles = getFilteredVehicles();
 
   // Dynamic live prediction states
   const [soc, setSoc] = useState<number>(vehicle.soc || 75);
@@ -371,6 +372,32 @@ export const OperationsView: React.FC = () => {
               </select>
             </div>
 
+            {/* Active Vehicle Picker among filtered vehicles */}
+            <div className="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 px-2.5 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-mono">
+              <Truck className="w-3.5 h-3.5 text-cyan-500 shrink-0" />
+              <select
+                value={vehicle.id}
+                onChange={(e) => setSelectedVehicle(e.target.value)}
+                className="bg-transparent text-[11px] font-bold text-slate-800 dark:text-slate-100 focus:outline-none cursor-pointer max-w-[170px] sm:max-w-[210px] truncate"
+                title="Select from filtered trucks"
+              >
+                {filteredVehicles.length === 0 ? (
+                  <option value="" disabled className="bg-white dark:bg-slate-900">
+                    No matching trucks
+                  </option>
+                ) : (
+                  filteredVehicles.map((v) => (
+                    <option key={v.id} value={v.id} className="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">
+                      {v.id} — {v.model.split(" ")[0]} ({v.fleet.split(" ")[0]}) • {v.soc.toFixed(0)}%
+                    </option>
+                  ))
+                )}
+              </select>
+              <span className="text-[10px] font-semibold text-cyan-700 dark:text-cyan-300 bg-cyan-50 dark:bg-cyan-950/60 border border-cyan-200 dark:border-cyan-800/80 px-1.5 py-0.5 rounded">
+                {filteredVehicles.length}
+              </span>
+            </div>
+
             <button
               onClick={() => {
                 setViewMode("engineering");
@@ -383,6 +410,23 @@ export const OperationsView: React.FC = () => {
             </button>
           </div>
         </div>
+
+        {filteredVehicles.length === 0 && (
+          <div className="p-3.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-800/80 text-amber-900 dark:text-amber-200 text-xs flex items-center justify-between">
+            <span>No vehicles match the active filter criteria ({manufacturerFilter !== "all" ? manufacturerFilter : ""} {stateFilter !== "all" ? stateFilter : ""}).</span>
+            <button
+              onClick={() => {
+                setManufacturerFilter("all");
+                setStateFilter("all");
+                setStatusFilter("all");
+                setSearchQuery("");
+              }}
+              className="text-xs font-bold underline hover:text-amber-700 cursor-pointer"
+            >
+              Reset All Filters
+            </button>
+          </div>
+        )}
 
         {/* ─── ACTION DIRECTIVE BANNER (PLAIN ENGLISH) ─── */}
         <div
