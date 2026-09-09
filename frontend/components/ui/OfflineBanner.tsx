@@ -57,7 +57,7 @@ export function OfflineBanner() {
   return (
     <div
       id="offline-banner"
-      className="sticky top-0 z-[100] w-full bg-gradient-to-r from-amber-600 via-rose-600 to-amber-700 text-white px-4 py-2 shadow-lg flex items-center justify-between text-xs sm:text-sm font-semibold tracking-wide animate-in fade-in slide-in-from-top duration-300 border-b border-rose-400/40"
+      className="sticky top-0 z-[100] w-full bg-gradient-to-r from-amber-600 via-rose-600 to-amber-700 text-white px-4 py-2 shadow-lg flex items-center justify-between text-xs sm:text-sm font-semibold tracking-wide animate-in fade-in slide-in-from-top duration-300 border-b border-rose-400/40 print:hidden"
     >
       <div className="flex items-center gap-2.5 max-w-5xl mx-auto">
         <span className="relative flex h-3 w-3">

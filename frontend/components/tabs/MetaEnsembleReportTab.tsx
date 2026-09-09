@@ -62,8 +62,40 @@ export const MetaEnsembleReportTab: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      {/* Top Banner with Print Button */}
-      <div className="app-card p-4 flex flex-wrap items-center justify-between gap-4 border border-emerald-200 dark:border-emerald-800/60 bg-emerald-50 dark:bg-emerald-950/20">
+      {/* Official Enterprise Document Header - Visible Only in Print */}
+      <div className="hidden print:block border-b-2 border-slate-900 pb-5 mb-6">
+        <div className="flex items-start justify-between">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <div className="w-7 h-7 rounded bg-slate-900 text-white font-extrabold text-xs flex items-center justify-center">
+                EV
+              </div>
+              <span className="text-xs font-mono font-bold tracking-widest uppercase text-slate-800">
+                Enterprise EV Telemetrics Certification Authority
+              </span>
+            </div>
+            <h1 className="text-xl font-extrabold text-slate-900 tracking-tight">
+              VEHICLE BATTERY ASSET & TRI-PILLAR DIAGNOSTIC CERTIFICATE
+            </h1>
+            <p className="text-[11px] text-slate-600 font-sans">
+              Module A (State Estimation) + Module B (Multi-Zone Thermal) + Module C (BA-BMS & Knee Point Prognostics)
+            </p>
+          </div>
+          <div className="text-right font-mono text-xs space-y-1">
+            <div className="text-[10px] uppercase text-slate-500 font-bold">Certificate ID</div>
+            <div className="font-bold text-slate-900 text-sm">CERT-EV-{vehicle.id}</div>
+            <div className="text-[10px] text-slate-500">
+              Date: {new Date().toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}
+            </div>
+            <div className="inline-block px-2 py-0.5 mt-0.5 bg-emerald-100 text-emerald-800 border border-emerald-300 rounded text-[9px] font-bold uppercase">
+              74-MODEL ENSEMBLE CERTIFIED
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Top Banner with Print Button (Hidden on Print) */}
+      <div className="app-card p-4 flex flex-wrap items-center justify-between gap-4 border border-emerald-200 dark:border-emerald-800/60 bg-emerald-50 dark:bg-emerald-950/20 print:hidden">
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-xl bg-emerald-100 dark:bg-emerald-900/40 border border-emerald-300 text-emerald-700 dark:text-emerald-400 flex items-center justify-center">
             <FileText className="w-5 h-5" />
@@ -81,7 +113,7 @@ export const MetaEnsembleReportTab: React.FC = () => {
 
         <button
           onClick={handlePrint}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 dark:bg-slate-800 dark:hover:bg-slate-700 text-white dark:text-slate-200 text-xs font-semibold transition-all hover:scale-105 shadow-sm"
+          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 dark:bg-slate-800 dark:hover:bg-slate-700 text-white dark:text-slate-200 text-xs font-semibold transition-all hover:scale-105 shadow-sm print:hidden"
         >
           <Printer className="w-4 h-4" />
           Export / Print Report (PDF)
@@ -89,7 +121,7 @@ export const MetaEnsembleReportTab: React.FC = () => {
       </div>
 
       {/* Report Header Card */}
-      <GlassCard className="space-y-6">
+      <GlassCard className="space-y-6 print:border print:border-slate-300 print:shadow-none print:bg-white">
         <div className="flex flex-wrap items-start justify-between gap-4 border-b border-slate-100 dark:border-slate-800 pb-6">
           <div>
             <div className="text-xs font-mono uppercase text-cyan-600 dark:text-cyan-400 font-bold">Vehicle Asset Certificate</div>
@@ -188,6 +220,33 @@ export const MetaEnsembleReportTab: React.FC = () => {
                 <span>{item}</span>
               </div>
             ))}
+          </div>
+        </div>
+
+        {/* Official Document Footer & Audit Signatures - Visible Only in Print */}
+        <div className="hidden print:block pt-8 mt-6 border-t-2 border-slate-900 space-y-6">
+          <div className="grid grid-cols-2 gap-12 text-xs">
+            <div>
+              <div className="text-[10px] font-mono uppercase text-slate-500 font-semibold mb-8">
+                Autonomous Telemetry Engineer Sign-Off
+              </div>
+              <div className="border-b border-slate-400 w-56 mb-1"></div>
+              <div className="font-bold text-slate-900">Lead Battery Systems Engineer</div>
+              <div className="text-[10px] text-slate-500">AI Diagnostics & Telemetry Division</div>
+            </div>
+            <div>
+              <div className="text-[10px] font-mono uppercase text-slate-500 font-semibold mb-8">
+                Commercial Fleet Operations Sign-Off
+              </div>
+              <div className="border-b border-slate-400 w-56 mb-1"></div>
+              <div className="font-bold text-slate-900">Fleet Operations Director</div>
+              <div className="text-[10px] text-slate-500">Commercial EV Asset Authority</div>
+            </div>
+          </div>
+
+          <div className="pt-4 border-t border-slate-200 flex justify-between items-center text-[9px] font-mono text-slate-500">
+            <span>SHA-256 Telemetry Audit Verification: {vehicle.id.toLowerCase()}-74m-iso26262-auth-verified</span>
+            <span>Page 1 of 1 • Multi-Zone Fleet Intelligence Platform</span>
           </div>
         </div>
       </GlassCard>

@@ -53,6 +53,8 @@ interface FleetStoreState {
   searchQuery: string;
   statusFilter: VehicleStatusFilter;
   hubFilter: string;
+  stateFilter: string;
+  manufacturerFilter: string;
 
   // Employee Page Orientation & Briefing System
   briefingOpen: boolean;
@@ -85,6 +87,8 @@ interface FleetStoreState {
   setSearchQuery: (q: string) => void;
   setStatusFilter: (s: VehicleStatusFilter) => void;
   setHubFilter: (h: string) => void;
+  setStateFilter: (s: string) => void;
+  setManufacturerFilter: (m: string) => void;
   getFilteredVehicles: () => FleetVehicle[];
 }
 
@@ -113,6 +117,8 @@ export const useFleetStore = create<FleetStoreState>((set, get) => ({
   searchQuery: "",
   statusFilter: "all",
   hubFilter: "all",
+  stateFilter: "all",
+  manufacturerFilter: "all",
 
   // Page Orientation Briefing defaults
   briefingOpen: true,
@@ -288,6 +294,8 @@ export const useFleetStore = create<FleetStoreState>((set, get) => ({
   setSearchQuery: (q: string) => set({ searchQuery: q }),
   setStatusFilter: (s: VehicleStatusFilter) => set({ statusFilter: s }),
   setHubFilter: (h: string) => set({ hubFilter: h }),
+  setStateFilter: (s: string) => set({ stateFilter: s }),
+  setManufacturerFilter: (m: string) => set({ manufacturerFilter: m }),
 
   lookupOrAddVehicle: (id: string) => {
     const vehicle = getOrCreateCustomVehicle(id);
@@ -299,7 +307,7 @@ export const useFleetStore = create<FleetStoreState>((set, get) => ({
   },
 
   getFilteredVehicles: () => {
-    const { vehicles, searchQuery, statusFilter, hubFilter } = get();
+    const { vehicles, searchQuery, statusFilter, hubFilter, stateFilter, manufacturerFilter } = get();
     return vehicles.filter((v) => {
       // 1. Search Query
       if (searchQuery.trim()) {
@@ -321,6 +329,29 @@ export const useFleetStore = create<FleetStoreState>((set, get) => ({
       // 3. Hub Filter
       if (hubFilter !== "all" && !v.fleet.toLowerCase().includes(hubFilter.toLowerCase())) {
         return false;
+      }
+
+      // 4. State Filter (DL, GJ, KA, MH, TN, UP)
+      if (stateFilter !== "all") {
+        const sf = stateFilter.toUpperCase().trim();
+        const idPrefix = v.id.slice(0, 2).toUpperCase();
+        const fleetLower = (v.fleet || "").toLowerCase();
+        const matchesState =
+          idPrefix === sf ||
+          (sf === "DL" && (fleetLower.includes("delhi") || idPrefix === "DL")) ||
+          (sf === "GJ" && (fleetLower.includes("ahmedabad") || fleetLower.includes("surat") || fleetLower.includes("gujarat") || idPrefix === "GJ")) ||
+          (sf === "KA" && (fleetLower.includes("bengaluru") || fleetLower.includes("bangalore") || fleetLower.includes("karnataka") || idPrefix === "KA")) ||
+          (sf === "MH" && (fleetLower.includes("mumbai") || fleetLower.includes("pune") || fleetLower.includes("maharashtra") || idPrefix === "MH")) ||
+          (sf === "TN" && (fleetLower.includes("chennai") || fleetLower.includes("tamil") || idPrefix === "TN")) ||
+          (sf === "UP" && (fleetLower.includes("lucknow") || fleetLower.includes("pradesh") || idPrefix === "UP"));
+        if (!matchesState) return false;
+      }
+
+      // 5. Manufacturer Filter (Euler Motors, Tata Motors, Mahindra, etc.)
+      if (manufacturerFilter !== "all") {
+        const mf = manufacturerFilter.toLowerCase().trim();
+        const modelLower = (v.model || "").toLowerCase();
+        if (!modelLower.includes(mf)) return false;
       }
 
       return true;

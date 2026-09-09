@@ -17,6 +17,8 @@ import {
   ChevronRight,
   Sparkles,
   Info,
+  MapPin,
+  Building2,
 } from "lucide-react";
 import { MetricExplainer } from "../ui/MetricExplainer";
 import { AIInsightsCard } from "../dashboard/AIInsightsCard";
@@ -48,6 +50,10 @@ export const FleetOverviewTab: React.FC = () => {
     setSearchQuery,
     statusFilter,
     setStatusFilter,
+    stateFilter,
+    setStateFilter,
+    manufacturerFilter,
+    setManufacturerFilter,
     getFilteredVehicles,
     selectedLiveTriage,
     setSelectedLiveTriage,
@@ -416,7 +422,10 @@ export const FleetOverviewTab: React.FC = () => {
               {(["all", "active", "warning", "critical"] as const).map((st) => (
                 <button
                   key={st}
-                  onClick={() => setStatusFilter(st)}
+                  onClick={() => {
+                    setStatusFilter(st);
+                    setCurrentPage(1);
+                  }}
                   className={`px-2 py-0.5 rounded capitalize text-[11px] font-semibold transition-all ${
                     statusFilter === st
                       ? "bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 shadow-xs"
@@ -426,6 +435,47 @@ export const FleetOverviewTab: React.FC = () => {
                   {st}
                 </button>
               ))}
+            </div>
+
+            {/* Manufacturer OEM Filter */}
+            <div className="flex items-center gap-1.5 bg-slate-50 dark:bg-slate-900 px-2.5 py-1 rounded-lg border border-slate-200 dark:border-slate-800 text-xs font-mono">
+              <Building2 className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+              <select
+                value={manufacturerFilter}
+                onChange={(e) => {
+                  setManufacturerFilter(e.target.value);
+                  setCurrentPage(1);
+                }}
+                className="bg-transparent text-[11px] font-semibold text-slate-700 dark:text-slate-300 focus:outline-none cursor-pointer pr-1"
+                title="Filter by Vehicle Manufacturer"
+              >
+                <option value="all" className="bg-white dark:bg-slate-900">All Manufacturers</option>
+                <option value="euler" className="bg-white dark:bg-slate-900">Euler Motors (HiLoad)</option>
+                <option value="tata" className="bg-white dark:bg-slate-900">Tata Motors (Ace EV)</option>
+                <option value="mahindra" className="bg-white dark:bg-slate-900">Mahindra Electric</option>
+              </select>
+            </div>
+
+            {/* State Filter */}
+            <div className="flex items-center gap-1.5 bg-slate-50 dark:bg-slate-900 px-2.5 py-1 rounded-lg border border-slate-200 dark:border-slate-800 text-xs font-mono">
+              <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+              <select
+                value={stateFilter}
+                onChange={(e) => {
+                  setStateFilter(e.target.value);
+                  setCurrentPage(1);
+                }}
+                className="bg-transparent text-[11px] font-semibold text-slate-700 dark:text-slate-300 focus:outline-none cursor-pointer pr-1"
+                title="Filter by State / RTO Region"
+              >
+                <option value="all" className="bg-white dark:bg-slate-900">All States</option>
+                <option value="DL" className="bg-white dark:bg-slate-900">Delhi (DL)</option>
+                <option value="GJ" className="bg-white dark:bg-slate-900">Gujarat (GJ)</option>
+                <option value="KA" className="bg-white dark:bg-slate-900">Karnataka (KA)</option>
+                <option value="MH" className="bg-white dark:bg-slate-900">Maharashtra (MH)</option>
+                <option value="TN" className="bg-white dark:bg-slate-900">Tamil Nadu (TN)</option>
+                <option value="UP" className="bg-white dark:bg-slate-900">Uttar Pradesh (UP)</option>
+              </select>
             </div>
           </div>
         </div>

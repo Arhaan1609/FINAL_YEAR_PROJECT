@@ -67,7 +67,7 @@ export const Sidebar: React.FC = () => {
   ];
 
   return (
-    <aside className="w-60 border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0A0D14] p-3.5 flex flex-col justify-between hidden md:flex min-h-[calc(100vh-3.5rem)] transition-colors select-none shrink-0">
+    <aside className="w-60 border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0A0D14] p-3.5 flex flex-col justify-between hidden md:flex min-h-[calc(100vh-3.5rem)] transition-colors select-none shrink-0 print:hidden">
       <div className="space-y-1">
         {/* Operations Command Quick Switch with Orientation Guide */}
         <div className="relative group mb-2">

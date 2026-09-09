@@ -26,7 +26,7 @@ export const Header: React.FC = () => {
   const selectedVehicle = vehicles.find((v) => v.id === selectedVehicleId) || vehicles[0];
 
   return (
-    <header className="h-14 border-b border-slate-200 dark:border-slate-800 bg-white/95 dark:bg-[#0A0D14]/95 backdrop-blur-md px-6 flex items-center justify-between sticky top-0 z-30 transition-colors">
+    <header className="h-14 border-b border-slate-200 dark:border-slate-800 bg-white/95 dark:bg-[#0A0D14]/95 backdrop-blur-md px-6 flex items-center justify-between sticky top-0 z-30 transition-colors print:hidden">
       {/* Left: Brand Identity & Landing Link */}
       <div className="flex items-center gap-4">
         <Link

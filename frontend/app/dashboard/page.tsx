@@ -38,7 +38,7 @@ export default function DashboardPage() {
   return (
     <div className="space-y-6">
       {/* ─── ROLE-BASED MODE SWITCHER HEADER ─── */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm print:hidden">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-500 to-emerald-500 flex items-center justify-center text-white font-bold shadow-md shadow-emerald-500/20">
             {viewMode === "operations" ? <Briefcase className="w-5 h-5" /> : <Cpu className="w-5 h-5" />}
@@ -106,7 +106,7 @@ export default function DashboardPage() {
       ) : (
         <div className="space-y-6">
           {/* Engineering Tab Scroller for Mobile */}
-          <div className="flex md:hidden items-center gap-2 overflow-x-auto pb-2 border-b border-slate-200 dark:border-slate-800">
+          <div className="flex md:hidden items-center gap-2 overflow-x-auto pb-2 border-b border-slate-200 dark:border-slate-800 print:hidden">
             {mobileTabs.map((tab) => {
               const Icon = tab.icon;
               const isActive = activeTab === tab.id;
