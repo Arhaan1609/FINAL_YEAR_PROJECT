@@ -81,6 +81,7 @@ def predict_driver_behavior(req: DriverBehaviorRequest):
         voltage_variance=req.voltage_variance,
         soc_drain_rate=req.soc_drain_rate,
     )
+    res["estimated_annual_soh_penalty_pct"] = res["annual_soh_penalty_percent"]
     return res
 
 

@@ -24,11 +24,11 @@ export const DriverProfilingTab: React.FC = () => {
   useEffect(() => {
     const isWarn = vehicle.status === "warning";
     const isCrit = vehicle.status === "critical";
-    setHarshAccel(isCrit ? 8 : isWarn ? 5 : 1);
+    setHarshAccel(isCrit ? 8 : isWarn ? 4 : 1);
     setHarshBrake(isCrit ? 6 : isWarn ? 3 : 1);
     setHarshCorner(isCrit ? 3 : isWarn ? 2 : 1);
-    setSpeedVariance(isCrit ? 22.5 : isWarn ? 14.0 : 6.5);
-    setMaxDischarge(isCrit ? 65.0 : isWarn ? 45.0 : 25.0);
+    setSpeedVariance(isCrit ? 21.0 : isWarn ? 12.0 : 5.0);
+    setMaxDischarge(isCrit ? 110.0 : isWarn ? 55.0 : 25.0);
   }, [selectedVehicleId, vehicle]);
 
   const [behaviorData, setBehaviorData] = useState<DriverBehaviorResponse | any | null>(null);
@@ -44,7 +44,7 @@ export const DriverProfilingTab: React.FC = () => {
         speed_variance: speedVariance,
         avg_speed: telemetry.avgSpeed || 34,
         max_speed: telemetry.maxSpeed || 58,
-        battery_temp_max: (telemetry.temperature || 32) + 4,
+        battery_temp_max: (telemetry.temperature || 32) + (maxDischarge > 75 ? 6 : 2),
         max_discharge_current: maxDischarge,
       });
       setBehaviorData(res);
@@ -67,10 +67,34 @@ export const DriverProfilingTab: React.FC = () => {
   const isAggressive = ai > 0.65;
   const isModerate = ai > 0.35 && ai <= 0.65;
 
-  const annualPenalty =
+  const rawPenalty =
     behaviorData?.estimated_annual_soh_penalty_pct ??
     behaviorData?.annual_soh_penalty_percent ??
     0.0;
+  const annualPenalty = rawPenalty < 0.05 ? 0.0 : rawPenalty;
+
+  // Preset quick selectors
+  const applyPreset = (type: "calm" | "moderate" | "aggressive") => {
+    if (type === "calm") {
+      setHarshAccel(1);
+      setHarshBrake(1);
+      setHarshCorner(1);
+      setSpeedVariance(5.0);
+      setMaxDischarge(25.0);
+    } else if (type === "moderate") {
+      setHarshAccel(4);
+      setHarshBrake(3);
+      setHarshCorner(2);
+      setSpeedVariance(12.0);
+      setMaxDischarge(55.0);
+    } else {
+      setHarshAccel(8);
+      setHarshBrake(6);
+      setHarshCorner(4);
+      setSpeedVariance(21.0);
+      setMaxDischarge(115.0);
+    }
+  };
 
   // Extract recommendations safely from array or backend string fields
   const recommendationList: string[] = Array.isArray(behaviorData?.recommendations)
@@ -152,7 +176,7 @@ export const DriverProfilingTab: React.FC = () => {
         </GlassCard>
 
         {/* Battery Stress Index Card */}
-        <GlassCard glow={bsi > 0.6 ? "crimson" : bsi > 0.4 ? "amber" : "purple"} className="text-center">
+        <GlassCard glow={bsi > 0.65 ? "crimson" : bsi > 0.38 ? "amber" : "purple"} className="text-center">
           <div className="flex items-center justify-between text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
             <span>Battery Stress Index (BSI)</span>
             <MetricExplainer
@@ -166,42 +190,77 @@ export const DriverProfilingTab: React.FC = () => {
               <AnimatedNumber
                 value={bsi}
                 decimals={3}
-                className={bsi > 0.6 ? "text-rose-600 dark:text-rose-400" : bsi > 0.4 ? "text-amber-600 dark:text-amber-400" : "text-purple-600 dark:text-purple-400"}
+                className={bsi > 0.65 ? "text-rose-600 dark:text-rose-400" : bsi > 0.38 ? "text-amber-600 dark:text-amber-400" : "text-purple-600 dark:text-purple-400"}
               />
             </div>
             <div className="text-xs text-slate-500 dark:text-slate-400 mt-1 font-mono">Electrochemical Strain (C-rate + Temp)</div>
           </div>
           <div className="pt-3 border-t border-slate-100 dark:border-slate-800 text-xs text-slate-600 dark:text-slate-300">
-            Peak Current Draw: <strong className="text-amber-600 dark:text-amber-400">{maxDischarge} A</strong>
+            Peak Current Draw: <strong className={maxDischarge > 75 ? "text-rose-600 dark:text-rose-400" : "text-amber-600 dark:text-amber-400"}>{maxDischarge.toFixed(0)} A</strong>
           </div>
         </GlassCard>
 
         {/* Projected Annual SOH Penalty */}
-        <GlassCard glow="amber" className="text-center flex flex-col justify-between">
+        <GlassCard glow={annualPenalty > 2.0 ? "crimson" : annualPenalty > 0.5 ? "amber" : "emerald"} className="text-center flex flex-col justify-between">
           <div className="flex items-center justify-between text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
             <span>Annual SOH Penalty</span>
-            <MetricExplainer metricKey="driver_ai" currentValue={`-${annualPenalty.toFixed(1)}%`} label="How it works" />
+            <MetricExplainer
+              metricKey="driver_ai"
+              currentValue={annualPenalty > 0.05 ? `-${annualPenalty.toFixed(1)}%` : "0.0% (Baseline)"}
+              label="How it works"
+            />
           </div>
 
           <div className="my-3">
-            <div className="text-4xl font-extrabold font-mono tracking-tight text-amber-600 dark:text-amber-400">
-              -<AnimatedNumber value={annualPenalty} decimals={1} suffix="%" />
+            <div className={`text-4xl font-extrabold font-mono tracking-tight ${annualPenalty > 2.0 ? "text-rose-600 dark:text-rose-400" : annualPenalty > 0.5 ? "text-amber-600 dark:text-amber-400" : "text-emerald-600 dark:text-emerald-400"}`}>
+              {annualPenalty > 0.05 && "-"}
+              <AnimatedNumber value={annualPenalty > 0.05 ? annualPenalty : 0.0} decimals={1} suffix="%" />
             </div>
-            <div className="text-xs text-slate-500 dark:text-slate-400 mt-1 font-mono">Excess degradation per 25,000 km</div>
+            <div className="text-xs text-slate-500 dark:text-slate-400 mt-1 font-mono">
+              {annualPenalty > 0.05 ? "Excess degradation per 25,000 km" : "Baseline fleet fade (~1.8%/yr)"}
+            </div>
           </div>
           <p className="text-[11px] text-slate-500 dark:text-slate-400 border-t border-slate-100 dark:border-slate-800 pt-2">
-            Aggressive tip-in elevates calendar fade rate
+            {annualPenalty > 0.05
+              ? "Dynamic C-rate & thermal spikes accelerate SEI degradation"
+              : "Gentle throttle preserves cathode & anode microstructure"}
           </p>
         </GlassCard>
       </div>
 
       {/* Behavioral Controls & Policy Recommendations */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Sliders */}
+        {/* Sliders & Presets */}
         <GlassCard className="space-y-4">
-          <h3 className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 border-b border-slate-100 dark:border-slate-800 pb-2">
-            Simulate Driving Pattern Telemetry
-          </h3>
+          <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-2">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+              Simulate Driving Pattern Telemetry
+            </h3>
+            {/* Quick Presets */}
+            <div className="flex items-center gap-1.5">
+              <button
+                onClick={() => applyPreset("calm")}
+                className="px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700 hover:opacity-80 transition-all"
+                title="Gentle eco-driving profile"
+              >
+                Eco
+              </button>
+              <button
+                onClick={() => applyPreset("moderate")}
+                className="px-2 py-0.5 rounded text-[10px] font-semibold bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border border-amber-300 dark:border-amber-700 hover:opacity-80 transition-all"
+                title="Standard fleet delivery schedule"
+              >
+                Nominal
+              </button>
+              <button
+                onClick={() => applyPreset("aggressive")}
+                className="px-2 py-0.5 rounded text-[10px] font-semibold bg-rose-100 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 border border-rose-300 dark:border-rose-700 hover:opacity-80 transition-all"
+                title="High-stress aggressive throttle profile"
+              >
+                Aggressive
+              </button>
+            </div>
+          </div>
 
           <div className="space-y-3">
             <div>
@@ -242,7 +301,7 @@ export const DriverProfilingTab: React.FC = () => {
               <input
                 type="range"
                 min="0"
-                max="12"
+                max="8"
                 value={harshCorner}
                 onChange={(e) => setHarshCorner(parseInt(e.target.value))}
                 className="w-full h-1.5 bg-slate-200 dark:bg-slate-800 rounded-lg appearance-none cursor-pointer accent-purple-600"
@@ -257,7 +316,7 @@ export const DriverProfilingTab: React.FC = () => {
               <input
                 type="range"
                 min="2"
-                max="20"
+                max="25"
                 step="0.5"
                 value={speedVariance}
                 onChange={(e) => setSpeedVariance(parseFloat(e.target.value))}
@@ -268,12 +327,14 @@ export const DriverProfilingTab: React.FC = () => {
             <div>
               <div className="flex justify-between text-xs font-mono mb-1">
                 <span className="text-slate-500 dark:text-slate-400">Peak Discharge Current (A)</span>
-                <span className="text-rose-600 dark:text-rose-400 font-bold">{maxDischarge.toFixed(0)} A</span>
+                <span className={maxDischarge > 75 ? "text-rose-600 dark:text-rose-400 font-bold" : "text-amber-600 dark:text-amber-400 font-bold"}>
+                  {maxDischarge.toFixed(0)} A
+                </span>
               </div>
               <input
                 type="range"
                 min="15"
-                max="65"
+                max="140"
                 step="1"
                 value={maxDischarge}
                 onChange={(e) => setMaxDischarge(parseFloat(e.target.value))}
@@ -299,8 +360,13 @@ export const DriverProfilingTab: React.FC = () => {
               ))}
             </div>
           </div>
-          <div className="text-[11px] text-slate-500 dark:text-slate-400 pt-3 border-t border-slate-100 dark:border-slate-800">
-            Formulation: <code className="text-xs text-slate-800 dark:text-slate-200 font-mono">AI = 0.25·Accel + 0.20·Brake + 0.15·σ + 0.15·v²</code>
+          <div className="text-[11px] text-slate-500 dark:text-slate-400 pt-3 border-t border-slate-100 dark:border-slate-800 space-y-1">
+            <div>
+              Formulation: <code className="text-[11px] text-slate-800 dark:text-slate-200 font-mono">AI = 0.25·Accel + 0.20·Brake + 0.15·Corner + 0.15·σᵥ + 0.15·(v̄/vₘₐₓ)² + 0.10·Overspeed</code>
+            </div>
+            <div>
+              Stress Index: <code className="text-[11px] text-purple-700 dark:text-purple-300 font-mono">BSI = 0.35·Temp + 0.30·(Iₚₑₐₖ/Iₙₒₘ) + 0.20·Var(V) + 0.15·DrainRate</code>
+            </div>
           </div>
         </GlassCard>
       </div>

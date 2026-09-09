@@ -219,37 +219,87 @@ export function getMockDiagnose(req: DiagnoseRequest): DiagnoseResponse {
   };
 }
 
-// 9. Module C — Driver Behavior
+// 9. Module C — Driver Behavior (Calibrated for commercial Euler HiLoad 12.4 kWh LFP)
 export function getMockDriverBehavior(req: DriverBehaviorRequest): DriverBehaviorResponse {
-  const totalEvents = req.harsh_accel_count * 2 + req.harsh_brake_count * 1.5 + req.harsh_corner_count;
-  let ai = Math.min(1.0, Math.max(0.05, totalEvents / 15 + (req.speed_variance / 20)));
-  let bsi = Math.min(1.0, Math.max(0.08, ai * 0.7 + (req.max_discharge_current / 100) * 0.3));
+  const normAccel = Math.min(1.0, (req.harsh_accel_count || 0) / 10.0);
+  const normBrake = Math.min(1.0, (req.harsh_brake_count || 0) / 10.0);
+  const normCorner = Math.min(1.0, (req.harsh_corner_count || 0) / 8.0);
+  const normSpeedVar = Math.min(1.0, (req.speed_variance || 5.0) / 25.0);
+  const avgSpd = req.avg_speed || 34.0;
+  const normKinetic = Math.min(1.0, Math.pow(avgSpd / 70.0, 2));
+  const normOverspeed = Math.min(1.0, (req.overspeed_count || 0) / 5.0);
 
-  ai = Number(ai.toFixed(3));
-  bsi = Number(bsi.toFixed(3));
+  const rawAi =
+    0.25 * normAccel +
+    0.20 * normBrake +
+    0.15 * normCorner +
+    0.15 * normSpeedVar +
+    0.15 * normKinetic +
+    0.10 * normOverspeed;
+  const ai = Number(Math.max(0.0, Math.min(1.0, rawAi)).toFixed(4));
+
+  const maxCurrent = Math.abs(req.max_discharge_current || 25.0);
+  const maxTemp = req.battery_temp_max || 34.0;
+
+  const tempStrain = Math.max(0.0, Math.min(1.0, (maxTemp - 30.0) / 22.0));
+  const currentStrain = Math.min(1.0, Math.max(0.0, (maxCurrent - 15.0) / 115.0));
+  const voltageVar = 0.4 + 2.2 * Math.pow(Math.min(1.0, maxCurrent / 120.0), 2) * (1.0 + normSpeedVar * 0.4);
+  const voltageStrain = Math.min(1.0, voltageVar / 4.5);
+  const socDrain = 0.42 + 0.38 * Math.min(1.0, maxCurrent / 100.0) + 0.20 * normAccel;
+  const drainStrain = Math.min(1.0, socDrain / 1.4);
+
+  const rawBsi =
+    0.35 * tempStrain +
+    0.30 * currentStrain +
+    0.20 * voltageStrain +
+    0.15 * drainStrain;
+  const bsi = Number(Math.max(0.0, Math.min(1.0, rawBsi)).toFixed(4));
+
+  const rawPenalty = 3.2 * Math.pow(ai, 1.35) + 1.8 * Math.pow(bsi, 1.5) - 0.22;
+  const penalty = Math.max(0.0, Math.min(5.0, Number(rawPenalty.toFixed(2))));
+  const finalPenalty = penalty < 0.05 ? 0.0 : penalty;
 
   let classification = "Smooth & Energy-Conscious";
-  let penalty = 0.8;
+  let sohImpact = "Optimal eco-driving: Minimal dynamic stress preserves active material (+3.5-4.5% lifetime retention).";
 
   if (ai > 0.65) {
-    classification = "Aggressive Fleet Operator";
-    penalty = 4.7;
+    classification = "Aggressive / High Stress";
+    sohImpact = `Aggressive driving: High C-rate surges accelerate SEI growth, inducing ~${finalPenalty.toFixed(1)}%/yr excess fade.`;
   } else if (ai > 0.35) {
-    classification = "Moderate Commuter";
-    penalty = 2.1;
+    classification = "Moderate Fleet Standard";
+    sohImpact = `Nominal fleet duty: Standard dynamic stress adds manageable ~${finalPenalty.toFixed(1)}%/yr excess capacity fade.`;
+  }
+
+  const directive =
+    bsi >= 0.65
+      ? "CRITICAL STRAIN: High C-rate discharge and thermal accumulation detected. BMS active power throttling (derating by 15-20%) advised to prevent accelerated SEI growth."
+      : bsi >= 0.38
+      ? "ELEVATED STRAIN: Dynamic cell polarization observed during throttle transients. Recommend moderating high-current burst durations."
+      : "NORMAL: Battery operates within optimal thermodynamic and electrical limits (C-rate < 0.35C, delta-T < 4°C).";
+
+  const recommendations = [directive, sohImpact];
+  if ((req.harsh_accel_count || 0) >= 3) {
+    recommendations.push(`Throttle Tip-In: High frequency of sudden accelerations (${req.harsh_accel_count}/trip). Soften initial pedal ramp to reduce I²R Joule heating.`);
+  }
+  if ((req.harsh_brake_count || 0) >= 3) {
+    recommendations.push(`Regen Braking: Aggressive braking spikes (${req.harsh_brake_count}/trip). Distribute deceleration over longer distances to protect graphite anode.`);
+  }
+  if (maxCurrent >= 75) {
+    recommendations.push(`Current Draw: Peak discharge reached ${maxCurrent.toFixed(0)} A (>0.45C). Recommend software torque capping during heavy payload climbs.`);
+  }
+  if ((req.speed_variance || 0) >= 12.0) {
+    recommendations.push(`Speed Uniformity: Elevated speed variance (${req.speed_variance.toFixed(1)} km/h) indicates erratic navigation. Maintain steady cruise speeds.`);
   }
 
   return {
     aggressiveness_index: ai,
     battery_stress_index: bsi,
     driver_classification: classification,
-    estimated_annual_soh_penalty_pct: penalty,
-    recommendations: [
-      ai > 0.5
-        ? "Advise driver to moderate rapid throttle tip-in to protect battery longevity."
-        : "Driver behavior maintains optimal electrochemical longevity.",
-      `Peak current discharge of ${req.max_discharge_current}A induces ${bsi > 0.5 ? 'elevated' : 'nominal'} cell stress.`,
-    ],
+    annual_soh_penalty_percent: finalPenalty,
+    estimated_annual_soh_penalty_pct: finalPenalty,
+    behavioral_impact_description: sohImpact,
+    bms_recommended_directive: directive,
+    recommendations,
   };
 }
 

@@ -212,8 +212,10 @@ class DriverBehaviorResponse(BaseSchema):
     battery_stress_index: float
     driver_classification: str
     annual_soh_penalty_percent: float
+    estimated_annual_soh_penalty_pct: Optional[float] = None
     behavioral_impact_description: str
     bms_recommended_directive: str
+    recommendations: List[str] = []
     sub_scores: Dict[str, float] = {}
 
 

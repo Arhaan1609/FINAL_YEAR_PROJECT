@@ -98,13 +98,14 @@ class BABMSEngine:
         soc_drain_rate: float = 0.65,
     ) -> Dict[str, Any]:
         """
-        Compute Driver Aggressiveness Index (AI) and Battery Stress Index (BSI).
+        Compute Driver Aggressiveness Index (AI) and Battery Stress Index (BSI)
+        calibrated for commercial EV operations (Euler HiLoad 12.4 kWh LFP pack).
         
         AI (0.0 to 1.0): Driver aggression ranking based on behavioral events.
         BSI (0.0 to 1.0): Cell-level physical strain caused by driving style.
         """
         # --- Aggressiveness Index (AI) ---
-        # Weighted normalized components
+        # Weighted normalized components matching behavior_rules.json (sum = 1.00)
         norm_accel = min(1.0, harsh_accel_count / 10.0)
         norm_brake = min(1.0, harsh_brake_count / 10.0)
         norm_corner = min(1.0, harsh_corner_count / 8.0)
@@ -122,25 +123,28 @@ class BABMSEngine:
         )
         ai_score = float(np.clip(round(ai_score, 4), 0.0, 1.0))
 
-        # Classify driver profile
-        if ai_score <= 0.35:
-            driver_class = "Smooth & Energy-Conscious"
-            soh_impact_desc = "Optimal driving style: preserves battery lifecycle (+4.7% SOH retention)."
-            soh_penalty_pct = 0.0
-        elif ai_score <= 0.65:
-            driver_class = "Moderate Fleet Standard"
-            soh_impact_desc = "Nominal fleet driving: expected baseline degradation."
-            soh_penalty_pct = 1.8
-        else:
-            driver_class = "Aggressive / High Stress"
-            soh_impact_desc = "Aggressive driving style: accelerated capacity loss (~4.7% faster SOH fade)."
-            soh_penalty_pct = 4.7
-
         # --- Battery Stress Index (BSI) ---
-        temp_strain = max(0.0, (battery_temp_max - 32.0) / 25.0)
-        current_strain = min(1.0, abs(max_discharge_current) / 80.0)
-        voltage_strain = min(1.0, voltage_variance / 5.0)
-        drain_strain = min(1.0, soc_drain_rate / 1.5)
+        # Dynamic physical coupling: if voltage_variance or soc_drain_rate are defaults,
+        # derive them dynamically from peak current transients and velocity variance
+        if voltage_variance is None or voltage_variance == 1.2:
+            curr_factor = (min(1.0, abs(max_discharge_current) / 120.0)) ** 2
+            speed_factor = 1.0 + min(1.0, speed_variance / 25.0) * 0.4
+            effective_voltage_var = 0.4 + 2.2 * curr_factor * speed_factor
+        else:
+            effective_voltage_var = voltage_variance
+
+        if soc_drain_rate is None or soc_drain_rate == 0.65:
+            effective_soc_drain = 0.42 + 0.38 * min(1.0, abs(max_discharge_current) / 100.0) + 0.20 * min(1.0, harsh_accel_count / 10.0)
+        else:
+            effective_soc_drain = soc_drain_rate
+
+        # Physical strain calibration:
+        # Euler HiLoad 12.4 kWh LFP: ~172 Ah nominal, 72V nominal, ~140A peak motor limit
+        # Cruising at 25A is ~0.15C (negligible strain). Overpotential rises above 35A (0.25C).
+        temp_strain = max(0.0, min(1.0, (battery_temp_max - 30.0) / 22.0))
+        current_strain = min(1.0, max(0.0, (abs(max_discharge_current) - 15.0) / 115.0))
+        voltage_strain = min(1.0, effective_voltage_var / 4.5)
+        drain_strain = min(1.0, effective_soc_drain / 1.4)
 
         bsi_score = (
             0.35 * temp_strain +
@@ -150,13 +154,46 @@ class BABMSEngine:
         )
         bsi_score = float(np.clip(round(bsi_score, 4), 0.0, 1.0))
 
-        # Mitigation directive
-        if bsi_score >= 0.70:
-            directive = "CRITICAL STRESS: Immediate power throttling recommended to prevent cell thermal overshoot."
-        elif bsi_score >= 0.40:
-            directive = "ELEVATED STRESS: Limit consecutive fast charges and avoid sustained high-current discharges."
+        # --- Continuous, Physics-Informed Annual SOH Degradation Penalty ---
+        # Baseline commercial LFP capacity fade under gentle eco-driving is ~1.8%/year (0.0% excess).
+        # Aggressive throttle transients and high regen currents accelerate SEI growth and cathode fatigue,
+        # continuously adding up to +4.5% excess annual capacity loss.
+        raw_penalty = 3.2 * (ai_score ** 1.35) + 1.8 * (bsi_score ** 1.5) - 0.22
+        soh_penalty_pct = float(np.clip(round(max(0.0, raw_penalty), 2), 0.0, 5.0))
+        if soh_penalty_pct < 0.05:
+            soh_penalty_pct = 0.0
+
+        # Classify driver profile cohort
+        if ai_score <= 0.35:
+            driver_class = "Smooth & Energy-Conscious"
+            soh_impact_desc = "Optimal eco-driving: Minimal dynamic stress preserves active material (+3.5-4.5% lifetime retention)."
+        elif ai_score <= 0.65:
+            driver_class = "Moderate Fleet Standard"
+            soh_impact_desc = f"Nominal fleet duty: Standard dynamic stress adds manageable ~{soh_penalty_pct:.1f}%/yr excess capacity fade."
         else:
-            directive = "NORMAL: Battery operates within optimal thermodynamic and electrical limits."
+            driver_class = "Aggressive / High Stress"
+            soh_impact_desc = f"Aggressive driving: High C-rate surges accelerate SEI growth, inducing ~{soh_penalty_pct:.1f}%/yr excess fade."
+
+        # Mitigation directives
+        if bsi_score >= 0.65:
+            directive = "CRITICAL STRAIN: High C-rate discharge and thermal accumulation detected. BMS active power throttling (derating by 15-20%) advised to prevent accelerated SEI growth."
+        elif bsi_score >= 0.38:
+            directive = "ELEVATED STRAIN: Dynamic cell polarization observed during throttle transients. Recommend moderating high-current burst durations."
+        else:
+            directive = "NORMAL: Battery operates within optimal thermodynamic and electrical limits (C-rate < 0.35C, delta-T < 4°C)."
+
+        # Targeted recommendations list
+        recs = [directive, soh_impact_desc]
+        if harsh_accel_count >= 3:
+            recs.append(f"Throttle Tip-In: High frequency of sudden accelerations ({int(harsh_accel_count)}/trip). Soften initial pedal ramp to reduce I²R Joule heating.")
+        if harsh_brake_count >= 3:
+            recs.append(f"Regen Braking: Aggressive braking spikes ({int(harsh_brake_count)}/trip). Distribute deceleration over longer distances to protect graphite anode from plating.")
+        if max_discharge_current >= 75:
+            recs.append(f"Current Draw: Peak discharge reached {max_discharge_current:.0f} A (>0.45C). Recommend software torque capping during heavy payload climbs.")
+        if speed_variance >= 12.0:
+            recs.append(f"Speed Uniformity: Elevated speed variance ({speed_variance:.1f} km/h) indicates erratic stop-and-go navigation. Maintain steady cruise speeds.")
+        if battery_temp_max >= 38.0:
+            recs.append(f"Thermal State: Peak cell temperature reached {battery_temp_max:.1f}°C. Ensure battery pack active cooling is unobstructed.")
 
         return {
             "aggressiveness_index": ai_score,
@@ -165,12 +202,18 @@ class BABMSEngine:
             "annual_soh_penalty_percent": soh_penalty_pct,
             "behavioral_impact_description": soh_impact_desc,
             "bms_recommended_directive": directive,
+            "recommendations": recs,
             "sub_scores": {
                 "harsh_acceleration_component": round(norm_accel, 3),
                 "harsh_braking_component": round(norm_brake, 3),
+                "aggressive_cornering_component": round(norm_corner, 3),
+                "speed_variance_component": round(norm_speed_var, 3),
                 "kinetic_intensity_component": round(norm_kinetic, 3),
+                "overspeeding_component": round(norm_overspeed, 3),
                 "thermal_strain_component": round(temp_strain, 3),
                 "current_strain_component": round(current_strain, 3),
+                "voltage_strain_component": round(voltage_strain, 3),
+                "drain_strain_component": round(drain_strain, 3),
             }
         }
 

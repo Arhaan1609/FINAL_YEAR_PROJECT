@@ -480,11 +480,30 @@ export const OperationsView: React.FC = () => {
                 {driverScore.split(" ")[0]}
               </div>
               <div className="text-xs text-slate-600 dark:text-slate-300 mt-1">
-                Battery Strain: <strong className="text-purple-600 dark:text-purple-400">Low Impact</strong>
+                Battery Strain:{" "}
+                <strong
+                  className={
+                    driverScore.includes("Aggressive")
+                      ? "text-rose-600 dark:text-rose-400 font-bold"
+                      : driverScore.includes("Moderate")
+                      ? "text-amber-600 dark:text-amber-400 font-bold"
+                      : "text-emerald-600 dark:text-emerald-400 font-bold"
+                  }
+                >
+                  {driverScore.includes("Aggressive")
+                    ? "Elevated Strain"
+                    : driverScore.includes("Moderate")
+                    ? "Nominal Wear"
+                    : "Low Impact"}
+                </strong>
               </div>
             </div>
             <div className="text-[11px] text-slate-400 pt-1 border-t border-slate-200/60 dark:border-slate-700/60">
-              {driverScore.includes("Aggressive") ? "⚠️ Harsh acceleration detected" : "✅ Eco-driving saves +1.4% health"}
+              {driverScore.includes("Aggressive")
+                ? "⚠️ High throttle transients accelerate SEI fade"
+                : driverScore.includes("Moderate")
+                ? "ℹ️ Standard fleet route duty cycle"
+                : "✅ Eco-driving extends pack life (+1.5-2 yrs)"}
             </div>
           </div>
         </div>
