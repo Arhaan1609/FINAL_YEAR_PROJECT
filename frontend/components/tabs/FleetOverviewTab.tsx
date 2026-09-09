@@ -148,12 +148,12 @@ export const FleetOverviewTab: React.FC = () => {
   }, [filteredVehicles, currentPage]);
 
   const isMatching = predictionState.vehicleId === vehicle.id && !predictionState.isLoading;
-  const currentSoc = isMatching && predictionState.soc !== undefined ? predictionState.soc : vehicle.soc;
+  const currentSoc = vehicle.soc;
   const currentSoh = isMatching && predictionState.soh !== undefined ? predictionState.soh : vehicle.soh;
   const currentRul = isMatching && predictionState.rul !== undefined ? predictionState.rul : vehicle.rul;
   const currentMileage = isMatching && predictionState.mileage !== undefined ? predictionState.mileage : vehicle.mileage;
 
-  const socDisplay = currentSoc.toFixed(1);
+  const socDisplay = vehicle.soc.toFixed(1);
   const sohDisplay = currentSoh.toFixed(1);
   const rulDisplay = currentRul;
   const mileageDisplay = currentMileage.toFixed(1);
@@ -162,7 +162,7 @@ export const FleetOverviewTab: React.FC = () => {
   const resolvedTriage = resolveLiveTriage(
     aiUrgency,
     currentSoh,
-    currentSoc,
+    vehicle.soc,
     vehicle.battery_temp,
     vehicle.status
   );
@@ -439,7 +439,7 @@ export const FleetOverviewTab: React.FC = () => {
                 <th className="py-2.5 px-3">Chassis / Model</th>
                 <th className="py-2.5 px-3">Status</th>
                 <th className="py-2.5 px-3">SOC</th>
-                <th className="py-2.5 px-3">SOH (Live / SOH₀)</th>
+                <th className="py-2.5 px-3">SOH</th>
                 <th className="py-2.5 px-3">Pack Temp</th>
                 <th className="py-2.5 px-3">Cycles</th>
                 <th className="py-2.5 px-3 text-right">Action</th>
@@ -484,21 +484,10 @@ export const FleetOverviewTab: React.FC = () => {
                       })()}
                     </td>
                     <td className="py-2.5 px-3">
-                      {isSelected && isMatching && currentSoc !== undefined ? (
-                        <span className="font-bold text-cyan-600 dark:text-cyan-400">{currentSoc.toFixed(1)}%</span>
-                      ) : (
-                        <span>{v.soc.toFixed(1)}%</span>
-                      )}
+                      <span>{v.soc.toFixed(1)}%</span>
                     </td>
                     <td className="py-2.5 px-3">
-                      {isSelected && isMatching && currentSoh !== undefined ? (
-                        <div className="flex items-center gap-1.5">
-                          <span className="font-bold text-emerald-600 dark:text-emerald-400">{currentSoh.toFixed(1)}%</span>
-                          <span className="text-[9px] text-slate-400 font-normal">({v.soh.toFixed(1)}% SOH₀)</span>
-                        </div>
-                      ) : (
-                        <span className="text-slate-600 dark:text-slate-300">{v.soh.toFixed(1)}% <span className="text-[9px] text-slate-400">SOH₀</span></span>
-                      )}
+                      <span className="text-slate-600 dark:text-slate-300">{v.soh.toFixed(1)}%</span>
                     </td>
                     <td className="py-2.5 px-3">{v.battery_temp.toFixed(1)}°C</td>
                     <td className="py-2.5 px-3">{v.charge_cycle_count}</td>
