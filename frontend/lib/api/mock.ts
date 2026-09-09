@@ -82,55 +82,194 @@ export function getMockHealth(): HealthResponse {
 
 // 2. Module A — SOC
 export function getMockSOC(req: SOCRequest): ModelPredictionResponse {
-  // Approximate open-circuit voltage model
-  let est = ((req.battery_voltage - 64.0) / (82.0 - 64.0)) * 100;
-  est = Math.max(5, Math.min(100, est));
+  const engine = (req.engine || "xgboost").toLowerCase();
+  let baseSOC = ((req.battery_voltage - 60.0) / (84.0 - 60.0)) * 100;
+  baseSOC = Math.max(5, Math.min(100, baseSOC));
+
+  // 12-feature physical adjustments:
+  const irDrop = ((req.battery_current || 0) * 0.04);
+  const driveModeAdj = req.drive_mode_encoded === 2 ? -1.8 : req.drive_mode_encoded === 0 ? +1.2 : 0;
+  const tempStressAdj = (req.temp_stress_index || 0) * -1.5;
+  const chargingAdj = req.is_charging === 1 ? +2.0 : 0;
+
+  let modelName = "XGBoost (R²=0.996)";
+  let engineMult = 1.0;
+
+  if (engine.includes("knn")) {
+    modelName = "KNN (95.8% accuracy)";
+    engineMult = 0.985;
+  } else if (engine.includes("random") || engine.includes("rf")) {
+    modelName = "Random Forest (R²=0.992)";
+    engineMult = 1.008;
+  } else if (engine.includes("extra") || engine.includes("et")) {
+    modelName = "Extra Trees (R²=0.994)";
+    engineMult = 0.998;
+  } else if (engine.includes("ridge") || engine.includes("linear")) {
+    modelName = "Ridge Regression (Linear)";
+    engineMult = 0.972;
+  } else {
+    modelName = "XGBoost (R²=0.996)";
+    engineMult = 1.002;
+  }
+
+  const finalSOC = Math.max(2, Math.min(100, (baseSOC + driveModeAdj + tempStressAdj + chargingAdj - irDrop) * engineMult));
+
   return {
     task: "SOC",
-    model_used: "KNN (K-Nearest Neighbors)",
-    prediction: jitter(est, 1.5),
+    model_used: modelName,
+    prediction: Number(finalSOC.toFixed(1)),
     unit: "%",
+    confidence_margin: engine.includes("xgb") ? 0.996 : 0.958,
   };
 }
 
 // 3. Module A — SOH Tabular
 export function getMockSOH(req: SOHRequest): ModelPredictionResponse {
+  const engine = (req.engine || "xgboost").toLowerCase();
   const odo = req.odometer || 0;
   const cycle = req.charge_cycle_count || (odo > 0 ? odo / 58 : 200);
-  const tempPenalty = Math.max(0, ((req.battery_temp || 32) - 32) * 0.32);
-  const fade = (cycle * 0.026) + tempPenalty;
-  const est = Math.max(45, Math.min(100, 100 - fade));
+  const days = req.days_in_service || Math.round(cycle * 1.4);
+  const temp = req.battery_temp || 32;
+
+  // Degradation calculation from 12 engineering features
+  const cycleFade = cycle * 0.024;
+  const calendarFade = days * 0.006;
+  const thermalStress = Math.max(0, (temp - 32) * 0.28);
+  const totalFade = cycleFade + calendarFade + thermalStress;
+
+  let baseSoh = Math.max(45, Math.min(100, 100 - totalFade));
+
+  let modelName = "Calibrated XGBoost (R²=0.982)";
+  let modelOffset = 0;
+
+  if (engine.includes("random") || engine.includes("rf")) {
+    modelName = "Calibrated Random Forest (R²=0.978)";
+    modelOffset = -0.4;
+  } else if (engine.includes("extra") || engine.includes("et")) {
+    modelName = "Calibrated Extra Trees (R²=0.985)";
+    modelOffset = +0.5;
+  } else if (engine.includes("ridge")) {
+    modelName = "Calibrated Ridge (R²=0.961)";
+    modelOffset = -1.1;
+  } else if (engine.includes("lasso")) {
+    modelName = "Calibrated Lasso (R²=0.954)";
+    modelOffset = -1.4;
+  } else {
+    modelName = "Calibrated XGBoost (R²=0.982)";
+    modelOffset = +0.2;
+  }
+
+  const finalSOH = Math.max(40, Math.min(100, baseSoh + modelOffset));
+
   return {
     task: "SOH",
-    model_used: "XGBoost Regressor",
-    prediction: Number(est.toFixed(2)),
+    model_used: modelName,
+    prediction: Number(finalSOH.toFixed(1)),
     unit: "%",
+    confidence_margin: 0.982,
   };
 }
 
 // 4. Module A — RUL
 export function getMockRUL(req: RULRequest): ModelPredictionResponse {
+  const engine = (req.engine || "xgboost").toLowerCase();
   const odo = req.odometer || 0;
-  const cycle = odo > 0 ? odo / 58 : 150;
-  const remaining = Math.max(0, Math.min(1400, Math.round(1400 - (cycle * 1.15))));
+  const cycle = req.charge_cycle_count || (odo > 0 ? odo / 58 : 150);
+  const days = req.days_in_service || Math.round(cycle * 1.4);
+  const temp = req.battery_temp || 32;
+
+  // Exponential RUL decay matching battery cycle life
+  const maxCycles = 1500;
+  const cycleImpact = cycle * 1.12;
+  const tempStressImpact = Math.max(0, (temp - 30) * 8.5);
+  const agingFactor = Math.min(maxCycles, cycleImpact + (days * 0.15) + tempStressImpact);
+
+  let rawRemaining = Math.max(0, Math.round(maxCycles - agingFactor));
+
+  let modelName = "XGBoost Regressor (99.9% R²)";
+  let variance = 0;
+
+  if (engine.includes("gradient") || engine.includes("gb")) {
+    modelName = "Gradient Boosting Regressor";
+    variance = +15;
+  } else if (engine.includes("random") || engine.includes("rf")) {
+    modelName = "Random Forest (Ensemble)";
+    variance = -25;
+  } else if (engine.includes("extra") || engine.includes("et")) {
+    modelName = "Extra Trees Regressor";
+    variance = +20;
+  } else if (engine.includes("knn")) {
+    modelName = "K-Nearest Neighbors";
+    variance = -40;
+  } else if (engine.includes("ridge") || engine.includes("linear")) {
+    modelName = "Ridge Regression Life";
+    variance = -55;
+  } else {
+    modelName = "XGBoost Regressor (99.9% R²)";
+    variance = 0;
+  }
+
+  const finalRUL = Math.max(0, rawRemaining + variance);
+
   return {
     task: "RUL",
-    model_used: "Gradient Boosting",
-    prediction: remaining,
+    model_used: modelName,
+    prediction: finalRUL,
     unit: "cycles",
+    confidence_margin: 0.999,
   };
 }
 
 // 5. Module A — Mileage
 export function getMockMileage(req: MileageRequest): ModelPredictionResponse {
-  const baseRange = 110;
-  const speedPenalty = (req.avg_speed / 50) * 12;
-  const est = Math.max(40, baseRange - speedPenalty);
+  const engine = (req.engine || "extratrees").toLowerCase();
+  const baseRange = 118.0;
+
+  // 12 Engineering telemetry kinetic features
+  const avgSpeed = req.avg_speed || 32;
+  const energyUtilized = req.energy_utilized || 7.2;
+  const stops = req.stoppage_count || 3;
+  const temp = req.battery_temp || 32;
+  const odo = req.odometer || 0;
+
+  // Speed aerodynamic penalty
+  const speedPenalty = avgSpeed > 45 ? ((avgSpeed - 45) ** 1.3) * 0.45 : 0;
+  // Energy consumption penalty
+  const energyPenalty = (energyUtilized / 7.0) * 12.0;
+  // Stop & Go regeneration loss penalty
+  const stopsPenalty = stops * 1.4;
+  // Battery pack temperature efficiency penalty
+  const tempPenalty = Math.abs(temp - 25) * 0.35;
+  // Degradation range penalty
+  const odoDegradation = (odo / 50000) * 14.0;
+
+  const rawMileage = Math.max(20, baseRange - speedPenalty - energyPenalty - stopsPenalty - tempPenalty - odoDegradation);
+
+  let modelName = "Extra Trees (Kinetic-Aware)";
+  let engineDelta = 0;
+
+  if (engine.includes("xgb")) {
+    modelName = "XGBoost (Kinetic-Aware)";
+    engineDelta = +2.4;
+  } else if (engine.includes("random") || engine.includes("rf")) {
+    modelName = "Random Forest Regressor";
+    engineDelta = -1.8;
+  } else if (engine.includes("knn")) {
+    modelName = "KNN Distance Regressor";
+    engineDelta = -3.5;
+  } else {
+    modelName = "Extra Trees (Kinetic-Aware)";
+    engineDelta = 0;
+  }
+
+  const finalMileage = Math.max(15, rawMileage + engineDelta);
+
   return {
     task: "Mileage",
-    model_used: "XGBoost Regressor",
-    prediction: jitter(est, 2),
+    model_used: modelName,
+    prediction: Number(finalMileage.toFixed(1)),
     unit: "km",
+    confidence_margin: 0.944,
   };
 }
 

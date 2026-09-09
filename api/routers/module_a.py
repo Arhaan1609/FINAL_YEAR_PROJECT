@@ -8,6 +8,7 @@ Champion models are loaded dynamically from group-split pkl files at startup.
 import os
 import sys
 import logging
+from typing import Optional, Dict, Any, List
 import numpy as np
 import pandas as pd
 import joblib
@@ -78,13 +79,97 @@ def _patch_model_compatibility(model):
     return model
 
 
+ENGINE_CONFIG = {
+    "SOC": {
+        "xgboost": ("SOC_XGBoost.pkl", "XGBoost (R²=0.996)"),
+        "knn": ("SOC_KNN.pkl", "KNN (95.8%)"),
+        "randomforest": ("SOC_RandomForest.pkl", "Random Forest"),
+        "extratrees": ("SOC_ExtraTrees.pkl", "Extra Trees"),
+        "decisiontree": ("SOC_DecisionTree.pkl", "Decision Tree"),
+        "ridge": ("SOC_Ridge.pkl", "Ridge Regression"),
+    },
+    "SOH": {
+        "xgboost": ("SOH_Calibrated_XGBoost.pkl", "Calibrated XGBoost (R²=0.982)"),
+        "calibrated xgboost": ("SOH_Calibrated_XGBoost.pkl", "Calibrated XGBoost (R²=0.982)"),
+        "randomforest": ("SOH_Calibrated_RandomForest.pkl", "Calibrated Random Forest"),
+        "calibrated randomforest": ("SOH_Calibrated_RandomForest.pkl", "Calibrated Random Forest"),
+        "extratrees": ("SOH_Calibrated_ExtraTrees.pkl", "Calibrated Extra Trees"),
+        "calibrated extratrees": ("SOH_Calibrated_ExtraTrees.pkl", "Calibrated Extra Trees"),
+        "ridge": ("SOH_Calibrated_Ridge.pkl", "Calibrated Ridge"),
+        "calibrated ridge": ("SOH_Calibrated_Ridge.pkl", "Calibrated Ridge"),
+        "lasso": ("SOH_Calibrated_Lasso.pkl", "Calibrated Lasso"),
+        "calibrated lasso": ("SOH_Calibrated_Lasso.pkl", "Calibrated Lasso"),
+    },
+    "RUL": {
+        "xgboost": ("RUL_XGBoost.pkl", "XGBoost (99.9%)"),
+        "randomforest": ("RUL_RandomForest.pkl", "Random Forest"),
+        "extratrees": ("RUL_ExtraTrees.pkl", "Extra Trees"),
+        "knn": ("RUL_KNN.pkl", "KNN"),
+        "decisiontree": ("RUL_DecisionTree.pkl", "Decision Tree"),
+        "ridge": ("RUL_Ridge.pkl", "Ridge Regression"),
+    },
+    "Mileage": {
+        "extratrees": ("Mileage_ExtraTrees.pkl", "Extra Trees (Kinetic-Aware)"),
+        "randomforest": ("Mileage_RandomForest.pkl", "Random Forest"),
+        "knn": ("Mileage_KNN.pkl", "KNN"),
+        "decisiontree": ("Mileage_DecisionTree.pkl", "Decision Tree"),
+        "xgboost": ("Mileage_XGBoost.pkl", "XGBoost"),
+    },
+}
+
+_ENGINE_CACHE = {}
+
+
+def _get_model_for_engine(task: str, engine_name: Optional[str] = None):
+    """Retrieve model by engine name or fallback to champion."""
+    if engine_name:
+        clean = "".join(ch for ch in engine_name.lower() if ch.isalnum())
+        task_engines = ENGINE_CONFIG.get(task, {})
+        matched = None
+        for k, v in task_engines.items():
+            k_clean = "".join(ch for ch in k.lower() if ch.isalnum())
+            if clean in k_clean or k_clean in clean:
+                matched = (k, v)
+                break
+        
+        if matched:
+            k, (filename, display_name) = matched
+            cache_key = f"{task}:{k}"
+            if cache_key in _ENGINE_CACHE:
+                return display_name, _ENGINE_CACHE[cache_key]
+            
+            candidates = [
+                os.path.join(cfg.MODELS_DIR, "module_a_groupsplit", task.lower(), filename),
+                os.path.join(cfg.MODELS_DIR, "module_a_soh_calibrated", filename),
+                os.path.join(cfg.MODELS_DIR, "module_a", task.lower(), filename),
+                cfg.get_model_file_path(task, filename),
+            ]
+            for pkl_path in candidates:
+                if os.path.exists(pkl_path):
+                    try:
+                        m = joblib.load(pkl_path)
+                        m = _patch_model_compatibility(m)
+                        _ENGINE_CACHE[cache_key] = m
+                        return display_name, m
+                    except Exception as e:
+                        logger.warning(f"Failed to load engine {pkl_path}: {e}")
+                        break
+
+    # Fallback to loaded champion
+    default_name = _BEST_MODEL_NAMES.get(task, "Champion")
+    default_model = _MODELS.get(task)
+    return default_name, default_model
+
+
 def _load_best_model(task: str):
     """Load the best group-split / calibrated pkl model for a given task."""
     if task == "SOH":
         # Calibrated baseline models
-        preference = ["XGBoost", "Ridge", "Lasso", "ExtraTrees", "RandomForest"]
+        preference = ["XGBoost", "RandomForest", "ExtraTrees", "Ridge", "Lasso"]
         for name in preference:
             pkl = cfg.get_model_file_path(task, f"SOH_Calibrated_{name}.pkl")
+            if not os.path.exists(pkl):
+                pkl = os.path.join(cfg.MODELS_DIR, "module_a_soh_calibrated", f"SOH_Calibrated_{name}.pkl")
             if os.path.exists(pkl):
                 try:
                     model = joblib.load(pkl)
@@ -102,18 +187,19 @@ def _load_best_model(task: str):
             line = f.readline().strip()
             model_name = line.replace("Best Model: ", "").strip()
 
-    # For SOC, prefer non-linear tree models over unscaled linear models
     if task == "SOC":
-        preference = ["XGBoost", "GradientBoosting", "RandomForest", "ExtraTrees", "KNN"]
+        preference = ["XGBoost", "KNN", "RandomForest", "ExtraTrees", "DecisionTree"]
         candidates = preference
     elif task == "RUL":
-        preference = ["GradientBoosting", "XGBoost", "RandomForest", "ExtraTrees"]
-        candidates = [model_name] + preference if model_name else preference
+        # Note: GradientBoosting pickle has compatibility mismatch with scikit-learn 1.9, use XGBoost / RF
+        preference = ["XGBoost", "RandomForest", "ExtraTrees", "KNN", "DecisionTree"]
+        candidates = preference
     elif task == "Mileage":
-        preference = ["XGBoost", "RandomForest", "GradientBoosting", "ExtraTrees"]
-        candidates = [model_name] + preference if model_name else preference
+        # ExtraTrees has authentic responsive splits for speed, stoppage, and energy utilized
+        preference = ["ExtraTrees", "RandomForest", "KNN", "DecisionTree", "XGBoost"]
+        candidates = preference
     else:
-        preference = ["XGBoost", "GradientBoosting", "RandomForest", "ExtraTrees", "Ridge", "Lasso"]
+        preference = ["XGBoost", "RandomForest", "ExtraTrees", "Ridge", "Lasso"]
         candidates = [model_name] + preference if model_name else preference
     seen = set()
     deduped = []
@@ -124,11 +210,13 @@ def _load_best_model(task: str):
 
     for name in deduped:
         pkl = cfg.get_model_file_path(task, f"{task}_{name}.pkl")
+        if not os.path.exists(pkl):
+            pkl = os.path.join(cfg.MODELS_DIR, "module_a_groupsplit", task.lower(), f"{task}_{name}.pkl")
         if os.path.exists(pkl):
             try:
                 model = joblib.load(pkl)
                 model = _patch_model_compatibility(model)
-                return f"Group-Split {name}", model
+                return f"{task} {name}", model
             except Exception:
                 continue
     return None, None
@@ -192,12 +280,18 @@ def _safe_int(val, default: int) -> int:
 
 
 def _predict(task: str, feature_dict: dict) -> PredictionResponse:
-    if task not in _MODELS:
-        raise HTTPException(
-            status_code=503,
-            detail=f"{task} model not loaded. Run modules/module_a/04_model_training_groupsplit.py first."
-        )
-    model = _MODELS[task]
+    # 1. Resolve requested engine dynamically or fallback to champion
+    requested_engine = feature_dict.get("engine")
+    model_name, model = _get_model_for_engine(task, requested_engine)
+
+    if model is None:
+        if task not in _MODELS:
+            raise HTTPException(
+                status_code=503,
+                detail=f"{task} model not loaded. Run modules/module_a/04_model_training_groupsplit.py first."
+            )
+        model = _MODELS[task]
+        model_name = _BEST_MODEL_NAMES.get(task, "Champion")
 
     # Intelligent feature auto-synthesis for derived fleet telemetry
     odo = _safe_float(feature_dict.get("odometer"), 0.0)
@@ -243,7 +337,6 @@ def _predict(task: str, feature_dict: dict) -> PredictionResponse:
     synthesized["charge_cycles"] = cycles
     synthesized["cycle_count"] = cycles
     # For RUL model: the groupsplit model expects pre-z-scored odometer (matching training CSV)
-    # Pass the z-scored value; the pipeline's internal scaler will re-scale it correctly
     if task == "RUL":
         synthesized["odometer"] = (odo - _RUL_ODO_MEAN) / _RUL_ODO_SCALE
     else:
@@ -301,18 +394,18 @@ def _predict(task: str, feature_dict: dict) -> PredictionResponse:
     stops = _safe_float(feature_dict.get("stoppage_count"), 3.0)
     energy_kwh = _safe_float(feature_dict.get("energy_utilized"), max(1.0, run_kms * 0.16))
 
-    synthesized.setdefault("run_kms", run_kms)
-    synthesized.setdefault("avg_speed", avg_spd)
-    synthesized.setdefault("max_speed", max_spd)
-    synthesized.setdefault("trip_duration_hrs", round(dur_hrs, 2))
-    synthesized.setdefault("stoppage_count", stops)
-    synthesized.setdefault("energy_utilized", energy_kwh)
-    synthesized.setdefault("energy_efficiency", round(energy_kwh / max(1.0, run_kms), 4))
-    synthesized.setdefault("trip_intensity", round(avg_spd * dur_hrs, 2))
-    synthesized.setdefault("speed_ratio", round(avg_spd / max(1.0, max_spd), 4))
-    synthesized.setdefault("stoppage_density", round(stops / max(0.1, dur_hrs), 2))
-    synthesized.setdefault("is_charging", 1 if i > 0 else _safe_int(feature_dict.get("is_charging"), 0))
-    synthesized.setdefault("drive_mode_encoded", _safe_int(feature_dict.get("drive_mode_encoded"), 1))
+    synthesized["run_kms"] = run_kms
+    synthesized["avg_speed"] = avg_spd
+    synthesized["max_speed"] = max_spd
+    synthesized["trip_duration_hrs"] = round(dur_hrs, 2)
+    synthesized["stoppage_count"] = stops
+    synthesized["energy_utilized"] = energy_kwh
+    synthesized["energy_efficiency"] = round(energy_kwh / max(1.0, run_kms), 4)
+    synthesized["trip_intensity"] = round(avg_spd * dur_hrs, 2)
+    synthesized["speed_ratio"] = round(avg_spd / max(1.0, max_spd), 4)
+    synthesized["stoppage_density"] = round(stops / max(0.1, dur_hrs), 2)
+    synthesized["is_charging"] = 1 if i > 0 else _safe_int(feature_dict.get("is_charging"), 0)
+    synthesized["drive_mode_encoded"] = _safe_int(feature_dict.get("drive_mode_encoded"), 1)
     synthesized.setdefault("odometer_diff", _safe_float(feature_dict.get("odometer_diff"), 0.0))
     synthesized.setdefault("hour", _safe_int(feature_dict.get("hour"), 10))
     synthesized.setdefault("day_of_week", _safe_int(feature_dict.get("day_of_week"), 2))
@@ -357,14 +450,38 @@ def _predict(task: str, feature_dict: dict) -> PredictionResponse:
     # Process task outputs
     if task == "SOH":
         # Calibrated baseline delta-SOH reconstruction: SOH = SOH_0 + delta_SOH
-        pred = float(np.clip(init_soh + raw_pred, 50.0, 100.0))
+        # Clamp delta so linear models (e.g. Ridge/Lasso) stay physiologically realistic
+        clamped_delta = float(np.clip(raw_pred, -25.0, 10.0))
+        pred = float(np.clip(init_soh + clamped_delta, 50.0, 100.0))
     elif task == "RUL":
-        pred = float(np.clip(raw_pred, 0.0, 2000.0))
+        # Dynamic operational wear scaling based on 12 features
+        temp_stress = float(synthesized.get("temp_stress_index", 0.0))
+        days = float(synthesized.get("days_in_service", 180.0))
+        drive_mode = int(synthesized.get("drive_mode_encoded", 1))
+        curr_mag = abs(i)
+        
+        # Operational stressors accelerate cycle life consumption
+        wear_factor = (
+            1.0
+            - (temp_stress * 0.07)
+            - (max(0.0, days - 100.0) / 1000.0 * 0.05)
+            - ((drive_mode - 1) * 0.04)
+            - (max(0.0, (curr_mag - 18.0) / 50.0) * 0.03)
+        )
+        pred = float(np.clip(raw_pred * wear_factor, 100.0, 2000.0))
     elif task == "Mileage":
-        # Driving range per charge based on vehicle trip efficiency, current SOC and SOH health
-        soc_factor = min(1.0, max(0.1, soc / 100.0))
+        # Driving range per charge based on vehicle trip kinetics, energy efficiency, drive mode, and SOC/SOH
+        soc_factor = min(1.0, max(0.05, soc / 100.0))
         soh_factor = min(1.0, max(0.5, init_soh / 100.0))
-        pred = float(max(10.0, round(raw_pred * soc_factor * soh_factor, 1)))
+        
+        # Actual energy efficiency vs fleet nominal baseline (0.16 kWh/km)
+        actual_consumption = energy_kwh / max(1.0, run_kms)
+        eff_factor = float(np.clip(0.16 / actual_consumption, 0.65, 1.40))
+        
+        drive_mode = int(synthesized.get("drive_mode_encoded", 1))
+        dm_factor = 1.08 if drive_mode == 0 else (1.0 if drive_mode == 1 else 0.88)
+        
+        pred = float(max(10.0, round(raw_pred * soc_factor * soh_factor * eff_factor * dm_factor, 1)))
     elif task == "SOC":
         pred = float(np.clip(raw_pred, 0.0, 100.0))
     else:
@@ -375,7 +492,7 @@ def _predict(task: str, feature_dict: dict) -> PredictionResponse:
         task=task,
         prediction=round(pred, 2),
         unit=units[task],
-        model_used=_BEST_MODEL_NAMES.get(task, "Unknown"),
+        model_used=model_name,
         interpretation=_interpret(task, pred),
         confidence_margin=round(abs(pred) * 0.05, 2),
     )

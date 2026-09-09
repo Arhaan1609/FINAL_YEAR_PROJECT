@@ -514,9 +514,11 @@ export const PageBriefingModal: React.FC = () => {
               <button
                 onClick={closeBriefing}
                 aria-label="Close page orientation guide"
-                className="flex items-center justify-center w-8 h-8 rounded-xl bg-slate-200/80 hover:bg-rose-500 hover:text-white dark:bg-slate-800 dark:hover:bg-rose-600 text-slate-600 dark:text-slate-300 transition-all shadow-sm"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-200/90 hover:bg-rose-500 hover:text-white dark:bg-slate-800 dark:hover:bg-rose-600 text-slate-700 dark:text-slate-200 transition-all shadow-sm group"
+                title="Dismiss guide and return to page"
               >
-                <X className="w-5 h-5" />
+                <span className="text-xs font-bold font-sans">Close</span>
+                <X className="w-4 h-4 text-slate-500 group-hover:text-white dark:text-slate-400" />
               </button>
             </div>
 
@@ -716,10 +718,10 @@ export const PageBriefingModal: React.FC = () => {
 
                 <button
                   onClick={closeBriefing}
-                  className="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition-all shadow-md shadow-emerald-600/20"
+                  className="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition-all shadow-md shadow-emerald-600/20"
                 >
-                  <span>Got It, Let&apos;s Work!</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
+                  <span>Understood, Explore Page</span>
+                  <X className="w-4 h-4" />
                 </button>
               </div>
             </div>

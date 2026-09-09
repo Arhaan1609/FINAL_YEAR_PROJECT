@@ -35,6 +35,7 @@ class SOCRequest(BaseSchema):
     is_peak: int = Field(0, ge=0, le=1)
     oem_encoded: int = Field(0, ge=0)
     model_encoded: int = Field(0, ge=0)
+    engine: Optional[str] = Field(None, description="Inference engine: XGBoost, KNN, RandomForest, ExtraTrees, DecisionTree, Ridge")
 
 
 class SOHRequest(BaseSchema):
@@ -58,10 +59,11 @@ class SOHRequest(BaseSchema):
     soh: Optional[float] = Field(None, ge=40.0, le=100.0, description="Asset baseline SOH (%)")
     chassis_no: Optional[str] = Field(None, description="Physical vehicle chassis identifier")
     vehicle_id: Optional[str] = Field(None, description="Vehicle registration identifier")
+    engine: Optional[str] = Field(None, description="Inference engine: Calibrated XGBoost, Calibrated RandomForest, Calibrated ExtraTrees, Calibrated Ridge, Calibrated Lasso")
 
 
 class RULRequest(BaseSchema):
-    """Input features for Remaining Useful Life prediction (Module A — Random Forest / GradientBoosting)."""
+    """Input features for Remaining Useful Life prediction (Module A — Random Forest / GradientBoosting / XGBoost)."""
     odometer: float = Field(12000.0, ge=0)
     charge_cycle_count: Optional[float] = Field(None, ge=0, description="Cumulative charge cycles")
     soc_at_charge: float = Field(85.0, ge=0, le=100)
@@ -77,10 +79,11 @@ class RULRequest(BaseSchema):
     miles_per_charge_rolling_10: float = Field(88.0, ge=0)
     oem_encoded: int = Field(0, ge=0)
     model_encoded: int = Field(0, ge=0)
+    engine: Optional[str] = Field(None, description="Inference engine: XGBoost, RandomForest, ExtraTrees, KNN, DecisionTree, Ridge")
 
 
 class MileageRequest(BaseSchema):
-    """Input features for Mileage per Charge prediction (Module A — XGBoost)."""
+    """Input features for Mileage per Charge prediction (Module A — XGBoost / ExtraTrees)."""
     run_kms: float = Field(45.0, ge=0)
     avg_speed: float = Field(32.0, ge=0, le=200)
     max_speed: float = Field(55.0, ge=0, le=200)
@@ -91,6 +94,7 @@ class MileageRequest(BaseSchema):
     speed_ratio: float = Field(0.58, ge=0, le=1)
     stoppage_density: float = Field(0.05, ge=0)
     energy_utilized: float = Field(8.5, ge=0)
+    drive_mode_encoded: int = Field(1, ge=0, le=2, description="0=Eco, 1=Normal, 2=Sport")
     soc: Optional[float] = Field(None, ge=0, le=100, description="Current SOC percentage")
     soh: Optional[float] = Field(None, ge=40.0, le=100.0, description="Current SOH percentage")
     battery_voltage: Optional[float] = Field(None, ge=20, le=150)
@@ -102,6 +106,7 @@ class MileageRequest(BaseSchema):
     is_peak: int = Field(0, ge=0, le=1)
     oem_encoded: int = Field(0, ge=0)
     city_encoded: int = Field(0, ge=0)
+    engine: Optional[str] = Field(None, description="Inference engine: ExtraTrees, RandomForest, KNN, DecisionTree, XGBoost")
 
 
 # ──────────────────────────────────────────────

@@ -61,6 +61,7 @@ interface FleetStoreState {
   openBriefing: (key?: string) => void;
   closeBriefing: () => void;
   setAutoShowBriefing: (enabled: boolean) => void;
+  navigateToPage: (target: "operations" | DashboardTab) => void;
 
   // Actions
   setTheme: (theme: ThemeMode) => void;
@@ -156,11 +157,28 @@ export const useFleetStore = create<FleetStoreState>((set, get) => ({
     set({ autoShowBriefing: enabled });
   },
 
+  navigateToPage: (target: "operations" | DashboardTab) =>
+    set((state) => {
+      if (target === "operations") {
+        return {
+          viewMode: "operations",
+          briefingOpen: true,
+          activeBriefingKey: "operations",
+        };
+      } else {
+        return {
+          viewMode: "engineering",
+          activeTab: target,
+          briefingOpen: true,
+          activeBriefingKey: target,
+        };
+      }
+    }),
+
   setViewMode: (viewMode: ViewMode) =>
     set((state) => {
-      const isChanging = state.viewMode !== viewMode;
       const updates: Partial<FleetStoreState> = { viewMode };
-      if (isChanging && state.autoShowBriefing) {
+      if (state.autoShowBriefing) {
         updates.briefingOpen = true;
         updates.activeBriefingKey = viewMode === "operations" ? "operations" : state.activeTab;
       }
@@ -221,9 +239,8 @@ export const useFleetStore = create<FleetStoreState>((set, get) => ({
 
   setActiveTab: (tab: DashboardTab) =>
     set((state) => {
-      const isChanging = state.activeTab !== tab || state.viewMode !== "engineering";
-      const updates: Partial<FleetStoreState> = { activeTab: tab };
-      if (isChanging && state.autoShowBriefing) {
+      const updates: Partial<FleetStoreState> = { activeTab: tab, viewMode: "engineering" };
+      if (state.autoShowBriefing) {
         updates.briefingOpen = true;
         updates.activeBriefingKey = tab;
       }

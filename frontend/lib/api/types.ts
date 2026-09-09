@@ -30,6 +30,7 @@ export interface SOCRequest {
   battery_voltage: number;
   battery_temp: number;
   battery_current: number;
+  engine?: string;
   abs_current?: number;
   is_charging?: number;
   odometer?: number;
@@ -51,6 +52,7 @@ export interface SOHRequest {
   battery_voltage: number;
   battery_temp: number;
   battery_current: number;
+  engine?: string;
   abs_current?: number;
   odometer?: number;
   odometer_diff?: number;
@@ -70,6 +72,7 @@ export interface SOHRequest {
 }
 
 export interface RULRequest {
+  engine?: string;
   odometer?: number;
   charge_cycle_count?: number;
   battery_temp?: number;
@@ -87,6 +90,7 @@ export interface RULRequest {
 }
 
 export interface MileageRequest {
+  engine?: string;
   run_kms: number;
   avg_speed: number;
   max_speed: number;

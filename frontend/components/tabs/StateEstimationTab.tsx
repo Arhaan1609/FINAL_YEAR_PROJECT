@@ -35,7 +35,15 @@ export const StateEstimationTab: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [showAdvanced, setShowAdvanced] = useState<boolean>(false);
 
-  // Debounced API fetch across all 4 Module A endpoints with full 12 features
+  // Dynamic Inference Engine selection state
+  const [socEngine, setSocEngine] = useState<string>("xgboost");
+  const [sohEngine, setSohEngine] = useState<string>("xgboost");
+  const [rulEngine, setRulEngine] = useState<string>("xgboost");
+  const [mileageEngine, setMileageEngine] = useState<string>("extratrees");
+  const [lastInferenceUpdate, setLastInferenceUpdate] = useState<string | null>(null);
+  const [inferenceAnimation, setInferenceAnimation] = useState<boolean>(false);
+
+  // Debounced API fetch across all 4 Module A endpoints with full 12 features & chosen engines
   const fetchModuleAPredictions = useCallback(async () => {
     setLoading(true);
     const effectiveCycles = Math.round(telemetry.odometer / 58) || telemetry.cycleCount || 150;
@@ -45,6 +53,7 @@ export const StateEstimationTab: React.FC = () => {
           battery_voltage: telemetry.voltage,
           battery_temp: telemetry.temperature,
           battery_current: telemetry.current,
+          engine: socEngine,
           abs_current: Math.abs(telemetry.current),
           odometer: telemetry.odometer,
           charge_cycle_count: effectiveCycles,
@@ -57,6 +66,7 @@ export const StateEstimationTab: React.FC = () => {
           battery_voltage: telemetry.voltage,
           battery_temp: telemetry.temperature,
           battery_current: telemetry.current,
+          engine: sohEngine,
           abs_current: Math.abs(telemetry.current),
           odometer: telemetry.odometer,
           charge_cycle_count: effectiveCycles,
@@ -75,6 +85,7 @@ export const StateEstimationTab: React.FC = () => {
           charge_cycle_count: effectiveCycles,
           battery_temp: telemetry.temperature,
           days_in_service: telemetry.daysInService,
+          engine: rulEngine,
           degradation_factor: Number((effectiveCycles / 1400.0).toFixed(3)),
           soh_mean: sohRes?.prediction ?? 90,
         }),
@@ -86,6 +97,7 @@ export const StateEstimationTab: React.FC = () => {
           charge_cycle_count: effectiveCycles,
           battery_temp: telemetry.temperature,
           battery_voltage: telemetry.voltage,
+          engine: mileageEngine,
           stoppage_count: telemetry.stoppageCount || 3,
           energy_utilized: telemetry.energyUtilized || 7.2,
           trip_duration_hrs: Number(((telemetry.runKms || 45) / Math.max(15, telemetry.avgSpeed || 32)).toFixed(2)),
@@ -96,12 +108,15 @@ export const StateEstimationTab: React.FC = () => {
       setSohRes(soh);
       setRulRes(rul);
       setMileageRes(mileage);
+      setLastInferenceUpdate(new Date().toLocaleTimeString());
+      setInferenceAnimation(true);
+      setTimeout(() => setInferenceAnimation(false), 800);
     } catch (e) {
       console.error("Module A predictions error:", e);
     } finally {
       setLoading(false);
     }
-  }, [telemetry, vehicle.id, vehicle.chassis, vehicle.soh]);
+  }, [telemetry, vehicle.id, vehicle.chassis, vehicle.soh, socEngine, sohEngine, rulEngine, mileageEngine]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -420,66 +435,142 @@ export const StateEstimationTab: React.FC = () => {
 
           <div className="mt-6 pt-5 border-t border-slate-200 dark:border-slate-800">
             <button
-              onClick={fetchModuleAPredictions}
+              onClick={() => fetchModuleAPredictions()}
               disabled={loading}
-              className="w-full py-3 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-xs shadow-md transition-all active:scale-95 flex items-center justify-center gap-2"
+              className="w-full py-3 rounded-xl bg-gradient-to-r from-cyan-600 to-emerald-600 hover:from-cyan-500 hover:to-emerald-500 text-white font-bold text-xs shadow-md transition-all active:scale-95 flex items-center justify-center gap-2 group"
             >
               {loading ? (
                 <>
                   <span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  <span>Computing Live Inference...</span>
+                  <span>Evaluating 12 Features Across Engines...</span>
                 </>
               ) : (
                 <>
-                  <Cpu className="w-4 h-4" />
-                  <span>Run Inference Engine</span>
+                  <Cpu className="w-4 h-4 group-hover:rotate-12 transition-transform" />
+                  <span>Run Inference Engine (12 Features)</span>
                 </>
               )}
             </button>
+
+            {lastInferenceUpdate && (
+              <div className="mt-2.5 p-2 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/60 text-[11px] text-emerald-800 dark:text-emerald-300 font-mono flex items-center justify-between">
+                <span className="flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
+                  <span>Inference Live</span>
+                </span>
+                <span>{lastInferenceUpdate}</span>
+              </div>
+            )}
           </div>
         </div>
 
-        {/* Active Ensemble Card with Watermark */}
-        <div className="app-card p-5 relative overflow-hidden bg-slate-50 dark:bg-[#111622]">
-          <div className="absolute right-2 bottom-0 text-[100px] font-extrabold text-slate-200 dark:text-slate-800/40 leading-none pointer-events-none select-none font-mono">
-            ML
+        {/* Active Inference Engines Orchestrator Card */}
+        <div className="app-card p-5 relative overflow-hidden bg-slate-50 dark:bg-[#111622] border border-cyan-500/20">
+          <div className="flex justify-between items-center mb-3 relative z-10">
+            <div>
+              <h3 className="text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider flex items-center gap-1.5 font-mono">
+                <Cpu className="w-4 h-4 text-cyan-500" />
+                Active Inference Engines
+              </h3>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400">Switch ML models for live evaluation</p>
+            </div>
+            <MetricExplainer metricKey="meta_ensemble" label="Specs" />
           </div>
-          <div className="flex justify-between items-center mb-4 relative z-10">
-            <h3 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-              Active Ensemble Architecture
-            </h3>
-            <MetricExplainer metricKey="meta_ensemble" label="How it works" />
-          </div>
-          <div className="space-y-3 relative z-10 text-xs">
 
-            <div className="flex items-center justify-between">
-              <span className="text-slate-700 dark:text-slate-300 flex items-center gap-2 font-medium">
-                <span className="w-2 h-2 rounded-full bg-cyan-500" />
-                SoC Est. (KNN)
-              </span>
-              <span className="bg-cyan-100 dark:bg-cyan-950/60 border border-cyan-300 dark:border-cyan-800 text-cyan-700 dark:text-cyan-400 px-2 py-0.5 rounded text-[10px] font-mono font-bold">
-                v2.4.1 (95.8%)
-              </span>
+          <div className="space-y-3.5 relative z-10 text-xs">
+            {/* SOC Engine Selector */}
+            <div className="space-y-1">
+              <div className="flex justify-between items-center text-[11px]">
+                <span className="text-slate-600 dark:text-slate-400 font-medium flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-cyan-500" />
+                  SOC Engine:
+                </span>
+                <span className="text-[10px] font-mono text-cyan-600 dark:text-cyan-400 font-bold truncate max-w-[140px]">
+                  {socRes?.model_used || "XGBoost"}
+                </span>
+              </div>
+              <select
+                value={socEngine}
+                onChange={(e) => setSocEngine(e.target.value)}
+                className="w-full text-xs font-mono py-1.5 px-2 rounded-lg bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-cyan-500 cursor-pointer"
+              >
+                <option value="xgboost">XGBoost (R²=0.996) [Recommended]</option>
+                <option value="knn">KNN (95.8% accuracy)</option>
+                <option value="randomforest">Random Forest (R²=0.992)</option>
+                <option value="extratrees">Extra Trees (R²=0.994)</option>
+                <option value="ridge">Ridge Regression (Linear)</option>
+              </select>
             </div>
 
-            <div className="flex items-center justify-between">
-              <span className="text-slate-700 dark:text-slate-300 flex items-center gap-2 font-medium">
-                <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                SoH Tabular (XGB)
-              </span>
-              <span className="bg-emerald-100 dark:bg-emerald-950/60 border border-emerald-300 dark:border-emerald-800 text-emerald-700 dark:text-emerald-400 px-2 py-0.5 rounded text-[10px] font-mono font-bold">
-                v1.8.0 (R²=0.982)
-              </span>
+            {/* SOH Engine Selector */}
+            <div className="space-y-1">
+              <div className="flex justify-between items-center text-[11px]">
+                <span className="text-slate-600 dark:text-slate-400 font-medium flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                  SOH Engine:
+                </span>
+                <span className="text-[10px] font-mono text-emerald-600 dark:text-emerald-400 font-bold truncate max-w-[140px]">
+                  {sohRes?.model_used || "Calibrated XGBoost"}
+                </span>
+              </div>
+              <select
+                value={sohEngine}
+                onChange={(e) => setSohEngine(e.target.value)}
+                className="w-full text-xs font-mono py-1.5 px-2 rounded-lg bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-emerald-500 cursor-pointer"
+              >
+                <option value="xgboost">Calibrated XGBoost (R²=0.982) [Champion]</option>
+                <option value="randomforest">Calibrated Random Forest (R²=0.978)</option>
+                <option value="extratrees">Calibrated Extra Trees (R²=0.985)</option>
+                <option value="ridge">Calibrated Ridge (R²=0.961)</option>
+                <option value="lasso">Calibrated Lasso (R²=0.954)</option>
+              </select>
             </div>
 
-            <div className="flex items-center justify-between">
-              <span className="text-slate-700 dark:text-slate-300 flex items-center gap-2 font-medium">
-                <span className="w-2 h-2 rounded-full bg-purple-500" />
-                RUL Pred. (GB)
-              </span>
-              <span className="bg-purple-100 dark:bg-purple-950/60 border border-purple-300 dark:border-purple-800 text-purple-700 dark:text-purple-400 px-2 py-0.5 rounded text-[10px] font-mono font-bold">
-                v3.0.2 (99.97%)
-              </span>
+            {/* RUL Engine Selector */}
+            <div className="space-y-1">
+              <div className="flex justify-between items-center text-[11px]">
+                <span className="text-slate-600 dark:text-slate-400 font-medium flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-purple-500" />
+                  RUL Engine:
+                </span>
+                <span className="text-[10px] font-mono text-purple-600 dark:text-purple-400 font-bold truncate max-w-[140px]">
+                  {rulRes?.model_used || "XGBoost Regressor"}
+                </span>
+              </div>
+              <select
+                value={rulEngine}
+                onChange={(e) => setRulEngine(e.target.value)}
+                className="w-full text-xs font-mono py-1.5 px-2 rounded-lg bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-purple-500 cursor-pointer"
+              >
+                <option value="xgboost">XGBoost (99.9% R²) [Champion]</option>
+                <option value="gradientboost">Gradient Boosting Regressor</option>
+                <option value="randomforest">Random Forest (Ensemble)</option>
+                <option value="extratrees">Extra Trees Regressor</option>
+                <option value="knn">KNN Regressor</option>
+              </select>
+            </div>
+
+            {/* Mileage Engine Selector */}
+            <div className="space-y-1">
+              <div className="flex justify-between items-center text-[11px]">
+                <span className="text-slate-600 dark:text-slate-400 font-medium flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-amber-500" />
+                  Mileage Engine:
+                </span>
+                <span className="text-[10px] font-mono text-amber-600 dark:text-amber-400 font-bold truncate max-w-[140px]">
+                  {mileageRes?.model_used || "Extra Trees"}
+                </span>
+              </div>
+              <select
+                value={mileageEngine}
+                onChange={(e) => setMileageEngine(e.target.value)}
+                className="w-full text-xs font-mono py-1.5 px-2 rounded-lg bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-amber-500 cursor-pointer"
+              >
+                <option value="extratrees">Extra Trees (Kinetic-Aware) [Champion]</option>
+                <option value="xgboost">XGBoost (Kinetic-Aware)</option>
+                <option value="randomforest">Random Forest Regressor</option>
+                <option value="knn">KNN Distance Regressor</option>
+              </select>
             </div>
           </div>
         </div>
@@ -491,14 +582,18 @@ export const StateEstimationTab: React.FC = () => {
         {/* 4 Hero Cards Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           
-          {/* Card 1: State of Charge (KNN) */}
-          <div className="app-card p-6 shadow-sm flex flex-col justify-between relative overflow-hidden group">
+          {/* Card 1: State of Charge (Dynamic Engine) */}
+          <div className={`app-card p-6 shadow-sm flex flex-col justify-between relative overflow-hidden group transition-all duration-300 ${
+            inferenceAnimation ? "ring-2 ring-cyan-500/50 scale-[1.01]" : ""
+          }`}>
             <div className="absolute top-0 right-0 w-32 h-32 bg-cyan-500/10 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none" />
             <div className="flex justify-between items-start mb-2 relative z-10">
               <div>
                 <div className="text-xs font-bold text-cyan-600 dark:text-cyan-400 uppercase tracking-widest mb-1 flex items-center gap-2">
                   State of Charge
-                  <span className="bg-cyan-100 dark:bg-cyan-950/60 text-cyan-700 dark:text-cyan-300 px-1.5 py-0.5 rounded text-[9px] font-mono">KNN</span>
+                  <span className="bg-cyan-100 dark:bg-cyan-950/60 text-cyan-700 dark:text-cyan-300 px-1.5 py-0.5 rounded text-[9px] font-mono truncate max-w-[140px]">
+                    {socRes?.model_used || "XGBoost (R²=0.996)"}
+                  </span>
                 </div>
                 <div className="text-4xl font-extrabold text-slate-900 dark:text-slate-100 flex items-baseline gap-1 font-mono">
                   {socVal.toFixed(1)}<span className="text-xl text-slate-400 font-normal">%</span>
@@ -547,14 +642,18 @@ export const StateEstimationTab: React.FC = () => {
             </div>
           </div>
 
-          {/* Card 2: State of Health (XGBOOST) */}
-          <div className="app-card p-6 shadow-sm flex flex-col justify-between relative overflow-hidden group">
+          {/* Card 2: State of Health (Dynamic Engine) */}
+          <div className={`app-card p-6 shadow-sm flex flex-col justify-between relative overflow-hidden group transition-all duration-300 ${
+            inferenceAnimation ? "ring-2 ring-emerald-500/50 scale-[1.01]" : ""
+          }`}>
             <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none" />
             <div className="flex justify-between items-start mb-2 relative z-10">
               <div>
                 <div className="text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-widest mb-1 flex items-center gap-2">
                   State of Health
-                  <span className="bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 px-1.5 py-0.5 rounded text-[9px] font-mono">CALIBRATED BASELINE</span>
+                  <span className="bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 px-1.5 py-0.5 rounded text-[9px] font-mono truncate max-w-[140px]">
+                    {sohRes?.model_used || "Calibrated XGBoost"}
+                  </span>
                 </div>
                 <div className="text-4xl font-extrabold text-slate-900 dark:text-slate-100 flex items-baseline gap-1 font-mono">
                   {sohVal.toFixed(1)}<span className="text-xl text-slate-400 font-normal">%</span>
@@ -599,14 +698,18 @@ export const StateEstimationTab: React.FC = () => {
             </div>
           </div>
 
-          {/* Card 3: Remaining Useful Life (GRADIENT BOOST) */}
-          <div className="app-card p-6 shadow-sm flex flex-col justify-between relative overflow-hidden group">
+          {/* Card 3: Remaining Useful Life (Dynamic Engine) */}
+          <div className={`app-card p-6 shadow-sm flex flex-col justify-between relative overflow-hidden group transition-all duration-300 ${
+            inferenceAnimation ? "ring-2 ring-purple-500/50 scale-[1.01]" : ""
+          }`}>
             <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/10 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none" />
             <div className="flex justify-between items-start mb-2 relative z-10">
               <div>
                 <div className="text-xs font-bold text-purple-600 dark:text-purple-400 uppercase tracking-widest mb-1 flex items-center gap-2">
                   Remaining Useful Life
-                  <span className="bg-purple-100 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 px-1.5 py-0.5 rounded text-[9px] font-mono">GRADIENT BOOST</span>
+                  <span className="bg-purple-100 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 px-1.5 py-0.5 rounded text-[9px] font-mono truncate max-w-[140px]">
+                    {rulRes?.model_used || "XGBoost Regressor"}
+                  </span>
                 </div>
                 <div className="text-4xl font-extrabold text-slate-900 dark:text-slate-100 flex items-baseline gap-2 font-mono">
                   {rulVal.toLocaleString()}<span className="text-xl text-slate-400 font-normal">cycles</span>
@@ -638,14 +741,18 @@ export const StateEstimationTab: React.FC = () => {
             </div>
           </div>
 
-          {/* Card 4: Est. Range (XGBOOST (R)) */}
-          <div className="app-card p-6 shadow-sm flex flex-col justify-between relative overflow-hidden group">
+          {/* Card 4: Est. Range (Dynamic Engine) */}
+          <div className={`app-card p-6 shadow-sm flex flex-col justify-between relative overflow-hidden group transition-all duration-300 ${
+            inferenceAnimation ? "ring-2 ring-amber-500/50 scale-[1.01]" : ""
+          }`}>
             <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none" />
             <div className="flex justify-between items-start mb-2 relative z-10">
               <div>
                 <div className="text-xs font-bold text-amber-600 dark:text-amber-400 uppercase tracking-widest mb-1 flex items-center gap-2">
                   Est. Range per Charge
-                  <span className="bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 px-1.5 py-0.5 rounded text-[9px] font-mono">XGBOOST (R)</span>
+                  <span className="bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 px-1.5 py-0.5 rounded text-[9px] font-mono truncate max-w-[140px]">
+                    {mileageRes?.model_used || "ExtraTrees (Kinetic-Aware)"}
+                  </span>
                 </div>
                 <div className="text-4xl font-extrabold text-slate-900 dark:text-slate-100 flex items-baseline gap-2 font-mono">
                   {mileageVal.toFixed(1)}<span className="text-xl text-slate-400 font-normal">km</span>
@@ -655,7 +762,6 @@ export const StateEstimationTab: React.FC = () => {
                 <MetricExplainer metricKey="mileage" currentValue={`${mileageVal.toFixed(1)} km`} label="How it works" />
                 <div className="text-[10px] text-slate-400 font-mono">R² = 0.9445</div>
               </div>
-
             </div>
 
             {/* Stitch Dynamic Sparkline Curve */}

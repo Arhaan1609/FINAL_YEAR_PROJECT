@@ -24,7 +24,7 @@ import {
 } from "lucide-react";
 
 export default function DashboardPage() {
-  const { activeTab, setActiveTab, viewMode, setViewMode, openBriefing } = useFleetStore();
+  const { activeTab, setActiveTab, viewMode, setViewMode, openBriefing, navigateToPage } = useFleetStore();
 
   const mobileTabs = [
     { id: "fleet", label: "Fleet Hub", icon: LayoutDashboard },
@@ -74,7 +74,7 @@ export default function DashboardPage() {
           {/* View Mode Toggle Switch */}
           <div className="flex items-center p-1 bg-slate-100 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700">
             <button
-              onClick={() => setViewMode("operations")}
+              onClick={() => navigateToPage("operations")}
               className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-bold transition-all ${
                 viewMode === "operations"
                   ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-sm"
@@ -86,7 +86,7 @@ export default function DashboardPage() {
             </button>
 
             <button
-              onClick={() => setViewMode("engineering")}
+              onClick={() => navigateToPage(activeTab)}
               className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-bold transition-all ${
                 viewMode === "engineering"
                   ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-sm"
@@ -113,7 +113,7 @@ export default function DashboardPage() {
               return (
                 <button
                   key={tab.id}
-                  onClick={() => setActiveTab(tab.id as any)}
+                  onClick={() => navigateToPage(tab.id as any)}
                   className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all ${
                     isActive
                       ? "bg-cyan-50 dark:bg-cyan-950/60 text-cyan-700 dark:text-cyan-400 border border-cyan-200 dark:border-cyan-800"

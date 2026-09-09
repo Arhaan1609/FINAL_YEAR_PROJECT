@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 
 export const Sidebar: React.FC = () => {
-  const { activeTab, setActiveTab, viewMode, setViewMode, vehicles, openBriefing } = useFleetStore();
+  const { activeTab, setActiveTab, viewMode, setViewMode, vehicles, openBriefing, navigateToPage } = useFleetStore();
 
   // Dynamically derived readiness metrics from store to stay in sync with live telemetry
   const totalCount = vehicles.length || 778;
@@ -72,7 +72,7 @@ export const Sidebar: React.FC = () => {
         {/* Operations Command Quick Switch with Orientation Guide */}
         <div className="relative group mb-2">
           <button
-            onClick={() => setViewMode("operations")}
+            onClick={() => navigateToPage("operations")}
             className={`w-full flex items-center justify-between pr-8 pl-3 py-2.5 rounded-xl text-left transition-all ${
               viewMode === "operations"
                 ? "bg-gradient-to-r from-cyan-600 to-emerald-600 text-white font-bold shadow-md shadow-emerald-500/20"
@@ -113,10 +113,7 @@ export const Sidebar: React.FC = () => {
           return (
             <div key={item.id} className="relative group">
               <button
-                onClick={() => {
-                  setViewMode("engineering");
-                  setActiveTab(item.id);
-                }}
+                onClick={() => navigateToPage(item.id)}
                 className={`w-full flex items-center justify-between pr-8 pl-3 py-2.5 rounded-lg text-left transition-all ${
                   isActive
                     ? "bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100 font-semibold border-l-2 border-emerald-500 shadow-sm"
