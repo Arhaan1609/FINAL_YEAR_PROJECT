@@ -275,18 +275,18 @@ export const FleetOverviewTab: React.FC = () => {
           <div>
             <div className="flex items-center justify-between mb-2">
               <span className="text-[10px] font-mono text-slate-400 uppercase font-semibold">
-                Remaining Useful Life
+                Remaining Useful Life (RUL)
               </span>
               <MetricExplainer metricKey="rul" currentValue={`${rulDisplay} cycles`} label="How it works" />
             </div>
             <div className="flex items-baseline gap-2">
               <span className="text-3xl font-extrabold text-slate-900 dark:text-slate-100 font-mono tracking-tight">
-                {rulDisplay} <span className="text-xs font-normal text-slate-400">cycles</span>
+                {rulDisplay} <span className="text-xs font-normal text-slate-400">cycles left</span>
               </span>
             </div>
           </div>
           <div className="mt-3 pt-2.5 border-t border-slate-100 dark:border-slate-800 flex justify-between text-[10px] font-mono text-slate-400">
-            <span>Est: ~{(rulDisplay / 250).toFixed(1)} yrs</span>
+            <span>Est: ~{(rulDisplay / 250).toFixed(1)} yrs remaining</span>
             <span className="text-emerald-600">R² = 0.9997</span>
           </div>
         </div>
@@ -441,7 +441,7 @@ export const FleetOverviewTab: React.FC = () => {
                 <th className="py-2.5 px-3">SOC</th>
                 <th className="py-2.5 px-3">SOH</th>
                 <th className="py-2.5 px-3">Pack Temp</th>
-                <th className="py-2.5 px-3">Cycles</th>
+                <th className="py-2.5 px-3">Elapsed Cycles</th>
                 <th className="py-2.5 px-3 text-right">Action</th>
               </tr>
             </thead>
@@ -490,7 +490,7 @@ export const FleetOverviewTab: React.FC = () => {
                       <span className="text-slate-600 dark:text-slate-300">{v.soh.toFixed(1)}%</span>
                     </td>
                     <td className="py-2.5 px-3">{v.battery_temp.toFixed(1)}°C</td>
-                    <td className="py-2.5 px-3">{v.charge_cycle_count}</td>
+                    <td className="py-2.5 px-3">{v.charge_cycle_count} EFC</td>
                     <td className="py-2.5 px-3 text-right">
                       <button
                         onClick={(e) => {
