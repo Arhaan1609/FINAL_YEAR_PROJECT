@@ -200,8 +200,8 @@ export const HeroScrollStory: React.FC = () => {
               />
             </div>
 
-            <p className="text-xs sm:text-base text-slate-300 font-light leading-relaxed max-w-xl">
-              Physics-informed digital twins, 3-zone thermodynamic runaway prevention ($F_1 = 0.997$), and non-linear degradation knee prognostics trained on 930+ MB Indian commercial fleet telematics.
+            <p className="text-xs sm:text-base text-slate-300 font-normal leading-relaxed max-w-xl">
+              Enterprise battery intelligence for commercial EV fleets. Real-time state estimation, multi-zone thermal runaway prevention with a 99.7% F1 score, and predictive degradation prognostics powered by 74 production AI models.
             </p>
 
             {/* Quick Action CTAs */}
@@ -276,8 +276,8 @@ export const HeroScrollStory: React.FC = () => {
               <h3 className="text-base sm:text-lg font-bold text-white leading-snug">
                 Sub-Second CAN Telematics Ingestion
               </h3>
-              <p className="text-xs text-slate-300 font-light leading-relaxed">
-                Streams 28 high-frequency telemetry channels including dynamic discharge current (-150A to +80A regen) and localized voltage sag.
+              <p className="text-xs text-slate-300 font-normal leading-relaxed">
+                Streams 28 high-frequency CAN telemetry channels at 500 kbps, monitoring dynamic discharge currents and localized voltage sag for instant battery state estimation.
               </p>
             </div>
           </div>
@@ -390,8 +390,8 @@ export const HeroScrollStory: React.FC = () => {
               <h3 className="text-base sm:text-lg font-bold text-white leading-snug">
                 Forecasting Non-Linear Aging Knee Inflection
               </h3>
-              <p className="text-xs text-slate-300 font-light leading-relaxed">
-                Piecewise linear joint MSE optimization isolates the tipping point where linear aging transitions to accelerated capacity drop.
+              <p className="text-xs text-slate-300 font-normal leading-relaxed">
+                Pinpoints the critical inflection point where gradual cell degradation accelerates into rapid capacity loss, enabling pre-emptive maintenance hundreds of cycles ahead.
               </p>
             </div>
           </div>

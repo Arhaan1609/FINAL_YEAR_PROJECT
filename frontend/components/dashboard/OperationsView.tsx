@@ -207,7 +207,7 @@ export const OperationsView: React.FC = () => {
 
 
   return (
-    <div className="space-y-8 w-full">
+    <div className="space-y-6 sm:space-y-7 w-full">
       {/* ─── 1. TOP FLEET TRAFFIC-LIGHT TRIAGE BAR ─── */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* All Fleet */}
@@ -219,11 +219,11 @@ export const OperationsView: React.FC = () => {
               : "bg-white dark:bg-slate-900/90 border-slate-200 dark:border-slate-800 hover:border-slate-300"
           }`}
         >
-          <div className="flex justify-between items-center text-xs font-semibold text-slate-400">
+          <div className="flex justify-between items-center text-xs font-bold uppercase tracking-wider text-slate-400">
             <span>Total Monitored Fleet</span>
             <Truck className="w-4 h-4 text-cyan-400" />
           </div>
-          <div className="text-3xl font-extrabold font-mono mt-2">{totalCount} Trucks</div>
+          <div className="text-3xl sm:text-4xl font-extrabold font-mono tracking-tight mt-2">{totalCount} Trucks</div>
           <p className="text-[11px] text-slate-400 mt-1 font-mono">SQL Database Connected</p>
         </button>
 
@@ -236,11 +236,11 @@ export const OperationsView: React.FC = () => {
               : "bg-white dark:bg-slate-900/90 border-slate-200 dark:border-slate-800 hover:border-emerald-500/40"
           }`}
         >
-          <div className="flex justify-between items-center text-xs font-semibold text-emerald-500">
+          <div className="flex justify-between items-center text-xs font-bold uppercase tracking-wider text-emerald-500">
             <span>Ready for Route</span>
             <CheckCircle2 className="w-4 h-4 text-emerald-400" />
           </div>
-          <div className="text-3xl font-extrabold text-emerald-600 dark:text-emerald-400 font-mono mt-2">
+          <div className="text-3xl sm:text-4xl font-extrabold text-emerald-600 dark:text-emerald-400 font-mono tracking-tight mt-2">
             {activeCount} Trucks
           </div>
           <p className="text-[11px] text-emerald-600/80 dark:text-emerald-400/80 mt-1">
@@ -257,11 +257,11 @@ export const OperationsView: React.FC = () => {
               : "bg-white dark:bg-slate-900/90 border-slate-200 dark:border-slate-800 hover:border-amber-500/40"
           }`}
         >
-          <div className="flex justify-between items-center text-xs font-semibold text-amber-500">
+          <div className="flex justify-between items-center text-xs font-bold uppercase tracking-wider text-amber-500">
             <span>Needs Charge / Inspection</span>
             <AlertTriangle className="w-4 h-4 text-amber-400" />
           </div>
-          <div className="text-3xl font-extrabold text-amber-600 dark:text-amber-400 font-mono mt-2">
+          <div className="text-3xl sm:text-4xl font-extrabold text-amber-600 dark:text-amber-400 font-mono tracking-tight mt-2">
             {warningCount} Trucks
           </div>
           <p className="text-[11px] text-amber-600/80 dark:text-amber-400/80 mt-1">
@@ -278,11 +278,11 @@ export const OperationsView: React.FC = () => {
               : "bg-white dark:bg-slate-900/90 border-slate-200 dark:border-slate-800 hover:border-rose-500/40"
           }`}
         >
-          <div className="flex justify-between items-center text-xs font-semibold text-rose-500">
+          <div className="flex justify-between items-center text-xs font-bold uppercase tracking-wider text-rose-500">
             <span>Critical Hold / Service</span>
             <AlertOctagon className="w-4 h-4 text-rose-400" />
           </div>
-          <div className="text-3xl font-extrabold text-rose-600 dark:text-rose-400 font-mono mt-2">
+          <div className="text-3xl sm:text-4xl font-extrabold text-rose-600 dark:text-rose-400 font-mono tracking-tight mt-2">
             {criticalCount} Trucks
           </div>
           <p className="text-[11px] text-rose-600/80 dark:text-rose-400/80 mt-1">
@@ -390,22 +390,22 @@ export const OperationsView: React.FC = () => {
 
 
         {/* ─── 3. FOUR PLAIN-ENGLISH HEALTH CARDS ─── */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
           {/* Card 1: Fuel / Battery Level */}
           <div className="p-5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/80 space-y-3 flex flex-col justify-between">
             <div>
               <div className="flex justify-between items-center mb-2">
-                <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+                <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
                   <BatteryCharging className="w-4 h-4 text-cyan-500" />
                   <span>Battery Level (Fuel)</span>
                 </span>
                 <MetricExplainer metricKey="soc" currentValue={`${soc.toFixed(1)}%`} label="How it works" />
               </div>
-              <div className="text-3xl font-extrabold text-slate-900 dark:text-white font-mono">
+              <div className="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white font-mono tracking-tight">
                 {soc.toFixed(1)}%
               </div>
               <div className="text-xs text-slate-600 dark:text-slate-300 mt-1">
-                Estimated Range: <strong className="text-cyan-600 dark:text-cyan-400">{range.toFixed(0)} km</strong>
+                Estimated Range: <strong className="text-cyan-600 dark:text-cyan-400 font-mono font-bold">{range.toFixed(0)} km</strong>
               </div>
             </div>
             <div className="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2 overflow-hidden mt-3">
@@ -420,21 +420,21 @@ export const OperationsView: React.FC = () => {
           <div className="p-5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/80 space-y-3 flex flex-col justify-between">
             <div>
               <div className="flex justify-between items-center mb-2">
-                <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+                <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
                   <ShieldCheck className="w-4 h-4 text-emerald-500" />
                   <span>Battery Lifespan</span>
                 </span>
                 <MetricExplainer metricKey="soh" currentValue={`${soh.toFixed(1)}%`} label="How it works" />
               </div>
-              <div className="text-3xl font-extrabold text-slate-900 dark:text-white font-mono">
+              <div className="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white font-mono tracking-tight">
                 {soh.toFixed(1)}%
               </div>
               <div className="flex justify-between items-center text-xs text-slate-600 dark:text-slate-300 mt-1">
-                <span>Estimated Life: <strong className="text-emerald-600 dark:text-emerald-400">~{estimatedYearsLeft} Years</strong></span>
-                <span className="font-mono text-[10px] text-slate-400">({rul} cyc)</span>
+                <span>Estimated Life: <strong className="text-emerald-600 dark:text-emerald-400 font-mono font-bold">~{estimatedYearsLeft} Years</strong></span>
+                <span className="font-mono text-[11px] text-slate-400 font-semibold">({rul} cyc)</span>
               </div>
             </div>
-            <div className="text-[11px] text-slate-400 pt-1 border-t border-slate-200/60 dark:border-slate-700/60">
+            <div className="text-[11px] font-semibold text-slate-400 pt-1 border-t border-slate-200/60 dark:border-slate-700/60">
               Grade: {soh > 92 ? "Grade A (Excellent)" : soh > 82 ? "Grade B (Good)" : "Grade C (Degrading)"}
             </div>
           </div>
@@ -443,40 +443,39 @@ export const OperationsView: React.FC = () => {
           <div className="p-5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/80 space-y-3 flex flex-col justify-between">
             <div>
               <div className="flex justify-between items-center mb-2">
-                <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+                <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
                   <Thermometer className="w-4 h-4 text-amber-500" />
-                  <span>Operating Temperature</span>
+                  <span>Operating Temp</span>
                 </span>
                 <MetricExplainer metricKey="thermal" currentValue={`${vehicle.battery_temp.toFixed(1)}°C`} label="How it works" />
               </div>
-              <div className={`text-3xl font-extrabold font-mono ${vehicle.battery_temp > 45 ? "text-amber-500" : "text-slate-900 dark:text-white"}`}>
+              <div className={`text-3xl sm:text-4xl font-extrabold font-mono tracking-tight ${vehicle.battery_temp > 45 ? "text-amber-500" : "text-slate-900 dark:text-white"}`}>
                 {vehicle.battery_temp.toFixed(1)}°C
               </div>
               <div className="text-xs text-slate-600 dark:text-slate-300 mt-1">
-                Cooling Status: <strong className={thermalSafe ? "text-emerald-600 dark:text-emerald-400" : "text-amber-600 dark:text-amber-400"}>
-                  {thermalSafe ? "Normal (0.00% Risk)" : `Active Gradient (${(vehicle.motor_temp || 45.0).toFixed(0)}°C Motor)`}
+                Cooling: <strong className={thermalSafe ? "text-emerald-600 dark:text-emerald-400" : "text-amber-600 dark:text-amber-400"}>
+                  {thermalSafe ? "Normal (0.00% Risk)" : `Active (${(vehicle.motor_temp || 45.0).toFixed(0)}°C Motor)`}
                 </strong>
               </div>
             </div>
-            <div className="text-[11px] text-slate-400 pt-1 border-t border-slate-200/60 dark:border-slate-700/60">
+            <div className="text-[11px] font-semibold text-slate-400 pt-1 border-t border-slate-200/60 dark:border-slate-700/60">
               Thermal Runaway Risk: <strong className={thermalSafe ? "text-emerald-500" : "text-amber-500"}>
                 {thermalSafe ? "0.00% (Safe)" : "Gradient Advisory"}
               </strong>
             </div>
           </div>
 
-
           {/* Card 4: Driver Score */}
           <div className="p-5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/80 space-y-3 flex flex-col justify-between">
             <div>
               <div className="flex justify-between items-center mb-2">
-                <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+                <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
                   <User className="w-4 h-4 text-purple-500" />
                   <span>Driver Behavior</span>
                 </span>
                 <MetricExplainer metricKey="driver_ai" currentValue={driverScore.split(" ")[0]} label="How it works" />
               </div>
-              <div className="text-2xl font-extrabold text-slate-900 dark:text-white font-mono">
+              <div className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white font-mono tracking-tight">
                 {driverScore.split(" ")[0]}
               </div>
               <div className="text-xs text-slate-600 dark:text-slate-300 mt-1">

@@ -25,7 +25,7 @@ export const LandingNavbar: React.FC = () => {
           : "bg-slate-950/60 backdrop-blur-md border-b border-white/10 py-3.5"
       }`}
     >
-      <div className="max-w-7xl mx-auto px-6 sm:px-10 flex items-center justify-between">
+      <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
         {/* Brand Logo & Live Model Pill */}
         <Link href="/" className="flex items-center gap-3 group">
           <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-cyan-500 via-emerald-500 to-emerald-400 flex items-center justify-center text-slate-950 font-extrabold text-sm shadow-md shadow-emerald-500/20 group-hover:scale-105 transition-transform">
@@ -33,7 +33,7 @@ export const LandingNavbar: React.FC = () => {
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <span className="font-extrabold text-base sm:text-lg tracking-tight text-white drop-shadow-sm">
+              <span className="font-extrabold text-base sm:text-lg tracking-tight font-heading text-white drop-shadow-sm">
                 EV Battery Intelligence
               </span>
               <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-mono font-semibold bg-emerald-950/80 border border-emerald-500/40 text-emerald-300">

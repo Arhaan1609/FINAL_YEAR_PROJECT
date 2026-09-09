@@ -20,10 +20,11 @@ import {
   Briefcase,
   Layers,
   Sparkles,
+  Compass,
 } from "lucide-react";
 
 export default function DashboardPage() {
-  const { activeTab, setActiveTab, viewMode, setViewMode } = useFleetStore();
+  const { activeTab, setActiveTab, viewMode, setViewMode, openBriefing } = useFleetStore();
 
   const mobileTabs = [
     { id: "fleet", label: "Fleet Hub", icon: LayoutDashboard },
@@ -43,15 +44,15 @@ export default function DashboardPage() {
             {viewMode === "operations" ? <Briefcase className="w-5 h-5" /> : <Cpu className="w-5 h-5" />}
           </div>
           <div>
-            <div className="flex items-center gap-2">
-              <h1 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white">
+            <div className="flex items-center gap-2.5">
+              <h1 className="text-lg sm:text-xl font-extrabold tracking-tight text-slate-900 dark:text-white font-heading">
                 {viewMode === "operations" ? "Fleet Operations Command" : "Engineering ML Diagnostics"}
               </h1>
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-cyan-100 text-cyan-800 dark:bg-cyan-950 dark:text-cyan-300">
-                {viewMode === "operations" ? "Non-EV Friendly" : "74 ML Models"}
+              <span className="px-2.5 py-0.5 rounded-full text-[11px] font-mono font-bold uppercase tracking-wider bg-cyan-100 text-cyan-800 dark:bg-cyan-950/80 dark:text-cyan-300 border border-cyan-200 dark:border-cyan-800/60">
+                {viewMode === "operations" ? "Dispatch Triage" : "74 ML Models Live"}
               </span>
             </div>
-            <p className="text-xs text-slate-500 dark:text-slate-400">
+            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5 leading-normal font-sans">
               {viewMode === "operations"
                 ? "Simplified traffic-light dispatch triage, battery range, and maintenance directives."
                 : "Deep mathematical features, neural weights, and multi-target ensemble inference."}
@@ -59,31 +60,43 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* View Mode Toggle Switch */}
-        <div className="flex items-center p-1 bg-slate-100 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700">
+        <div className="flex flex-wrap items-center gap-2.5">
+          {/* Orientation Guide Trigger */}
           <button
-            onClick={() => setViewMode("operations")}
-            className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-bold transition-all ${
-              viewMode === "operations"
-                ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-sm"
-                : "text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
-            }`}
+            onClick={() => openBriefing(viewMode === "operations" ? "operations" : activeTab)}
+            className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-300 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 text-xs font-bold hover:bg-emerald-100 dark:hover:bg-emerald-900/60 transition-all shadow-sm"
+            title="Open plain-English guide explaining what this page does and what to infer"
           >
-            <Briefcase className="w-3.5 h-3.5 text-cyan-500" />
-            <span>Operations View</span>
+            <Compass className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+            <span>What does this page do?</span>
           </button>
 
-          <button
-            onClick={() => setViewMode("engineering")}
-            className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-bold transition-all ${
-              viewMode === "engineering"
-                ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-sm"
-                : "text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
-            }`}
-          >
-            <Cpu className="w-3.5 h-3.5 text-purple-500" />
-            <span>Engineering View</span>
-          </button>
+          {/* View Mode Toggle Switch */}
+          <div className="flex items-center p-1 bg-slate-100 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700">
+            <button
+              onClick={() => setViewMode("operations")}
+              className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-bold transition-all ${
+                viewMode === "operations"
+                  ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-sm"
+                  : "text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+              }`}
+            >
+              <Briefcase className="w-3.5 h-3.5 text-cyan-500" />
+              <span>Operations View</span>
+            </button>
+
+            <button
+              onClick={() => setViewMode("engineering")}
+              className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-bold transition-all ${
+                viewMode === "engineering"
+                  ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-sm"
+                  : "text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+              }`}
+            >
+              <Cpu className="w-3.5 h-3.5 text-purple-500" />
+              <span>Engineering View</span>
+            </button>
+          </div>
         </div>
       </div>
 

@@ -23,17 +23,17 @@ export const FleetRoiCalculator: React.FC = () => {
   const carbonMitigatedTons = Math.round(fleetSize * dailyKm * 365 * 0.00012);
 
   return (
-    <section id="roi" className="py-28 sm:py-36 px-6 sm:px-10 max-w-7xl mx-auto">
-      <div className="text-center max-w-3xl mx-auto mb-16">
+    <section id="roi" className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 max-w-[1440px] mx-auto">
+      <div className="text-center max-w-3xl mx-auto mb-14">
         <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-300 dark:border-emerald-700/60 text-emerald-700 dark:text-emerald-300 text-xs font-semibold mb-4 shadow-sm">
           <TrendingUp className="w-3.5 h-3.5 text-emerald-500" />
           <span>Commercial EV Fleet Business Case</span>
         </div>
-        <h2 className="text-3xl sm:text-5xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight">
+        <h2 className="text-3xl sm:text-5xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight font-heading">
           Quantify Your Fleet ROI &amp; Lifespan Gain
         </h2>
         <p className="text-sm sm:text-base text-slate-600 dark:text-slate-400 mt-3.5 leading-relaxed">
-          Simulate how knee-point prognostics, driver strain moderation, and thermal safety extend pack longevity and reduce fleet operational expenditure.
+          Simulate how predictive knee-point avoidance, driver strain moderation, and active thermal protection extend battery lifespan and reduce operational expenditure across your fleet.
         </p>
       </div>
 

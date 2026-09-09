@@ -6,7 +6,7 @@ import { ArrowRight, Terminal, Sparkles, ShieldCheck, Cpu, Database } from "luci
 
 export const FinalCallToAction: React.FC = () => {
   return (
-    <section className="py-24 px-6 sm:px-10 max-w-7xl mx-auto">
+    <section className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 max-w-[1440px] mx-auto">
       {/* Outer Card with Gradient Border */}
       <div className="relative rounded-3xl overflow-hidden bg-gradient-to-b from-slate-900 via-slate-950 to-slate-950 text-white border border-slate-800 p-8 sm:p-16 text-center shadow-2xl">
         {/* Glowing Orbs */}
@@ -19,7 +19,7 @@ export const FinalCallToAction: React.FC = () => {
             <span>Ready for Production Fleet Deployment</span>
           </div>
 
-          <h2 className="text-3xl sm:text-5xl font-extrabold tracking-tight leading-tight">
+          <h2 className="text-3xl sm:text-5xl font-extrabold tracking-tight leading-tight font-heading">
             Deploy Autonomous Battery Intelligence in Minutes.
           </h2>
 

@@ -3,7 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { useFleetStore } from "../../lib/store/useFleetStore";
-import { Sparkles, Sun, Moon, ArrowLeft, Activity } from "lucide-react";
+import { Sparkles, Sun, Moon, ArrowLeft, Activity, Compass } from "lucide-react";
 import { getVehicleTriage, triageLabel } from "../../lib/triage";
 
 export const Header: React.FC = () => {
@@ -18,6 +18,9 @@ export const Header: React.FC = () => {
     setIsMock,
     copilotOpen,
     setCopilotOpen,
+    viewMode,
+    activeTab,
+    openBriefing,
   } = useFleetStore();
 
   const selectedVehicle = vehicles.find((v) => v.id === selectedVehicleId) || vehicles[0];
@@ -94,6 +97,16 @@ export const Header: React.FC = () => {
           title={`Switch to ${theme === "light" ? "Dark" : "Light"} mode`}
         >
           {theme === "light" ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4 text-amber-400" />}
+        </button>
+
+        {/* Page Guide Button for New & Non-Tech Employees */}
+        <button
+          onClick={() => openBriefing(viewMode === "operations" ? "operations" : activeTab)}
+          className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-300 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 text-xs font-semibold hover:bg-emerald-100 dark:hover:bg-emerald-900/60 transition-all shadow-sm"
+          title="What does this page do? Click for plain-English orientation and action guide"
+        >
+          <Compass className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+          <span className="hidden sm:inline font-sans">Page Guide</span>
         </button>
 
         {/* Copilot button */}

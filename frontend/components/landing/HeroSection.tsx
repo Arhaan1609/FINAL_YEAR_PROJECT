@@ -50,7 +50,7 @@ export const HeroSection: React.FC = () => {
 
           {/* Subtitle */}
           <p className="text-base sm:text-lg text-slate-600 dark:text-slate-300 max-w-2xl mb-8 leading-relaxed">
-            Predict State of Charge, prevent multi-zone thermal faults ($F_1 = 0.997$), and forecast non-linear degradation knee points across commercial electric vehicle fleets using 74 production-grade ML & Deep Learning models.
+            Predict State of Charge, prevent multi-zone thermal faults with a 99.7% F1 score, and forecast battery degradation knee points across commercial electric vehicle fleets using 74 production AI models.
           </p>
 
           {/* Action CTAs */}
@@ -120,7 +120,7 @@ export const HeroSection: React.FC = () => {
         </div>
 
         <div className="app-card p-5 sm:p-6 bg-white/70 dark:bg-slate-900/60 backdrop-blur-xl border border-slate-200 dark:border-slate-800/80">
-          <div className="text-xs font-medium text-slate-500 dark:text-slate-400">Thermal Safety $F_1$</div>
+          <div className="text-xs font-medium text-slate-500 dark:text-slate-400">Thermal Safety F1 Score</div>
           <div className="text-3xl sm:text-4xl font-extrabold text-purple-600 dark:text-purple-400 mt-1 font-mono">
             0.997
           </div>

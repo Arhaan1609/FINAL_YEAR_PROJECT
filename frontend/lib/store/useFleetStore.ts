@@ -54,6 +54,14 @@ interface FleetStoreState {
   statusFilter: VehicleStatusFilter;
   hubFilter: string;
 
+  // Employee Page Orientation & Briefing System
+  briefingOpen: boolean;
+  activeBriefingKey: string;
+  autoShowBriefing: boolean;
+  openBriefing: (key?: string) => void;
+  closeBriefing: () => void;
+  setAutoShowBriefing: (enabled: boolean) => void;
+
   // Actions
   setTheme: (theme: ThemeMode) => void;
   toggleTheme: () => void;
@@ -105,6 +113,11 @@ export const useFleetStore = create<FleetStoreState>((set, get) => ({
   statusFilter: "all",
   hubFilter: "all",
 
+  // Page Orientation Briefing defaults
+  briefingOpen: true,
+  activeBriefingKey: "operations",
+  autoShowBriefing: true,
+
   telemetry: {
     voltage: MOCK_VEHICLES[0]?.voltage || 73.6,
     current: MOCK_VEHICLES[0]?.current || -14.0,
@@ -128,11 +141,41 @@ export const useFleetStore = create<FleetStoreState>((set, get) => ({
   setTheme: (theme: ThemeMode) => set({ theme }),
   toggleTheme: () => set((state) => ({ theme: state.theme === "light" ? "dark" : "light" })),
 
-  setViewMode: (viewMode: ViewMode) => set({ viewMode }),
-  toggleViewMode: () =>
+  openBriefing: (key?: string) =>
     set((state) => ({
-      viewMode: state.viewMode === "operations" ? "engineering" : "operations",
+      briefingOpen: true,
+      activeBriefingKey: key || (state.viewMode === "operations" ? "operations" : state.activeTab),
     })),
+  closeBriefing: () => set({ briefingOpen: false }),
+  setAutoShowBriefing: (enabled: boolean) => {
+    try {
+      if (typeof window !== "undefined") {
+        localStorage.setItem("ev_auto_show_page_briefing", enabled ? "true" : "false");
+      }
+    } catch {}
+    set({ autoShowBriefing: enabled });
+  },
+
+  setViewMode: (viewMode: ViewMode) =>
+    set((state) => {
+      const isChanging = state.viewMode !== viewMode;
+      const updates: Partial<FleetStoreState> = { viewMode };
+      if (isChanging && state.autoShowBriefing) {
+        updates.briefingOpen = true;
+        updates.activeBriefingKey = viewMode === "operations" ? "operations" : state.activeTab;
+      }
+      return updates;
+    }),
+  toggleViewMode: () =>
+    set((state) => {
+      const nextMode = state.viewMode === "operations" ? "engineering" : "operations";
+      const updates: Partial<FleetStoreState> = { viewMode: nextMode };
+      if (state.autoShowBriefing) {
+        updates.briefingOpen = true;
+        updates.activeBriefingKey = nextMode === "operations" ? "operations" : state.activeTab;
+      }
+      return updates;
+    }),
 
   setSelectedVehicle: (id: string) => {
     const cleanId = id.trim();
@@ -176,7 +219,16 @@ export const useFleetStore = create<FleetStoreState>((set, get) => ({
       return {};
     }),
 
-  setActiveTab: (tab: DashboardTab) => set({ activeTab: tab }),
+  setActiveTab: (tab: DashboardTab) =>
+    set((state) => {
+      const isChanging = state.activeTab !== tab || state.viewMode !== "engineering";
+      const updates: Partial<FleetStoreState> = { activeTab: tab };
+      if (isChanging && state.autoShowBriefing) {
+        updates.briefingOpen = true;
+        updates.activeBriefingKey = tab;
+      }
+      return updates;
+    }),
 
   setIsMock: (mock: boolean) => {
     setMockModeOverride(mock);

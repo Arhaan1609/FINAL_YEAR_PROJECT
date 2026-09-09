@@ -68,6 +68,20 @@ const config: Config = {
         "glow-amber": "0 0 25px -5px rgba(217, 119, 6, 0.3)",
         "glow-crimson": "0 0 25px -5px rgba(220, 38, 38, 0.4)",
       },
+      fontFamily: {
+        sans: ["'Plus Jakarta Sans'", "'Inter'", "-apple-system", "BlinkMacSystemFont", "sans-serif"],
+        mono: ["'JetBrains Mono'", "'Fira Code'", "monospace"],
+        heading: ["'Plus Jakarta Sans'", "'Inter'", "sans-serif"],
+      },
+      letterSpacing: {
+        tightest: "-0.03em",
+        tighter: "-0.02em",
+        tight: "-0.01em",
+        normal: "0",
+        wide: "0.02em",
+        wider: "0.04em",
+        widest: "0.08em",
+      },
       animation: {
         "pulse-slow": "pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite",
         "pulse-fast": "pulse 1.2s cubic-bezier(0.4, 0, 0.6, 1) infinite",

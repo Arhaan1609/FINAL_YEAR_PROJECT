@@ -93,7 +93,7 @@ export const ScrollIntelligenceStory: React.FC = () => {
       color: "purple",
       badge: "+3.2 Years Lifespan",
       description:
-        "Translates mathematical insights into actionable fleet decisions. Normalizes driver aggressiveness ($AI$), mitigates battery stress ($BSI$), and predicts capacity knee points to save thousands per vehicle annually.",
+        "Translates machine learning insights into actionable fleet decisions: profiles driver aggressiveness, mitigates electro-thermal battery stress, and predicts capacity knee points to extend pack lifespan.",
       metrics: [
         { label: "Annual Cost Savings", val: "₹1,45,000 / EV" },
         { label: "Knee Warning Buffer", val: "450+ Cycles" },

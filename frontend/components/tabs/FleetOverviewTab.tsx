@@ -184,7 +184,7 @@ export const FleetOverviewTab: React.FC = () => {
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h2 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-100">
+              <h2 className="text-sm sm:text-base font-extrabold font-heading text-slate-900 dark:text-slate-100 tracking-tight">
                 Commercial Telematics Active
               </h2>
               {(() => {
@@ -192,11 +192,11 @@ export const FleetOverviewTab: React.FC = () => {
                 const isEscalated = resolvedTriage !== staticTriage;
                 return (
                   <div className="flex items-center gap-1.5 flex-wrap">
-                    <span className={`px-2 py-0.5 rounded text-[10px] font-mono font-semibold ${triageBadgeClass(resolvedTriage)}`}>
+                    <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-mono font-bold uppercase tracking-wider ${triageBadgeClass(resolvedTriage)}`}>
                       {triageLabel(resolvedTriage)}
                     </span>
                     {isEscalated && (
-                      <span className="text-[10px] font-mono font-medium text-amber-700 dark:text-amber-300 bg-amber-100 dark:bg-amber-950/60 border border-amber-300 dark:border-amber-800 px-1.5 py-0.5 rounded">
+                      <span className="text-[10px] font-mono font-bold text-amber-700 dark:text-amber-300 bg-amber-100 dark:bg-amber-950/60 border border-amber-300 dark:border-amber-800 px-2 py-0.5 rounded-full uppercase tracking-wider">
                         Registry: {triageLabel(staticTriage)} → Live ML Escalated
                       </span>
                     )}
@@ -207,14 +207,14 @@ export const FleetOverviewTab: React.FC = () => {
             </div>
             <p className="text-[11px] text-slate-500 font-mono mt-0.5">
               Live sub-second inference:{" "}
-              <strong className="text-slate-800 dark:text-slate-200 font-bold">{vehicle.id}</strong> (Euler HiLoad 12.4 kWh LFP)
+              <strong className="text-slate-800 dark:text-slate-200 font-bold font-mono">{vehicle.id}</strong> (Euler HiLoad 12.4 kWh LFP)
             </p>
           </div>
         </div>
 
         <button
           onClick={() => setCopilotOpen(true)}
-          className="px-3 py-1.5 rounded-lg bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 text-xs font-medium hover:opacity-90 transition-all flex items-center gap-1.5 shrink-0"
+          className="px-3.5 py-1.5 rounded-lg bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 text-xs font-semibold hover:opacity-90 transition-all flex items-center gap-1.5 shrink-0 shadow-xs"
         >
           <Sparkles className="w-3.5 h-3.5 text-emerald-400 dark:text-emerald-600" />
           <span>Ask AI Copilot</span>
@@ -227,19 +227,19 @@ export const FleetOverviewTab: React.FC = () => {
         <div className="p-4 rounded-xl bg-white dark:bg-[#0D111A] border border-slate-200 dark:border-slate-800 shadow-xs flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between mb-2">
-              <span className="text-[10px] font-mono text-slate-400 uppercase font-semibold">
+              <span className="text-[11px] font-mono text-slate-400 uppercase font-bold tracking-wider">
                 State of Charge (SOC)
               </span>
               <MetricExplainer metricKey="soc" currentValue={`${socDisplay}%`} label="How it works" />
             </div>
             <div className="flex items-baseline gap-2">
-              <span className="text-3xl font-extrabold text-slate-900 dark:text-slate-100 font-mono tracking-tight">
+              <span className="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-slate-100 font-mono tracking-tight tabular-nums">
                 {socDisplay}%
               </span>
-              <span className="text-xs font-mono text-emerald-600 font-semibold">Nominal</span>
+              <span className="text-[11px] font-mono text-emerald-600 font-bold uppercase tracking-wider">Nominal</span>
             </div>
           </div>
-          <div className="mt-3 pt-2.5 border-t border-slate-100 dark:border-slate-800 flex justify-between text-[10px] font-mono text-slate-400">
+          <div className="mt-3 pt-2.5 border-t border-slate-100 dark:border-slate-800 flex justify-between text-[11px] font-mono text-slate-400">
             <span>Pack: {vehicle.voltage.toFixed(1)}V</span>
             <span>Draw: {vehicle.current.toFixed(1)}A</span>
           </div>
@@ -249,22 +249,22 @@ export const FleetOverviewTab: React.FC = () => {
         <div className="p-4 rounded-xl bg-white dark:bg-[#0D111A] border border-slate-200 dark:border-slate-800 shadow-xs flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between mb-2">
-              <span className="text-[10px] font-mono text-slate-400 uppercase font-semibold">
+              <span className="text-[11px] font-mono text-slate-400 uppercase font-bold tracking-wider">
                 State of Health (SOH)
               </span>
               <MetricExplainer metricKey="soh" currentValue={`${sohDisplay}%`} label="How it works" />
             </div>
             <div className="flex items-baseline gap-2">
-              <span className="text-3xl font-extrabold text-emerald-600 dark:text-emerald-400 font-mono tracking-tight">
+              <span className="text-3xl sm:text-4xl font-extrabold text-emerald-600 dark:text-emerald-400 font-mono tracking-tight tabular-nums">
                 {sohDisplay}%
               </span>
-              <span className="text-[10px] font-mono text-emerald-600 font-medium">Calibrated SOH₀</span>
+              <span className="text-[11px] font-mono text-emerald-600 font-bold uppercase tracking-wider">Calibrated SOH₀</span>
             </div>
-            <div className="text-[10px] text-slate-400 mt-1">
+            <div className="text-[11px] text-slate-400 mt-1 font-mono">
               Baseline-anchored estimate (see methodology)
             </div>
           </div>
-          <div className="mt-3 pt-2.5 border-t border-slate-100 dark:border-slate-800 flex justify-between text-[10px] font-mono text-slate-400">
+          <div className="mt-3 pt-2.5 border-t border-slate-100 dark:border-slate-800 flex justify-between text-[11px] font-mono text-slate-400">
             <span>Cycles: {vehicle.charge_cycle_count} EFC</span>
             <span>Temp: {vehicle.battery_temp.toFixed(1)}°C</span>
           </div>
@@ -274,20 +274,20 @@ export const FleetOverviewTab: React.FC = () => {
         <div className="p-4 rounded-xl bg-white dark:bg-[#0D111A] border border-slate-200 dark:border-slate-800 shadow-xs flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between mb-2">
-              <span className="text-[10px] font-mono text-slate-400 uppercase font-semibold">
+              <span className="text-[11px] font-mono text-slate-400 uppercase font-bold tracking-wider">
                 Remaining Useful Life (RUL)
               </span>
               <MetricExplainer metricKey="rul" currentValue={`${rulDisplay} cycles`} label="How it works" />
             </div>
             <div className="flex items-baseline gap-2">
-              <span className="text-3xl font-extrabold text-slate-900 dark:text-slate-100 font-mono tracking-tight">
-                {rulDisplay} <span className="text-xs font-normal text-slate-400">cycles left</span>
+              <span className="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-slate-100 font-mono tracking-tight tabular-nums">
+                {rulDisplay} <span className="text-xs font-normal text-slate-400">cycles</span>
               </span>
             </div>
           </div>
-          <div className="mt-3 pt-2.5 border-t border-slate-100 dark:border-slate-800 flex justify-between text-[10px] font-mono text-slate-400">
+          <div className="mt-3 pt-2.5 border-t border-slate-100 dark:border-slate-800 flex justify-between text-[11px] font-mono text-slate-400">
             <span>Est: ~{(rulDisplay / 250).toFixed(1)} yrs remaining</span>
-            <span className="text-emerald-600">R² = 0.9997</span>
+            <span className="text-emerald-600 font-bold">R² = 0.9997</span>
           </div>
         </div>
 
@@ -295,20 +295,20 @@ export const FleetOverviewTab: React.FC = () => {
         <div className="p-4 rounded-xl bg-white dark:bg-[#0D111A] border border-slate-200 dark:border-slate-800 shadow-xs flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between mb-2">
-              <span className="text-[10px] font-mono text-slate-400 uppercase font-semibold">
+              <span className="text-[11px] font-mono text-slate-400 uppercase font-bold tracking-wider">
                 Range per Charge
               </span>
               <MetricExplainer metricKey="mileage" currentValue={`${mileageDisplay} km`} label="How it works" />
             </div>
             <div className="flex items-baseline gap-2">
-              <span className="text-3xl font-extrabold text-slate-900 dark:text-slate-100 font-mono tracking-tight">
+              <span className="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-slate-100 font-mono tracking-tight tabular-nums">
                 {mileageDisplay} <span className="text-xs font-normal text-slate-400">km</span>
               </span>
             </div>
           </div>
-          <div className="mt-3 pt-2.5 border-t border-slate-100 dark:border-slate-800 flex justify-between text-[10px] font-mono text-slate-400">
+          <div className="mt-3 pt-2.5 border-t border-slate-100 dark:border-slate-800 flex justify-between text-[11px] font-mono text-slate-400">
             <span>Speed: {vehicle.speed.toFixed(1)} km/h</span>
-            <span className="text-emerald-600">Optimal</span>
+            <span className="text-emerald-600 font-bold uppercase tracking-wider">Optimal</span>
           </div>
         </div>
       </div>
@@ -390,7 +390,7 @@ export const FleetOverviewTab: React.FC = () => {
       <div className="rounded-xl p-5 bg-white dark:bg-[#0D111A] border border-slate-200 dark:border-slate-800 shadow-xs space-y-4">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-slate-200 dark:border-slate-800 pb-3">
           <div>
-            <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">
+            <h3 className="text-base font-bold font-heading text-slate-900 dark:text-slate-100 tracking-tight">
               Commercial Fleet Directory
             </h3>
             <p className="text-xs text-slate-400 font-mono">
@@ -417,9 +417,9 @@ export const FleetOverviewTab: React.FC = () => {
                 <button
                   key={st}
                   onClick={() => setStatusFilter(st)}
-                  className={`px-2 py-0.5 rounded capitalize text-[11px] transition-all ${
+                  className={`px-2 py-0.5 rounded capitalize text-[11px] font-semibold transition-all ${
                     statusFilter === st
-                      ? "bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 font-semibold shadow-xs"
+                      ? "bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 shadow-xs"
                       : "text-slate-500 hover:text-slate-900 dark:hover:text-slate-200"
                   }`}
                 >
@@ -434,7 +434,7 @@ export const FleetOverviewTab: React.FC = () => {
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs font-mono">
             <thead>
-              <tr className="border-b border-slate-200 dark:border-slate-800 text-slate-400 uppercase text-[10px]">
+              <tr className="border-b border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 uppercase text-[11px] font-bold tracking-wider font-sans">
                 <th className="py-2.5 px-3">Vehicle ID</th>
                 <th className="py-2.5 px-3">Chassis / Model</th>
                 <th className="py-2.5 px-3">Status</th>
@@ -458,7 +458,7 @@ export const FleetOverviewTab: React.FC = () => {
                         : "hover:bg-slate-50 dark:hover:bg-slate-800/30 text-slate-700 dark:text-slate-300"
                     }`}
                   >
-                    <td className="py-2.5 px-3 font-bold text-slate-900 dark:text-slate-100">
+                    <td className="py-2.5 px-3 font-bold font-mono text-slate-900 dark:text-slate-100">
                       {v.id}
                     </td>
                     <td className="py-2.5 px-3 text-[11px] text-slate-500 dark:text-slate-400 truncate max-w-[140px]">
@@ -470,12 +470,12 @@ export const FleetOverviewTab: React.FC = () => {
                         const triage = isSelected && selectedLiveTriage ? selectedLiveTriage : staticTriage;
                         return (
                           <div className="flex items-center gap-1">
-                            <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] uppercase font-semibold ${triageBadgeClass(triage)}`}>
+                            <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] uppercase font-bold tracking-wider ${triageBadgeClass(triage)}`}>
                               <span className={`w-1.5 h-1.5 rounded-full ${triageDotClass(triage)}`} />
                               {triageLabel(triage)}
                             </span>
                             {isSelected && selectedLiveTriage && selectedLiveTriage !== staticTriage && (
-                              <span className="text-[8px] font-mono font-bold text-amber-700 dark:text-amber-300 bg-amber-100 dark:bg-amber-950/80 px-1 py-0.5 rounded border border-amber-300 dark:border-amber-800">
+                              <span className="text-[9px] font-mono font-bold text-amber-700 dark:text-amber-300 bg-amber-100 dark:bg-amber-950/80 px-1.5 py-0.5 rounded border border-amber-300 dark:border-amber-800">
                                 LIVE ML
                               </span>
                             )}
@@ -483,23 +483,23 @@ export const FleetOverviewTab: React.FC = () => {
                         );
                       })()}
                     </td>
-                    <td className="py-2.5 px-3">
+                    <td className="py-2.5 px-3 tabular-nums font-mono">
                       <span>{v.soc.toFixed(1)}%</span>
                     </td>
-                    <td className="py-2.5 px-3">
+                    <td className="py-2.5 px-3 tabular-nums font-mono">
                       <span className="text-slate-600 dark:text-slate-300">{v.soh.toFixed(1)}%</span>
                     </td>
-                    <td className="py-2.5 px-3">{v.battery_temp.toFixed(1)}°C</td>
-                    <td className="py-2.5 px-3">{v.charge_cycle_count} EFC</td>
+                    <td className="py-2.5 px-3 tabular-nums font-mono">{v.battery_temp.toFixed(1)}°C</td>
+                    <td className="py-2.5 px-3 tabular-nums font-mono">{v.charge_cycle_count} EFC</td>
                     <td className="py-2.5 px-3 text-right">
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
                           setSelectedVehicle(v.id);
                         }}
-                        className={`px-2 py-0.5 rounded text-[10px] font-semibold transition-all ${
+                        className={`px-2.5 py-1 rounded text-[11px] font-semibold uppercase tracking-wider transition-all ${
                           isSelected
-                            ? "bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900"
+                            ? "bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 shadow-xs"
                             : "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700"
                         }`}
                       >

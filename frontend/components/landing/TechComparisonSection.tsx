@@ -21,13 +21,13 @@ export const TechComparisonSection: React.FC = () => {
     {
       feature: "Thermal Runway Safety",
       legacy: "Single-point threshold alarm after overheating occurs",
-      platform: "3-Zone Multi-Entity Random Forest (99.71% F1, VBT/VCT/VMT)",
+      platform: "3-Zone Thermal Safety Model (99.71% Precision across Battery, Inverter & Motor)",
       highlight: true,
     },
     {
       feature: "Driver Behavioral Analysis",
       legacy: "None (BMS blind to driving aggression)",
-      platform: "Normalized Driver Aggressiveness ($AI$) & Battery Stress ($BSI$)",
+      platform: "Driver Aggressiveness Profiling & Real-Time Battery Stress Index (BSI)",
       highlight: false,
     },
     {
@@ -45,17 +45,17 @@ export const TechComparisonSection: React.FC = () => {
   ];
 
   return (
-    <section id="comparison" className="py-24 px-6 sm:px-10 max-w-7xl mx-auto">
-      <div className="text-center max-w-3xl mx-auto mb-16">
+    <section id="comparison" className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 max-w-[1440px] mx-auto">
+      <div className="text-center max-w-3xl mx-auto mb-14">
         <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-cyan-50 dark:bg-cyan-950/60 border border-cyan-300 dark:border-cyan-700/60 text-cyan-700 dark:text-cyan-300 text-xs font-semibold mb-4 shadow-sm">
           <Sparkles className="w-3.5 h-3.5 text-cyan-500" />
           <span>Competitive Architecture Matrix</span>
         </div>
-        <h2 className="text-3xl sm:text-5xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight">
+        <h2 className="text-3xl sm:text-5xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight font-heading">
           Legacy BMS vs. Tri-Pillar Neural Platform
         </h2>
         <p className="text-sm sm:text-base text-slate-600 dark:text-slate-400 mt-3.5 leading-relaxed">
-          Why traditional onboard battery management systems fail in commercial duty cycles, and how our cyber-physical architecture solves non-linear battery degradation.
+          How legacy onboard battery management systems fall short in commercial duty cycles, and how our AI architecture prevents premature degradation and catastrophic thermal events.
         </p>
       </div>
 

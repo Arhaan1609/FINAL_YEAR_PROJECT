@@ -171,18 +171,18 @@ export const LiveModelSandbox: React.FC = () => {
   const isThermalWarning = temp > 45 || thermalRisk > 0.3;
 
   return (
-    <section id="sandbox" className="py-24 sm:py-32 px-6 sm:px-10 max-w-7xl mx-auto">
+    <section id="sandbox" className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 max-w-[1440px] mx-auto">
       {/* Section Header */}
       <div className="text-center max-w-3xl mx-auto mb-10">
         <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-cyan-50 dark:bg-cyan-950/60 border border-cyan-300 dark:border-cyan-700/60 text-cyan-700 dark:text-cyan-300 text-xs font-semibold mb-3 shadow-sm">
           <Sparkles className="w-3.5 h-3.5 text-cyan-500" />
           <span>Interactive Telemetry &amp; 3D Model Sandbox</span>
         </div>
-        <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight">
+        <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight font-heading">
           Test Live Models in Real Time
         </h2>
         <p className="text-sm sm:text-base text-slate-600 dark:text-slate-400 mt-3 leading-relaxed">
-          Select an examiner scenario or adjust CAN parameters below. 74 trained models execute live sub-10ms inference with real-time 3D thermal digital twin coupling.
+          Simulate live operational conditions or adjust CAN telemetry sliders below. Experience debounced live inference powered by 74 production AI models coupled with real-time 3D thermal pack visualization.
         </p>
 
         {/* Unified 3-Pill Scenario Segmented Control */}
