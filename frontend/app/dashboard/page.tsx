@@ -128,64 +128,64 @@ export default function DashboardPage() {
         <DashboardUrlSync />
       </Suspense>
 
-      {/* ─── ROLE-BASED MODE SWITCHER HEADER ─── */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm print:hidden">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-500 to-emerald-500 flex items-center justify-center text-white font-bold shadow-md shadow-emerald-500/20">
+      {/* ─── DASHBOARD MODE SWITCHER ─── */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 px-5 py-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs print:hidden font-sans">
+        <div className="flex items-center gap-3.5">
+          <div className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center text-cyan-600 dark:text-cyan-400 font-bold shadow-xs">
             {viewMode === "operations" ? <Briefcase className="w-5 h-5" /> : <Cpu className="w-5 h-5" />}
           </div>
           <div>
             <div className="flex items-center gap-2.5">
-              <h1 className="text-lg sm:text-xl font-extrabold tracking-tight text-slate-900 dark:text-white font-heading">
-                {viewMode === "operations" ? "Fleet Operations Command" : "Engineering ML Diagnostics"}
+              <h1 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white tracking-tight">
+                {viewMode === "operations" ? "Fleet Operations & Dispatch" : "Engineering Telemetry Workbench"}
               </h1>
-              <span className="px-2.5 py-0.5 rounded-full text-[11px] font-mono font-bold uppercase tracking-wider bg-cyan-100 text-cyan-800 dark:bg-cyan-950/80 dark:text-cyan-300 border border-cyan-200 dark:border-cyan-800/60">
-                {viewMode === "operations" ? "Dispatch Triage" : "74 ML Models Live"}
+              <span className="px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
+                {viewMode === "operations" ? "Commercial Dispatch" : "74 ML Models"}
               </span>
             </div>
-            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5 leading-normal font-sans">
+            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-0.5">
               {viewMode === "operations"
-                ? "Simplified traffic-light dispatch triage, battery range, and maintenance directives."
-                : "Deep mathematical features, neural weights, and multi-target ensemble inference."}
+                ? "Real-time dispatch readiness, route clearance, and battery health verification."
+                : "Multi-parameter state estimation, thermal safety envelopes, and battery degradation prognostics."}
             </p>
           </div>
         </div>
 
         <div className="flex flex-wrap items-center gap-2.5">
-          {/* Orientation Guide Trigger */}
+          {/* Guide Trigger */}
           <button
             onClick={() => openBriefing(viewMode === "operations" ? "operations" : activeTab)}
-            className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-300 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 text-xs font-bold hover:bg-emerald-100 dark:hover:bg-emerald-900/60 transition-all shadow-sm"
-            title="Open plain-English guide explaining what this page does and what to infer"
+            className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 text-xs font-semibold transition-all shadow-xs"
+            title="Open guide explaining this view"
           >
-            <Compass className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-            <span>What does this page do?</span>
+            <Compass className="w-3.5 h-3.5 text-cyan-600 dark:text-cyan-400" />
+            <span>Guide</span>
           </button>
 
           {/* View Mode Toggle Switch */}
-          <div className="flex items-center p-1 bg-slate-100 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700">
+          <div className="flex items-center p-1 bg-slate-100 dark:bg-slate-800/80 rounded-lg border border-slate-200 dark:border-slate-700 text-xs font-medium">
             <button
               onClick={() => navigateToPage("operations")}
-              className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-bold transition-all ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md font-semibold transition-all ${
                 viewMode === "operations"
-                  ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-sm"
-                  : "text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                  ? "bg-white dark:bg-slate-900 text-cyan-600 dark:text-cyan-400 shadow-xs border border-slate-200 dark:border-slate-700"
+                  : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
               }`}
             >
-              <Briefcase className="w-3.5 h-3.5 text-cyan-500" />
-              <span>Operations View</span>
+              <Briefcase className="w-3.5 h-3.5" />
+              <span>Operations</span>
             </button>
 
             <button
               onClick={() => navigateToPage(activeTab)}
-              className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-bold transition-all ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md font-semibold transition-all ${
                 viewMode === "engineering"
-                  ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-sm"
-                  : "text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                  ? "bg-white dark:bg-slate-900 text-emerald-600 dark:text-emerald-400 shadow-xs border border-slate-200 dark:border-slate-700"
+                  : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
               }`}
             >
-              <Cpu className="w-3.5 h-3.5 text-purple-500" />
-              <span>Engineering View</span>
+              <Cpu className="w-3.5 h-3.5" />
+              <span>Engineering</span>
             </button>
           </div>
         </div>

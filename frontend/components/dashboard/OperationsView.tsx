@@ -215,155 +215,247 @@ export const OperationsView: React.FC = () => {
 
 
   return (
-    <div className="space-y-6 sm:space-y-7 w-full">
-      {/* ─── 1. TOP FLEET TRAFFIC-LIGHT TRIAGE BAR ─── */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* All Fleet */}
-        <button
-          onClick={() => setStatusFilter("all")}
-          className={`p-5 rounded-2xl border text-left transition-all shadow-sm flex flex-col justify-between ${
-            statusFilter === "all"
-              ? "bg-slate-900 text-white border-cyan-500 shadow-md ring-2 ring-cyan-500/20"
-              : "bg-white dark:bg-slate-900/90 border-slate-200 dark:border-slate-800 hover:border-slate-300"
-          }`}
-        >
-          <div className="flex justify-between items-center text-xs font-bold uppercase tracking-wider text-slate-400">
-            <span>Total Monitored Fleet</span>
-            <Truck className="w-4 h-4 text-cyan-400" />
-          </div>
-          <div className="text-3xl sm:text-4xl font-extrabold font-mono tracking-tight mt-2">{totalCount} Trucks</div>
-          <p className="text-[11px] text-slate-400 mt-1 font-mono">SQL Database Connected</p>
-        </button>
-
-        {/* Ready for Route (Active) */}
-        <button
-          onClick={() => setStatusFilter("active")}
-          className={`p-5 rounded-2xl border text-left transition-all shadow-sm flex flex-col justify-between ${
-            statusFilter === "active"
-              ? "bg-emerald-950/80 text-white border-emerald-500 shadow-md ring-2 ring-emerald-500/30"
-              : "bg-white dark:bg-slate-900/90 border-slate-200 dark:border-slate-800 hover:border-emerald-500/40"
-          }`}
-        >
-          <div className="flex justify-between items-center text-xs font-bold uppercase tracking-wider text-emerald-500">
-            <span>Ready for Route</span>
-            <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-          </div>
-          <div className="text-3xl sm:text-4xl font-extrabold text-emerald-600 dark:text-emerald-400 font-mono tracking-tight mt-2">
-            {activeCount} Trucks
-          </div>
-          <p className="text-[11px] text-emerald-600/80 dark:text-emerald-400/80 mt-1">
-            Batteries healthy • Ready to dispatch
-          </p>
-        </button>
-
-        {/* Needs Charge / Advisory (Warning) */}
-        <button
-          onClick={() => setStatusFilter("warning")}
-          className={`p-5 rounded-2xl border text-left transition-all shadow-sm flex flex-col justify-between ${
-            statusFilter === "warning"
-              ? "bg-amber-950/80 text-white border-amber-500 shadow-md ring-2 ring-amber-500/30"
-              : "bg-white dark:bg-slate-900/90 border-slate-200 dark:border-slate-800 hover:border-amber-500/40"
-          }`}
-        >
-          <div className="flex justify-between items-center text-xs font-bold uppercase tracking-wider text-amber-500">
-            <span>Needs Charge / Inspection</span>
-            <AlertTriangle className="w-4 h-4 text-amber-400" />
-          </div>
-          <div className="text-3xl sm:text-4xl font-extrabold text-amber-600 dark:text-amber-400 font-mono tracking-tight mt-2">
-            {warningCount} Trucks
-          </div>
-          <p className="text-[11px] text-amber-600/80 dark:text-amber-400/80 mt-1">
-            Low battery or moderate temperature
-          </p>
-        </button>
-
-        {/* Immediate Attention (Critical) */}
-        <button
-          onClick={() => setStatusFilter("critical")}
-          className={`p-5 rounded-2xl border text-left transition-all shadow-sm flex flex-col justify-between ${
-            statusFilter === "critical"
-              ? "bg-rose-950/80 text-white border-rose-500 shadow-md ring-2 ring-rose-500/30"
-              : "bg-white dark:bg-slate-900/90 border-slate-200 dark:border-slate-800 hover:border-rose-500/40"
-          }`}
-        >
-          <div className="flex justify-between items-center text-xs font-bold uppercase tracking-wider text-rose-500">
-            <span>Critical Hold / Service</span>
-            <AlertOctagon className="w-4 h-4 text-rose-400" />
-          </div>
-          <div className="text-3xl sm:text-4xl font-extrabold text-rose-600 dark:text-rose-400 font-mono tracking-tight mt-2">
-            {criticalCount} Trucks
-          </div>
-          <p className="text-[11px] text-rose-600/80 dark:text-rose-400/80 mt-1">
-            Do not dispatch • Service required
-          </p>
-        </button>
-      </div>
-
-      {/* ─── 2. SELECTED VEHICLE DISPATCH PASSPORT & ACTION BANNER ─── */}
-      <div className="app-card p-6 sm:p-8 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xl space-y-6">
-        {/* Header with Quick Selector & Search */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-6">
+    <div className="space-y-6 w-full font-sans">
+      {/* ─── 1. FLEET DISPATCH CLEARANCE LANES ─── */}
+      <div className="tech-surface p-5 sm:p-6">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-4 mb-4">
           <div>
             <div className="flex items-center gap-2">
+              <h2 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white tracking-tight">
+                Fleet Dispatch Clearance
+              </h2>
+              <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
+                {totalCount} Total Vehicles
+              </span>
+            </div>
+            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-0.5">
+              Three-lane operational dispatch readiness based on live battery telemetry and predictive health models.
+            </p>
+          </div>
+
+          {/* Unified Fleet Ratio Meter */}
+          <div className="flex items-center gap-3 text-xs">
+            <span className="text-slate-500 dark:text-slate-400 font-medium">Fleet Allocation:</span>
+            <div className="w-48 sm:w-60 h-3 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden flex border border-slate-200 dark:border-slate-700">
+              <div
+                className="bg-emerald-500 h-full transition-all duration-500"
+                style={{ width: `${(activeCount / totalCount) * 100}%` }}
+                title={`Approved: ${activeCount} (${((activeCount / totalCount) * 100).toFixed(1)}%)`}
+              />
+              <div
+                className="bg-amber-500 h-full transition-all duration-500"
+                style={{ width: `${(warningCount / totalCount) * 100}%` }}
+                title={`Review: ${warningCount} (${((warningCount / totalCount) * 100).toFixed(1)}%)`}
+              />
+              <div
+                className="bg-rose-500 h-full transition-all duration-500"
+                style={{ width: `${(criticalCount / totalCount) * 100}%` }}
+                title={`Grounded: ${criticalCount} (${((criticalCount / totalCount) * 100).toFixed(1)}%)`}
+              />
+            </div>
+            <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 font-mono">
+              {((activeCount / totalCount) * 100).toFixed(0)}% Ready
+            </span>
+          </div>
+        </div>
+
+        {/* 4 Clickable Tactical Status Lanes */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+          {/* Total Monitored */}
+          <button
+            onClick={() => setStatusFilter("all")}
+            className={`p-4 rounded-xl border text-left transition-all ${
+              statusFilter === "all"
+                ? "bg-slate-900 text-white dark:bg-slate-800 border-cyan-500 shadow-md ring-2 ring-cyan-500/40"
+                : "bg-white dark:bg-slate-900/60 border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700"
+            }`}
+          >
+            <div className="flex justify-between items-center text-xs font-semibold uppercase tracking-wider">
+              <span className={statusFilter === "all" ? "text-cyan-400 font-bold" : "text-slate-600 dark:text-slate-400"}>
+                All Vehicles
+              </span>
+              <Truck className={`w-4 h-4 ${statusFilter === "all" ? "text-cyan-400" : "text-slate-400 dark:text-slate-500"}`} />
+            </div>
+            <div className={`text-2xl sm:text-3xl font-extrabold mt-1.5 font-mono ${
+              statusFilter === "all" ? "text-white" : "text-slate-900 dark:text-white"
+            }`}>
+              {totalCount} <span className={`text-xs font-normal font-sans ${statusFilter === "all" ? "text-slate-300" : "text-slate-500 dark:text-slate-400"}`}>units</span>
+            </div>
+            <p className={`text-xs mt-1 ${statusFilter === "all" ? "text-slate-300 font-medium" : "text-slate-500 dark:text-slate-400"}`}>
+              Live Telemetry Synchronized
+            </p>
+          </button>
+
+          {/* Lane A: Ready for Route */}
+          <button
+            onClick={() => setStatusFilter("active")}
+            className={`p-4 rounded-xl border text-left transition-all ${
+              statusFilter === "active"
+                ? "bg-emerald-50 dark:bg-emerald-950/70 border-emerald-500 shadow-md ring-2 ring-emerald-500/40"
+                : "bg-white dark:bg-slate-900/60 border-slate-200 dark:border-slate-800 hover:border-emerald-500/40"
+            }`}
+          >
+            <div className={`flex justify-between items-center text-xs font-semibold uppercase tracking-wider ${
+              statusFilter === "active" ? "text-emerald-800 dark:text-emerald-300 font-bold" : "text-emerald-600 dark:text-emerald-400"
+            }`}>
+              <span className="flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                <span>Ready to Dispatch</span>
+              </span>
+              <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+            </div>
+            <div className={`text-2xl sm:text-3xl font-extrabold mt-1.5 font-mono ${
+              statusFilter === "active" ? "text-emerald-700 dark:text-emerald-300" : "text-emerald-600 dark:text-emerald-400"
+            }`}>
+              {activeCount} <span className={`text-xs font-normal font-sans ${
+                statusFilter === "active" ? "text-emerald-800 dark:text-emerald-400" : "opacity-70"
+              }`}>units</span>
+            </div>
+            <p className={`text-xs mt-1 ${
+              statusFilter === "active" ? "text-emerald-800 dark:text-emerald-300 font-medium" : "text-slate-500 dark:text-slate-400"
+            }`}>
+              Optimal Battery Health & Range
+            </p>
+          </button>
+
+          {/* Lane B: Needs Charge / Advisory */}
+          <button
+            onClick={() => setStatusFilter("warning")}
+            className={`p-4 rounded-xl border text-left transition-all ${
+              statusFilter === "warning"
+                ? "bg-amber-50 dark:bg-amber-950/70 border-amber-500 shadow-md ring-2 ring-amber-500/40"
+                : "bg-white dark:bg-slate-900/60 border-slate-200 dark:border-slate-800 hover:border-amber-500/40"
+            }`}
+          >
+            <div className={`flex justify-between items-center text-xs font-semibold uppercase tracking-wider ${
+              statusFilter === "warning" ? "text-amber-800 dark:text-amber-300 font-bold" : "text-amber-600 dark:text-amber-400"
+            }`}>
+              <span className="flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-amber-500" />
+                <span>Review / Advisory</span>
+              </span>
+              <AlertTriangle className="w-4 h-4 text-amber-500" />
+            </div>
+            <div className={`text-2xl sm:text-3xl font-extrabold mt-1.5 font-mono ${
+              statusFilter === "warning" ? "text-amber-700 dark:text-amber-300" : "text-amber-600 dark:text-amber-400"
+            }`}>
+              {warningCount} <span className={`text-xs font-normal font-sans ${
+                statusFilter === "warning" ? "text-amber-800 dark:text-amber-400" : "opacity-70"
+              }`}>units</span>
+            </div>
+            <p className={`text-xs mt-1 ${
+              statusFilter === "warning" ? "text-amber-800 dark:text-amber-300 font-medium" : "text-slate-500 dark:text-slate-400"
+            }`}>
+              Low Charge or Moderate Temp
+            </p>
+          </button>
+
+          {/* Lane C: Critical Hold / Service */}
+          <button
+            onClick={() => setStatusFilter("critical")}
+            className={`p-4 rounded-xl border text-left transition-all ${
+              statusFilter === "critical"
+                ? "bg-rose-50 dark:bg-rose-950/70 border-rose-500 shadow-md ring-2 ring-rose-500/40"
+                : "bg-white dark:bg-slate-900/60 border-slate-200 dark:border-slate-800 hover:border-rose-500/40"
+            }`}
+          >
+            <div className={`flex justify-between items-center text-xs font-semibold uppercase tracking-wider ${
+              statusFilter === "critical" ? "text-rose-800 dark:text-rose-300 font-bold" : "text-rose-600 dark:text-rose-400"
+            }`}>
+              <span className="flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-rose-500" />
+                <span>Maintenance Hold</span>
+              </span>
+              <AlertOctagon className="w-4 h-4 text-rose-500" />
+            </div>
+            <div className={`text-2xl sm:text-3xl font-extrabold mt-1.5 font-mono ${
+              statusFilter === "critical" ? "text-rose-700 dark:text-rose-300" : "text-rose-600 dark:text-rose-400"
+            }`}>
+              {criticalCount} <span className={`text-xs font-normal font-sans ${
+                statusFilter === "critical" ? "text-rose-800 dark:text-rose-400" : "opacity-70"
+              }`}>units</span>
+            </div>
+            <p className={`text-xs mt-1 ${
+              statusFilter === "critical" ? "text-rose-800 dark:text-rose-300 font-medium" : "text-slate-500 dark:text-slate-400"
+            }`}>
+              Grounded · Inspection Required
+            </p>
+          </button>
+        </div>
+      </div>
+
+      {/* ─── 2. SELECTED VEHICLE TELEMETRY OVERVIEW ─── */}
+      <div className="tech-surface p-5 sm:p-6 space-y-5">
+        {/* Chassis Title Header & Multi-Filter Control Console */}
+        <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-4">
+          <div>
+            <div className="flex items-center gap-3">
+              <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Selected Vehicle:</span>
               <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight font-mono">
                 {vehicle.id}
               </h2>
               <span
-                className={`px-3 py-1 rounded-full text-xs font-bold font-mono uppercase tracking-wider ${
+                className={`px-3 py-1 rounded-full text-xs font-bold border ${
                   isCritical
-                    ? "bg-rose-100 text-rose-700 dark:bg-rose-950/80 dark:text-rose-300 border border-rose-400"
+                    ? "bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300 border-rose-400"
                     : isWarning
-                    ? "bg-amber-100 text-amber-700 dark:bg-amber-950/80 dark:text-amber-300 border border-amber-400"
-                    : "bg-emerald-100 text-emerald-700 dark:bg-emerald-950/80 dark:text-emerald-300 border border-emerald-400"
+                    ? "bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 border-amber-400"
+                    : "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border-emerald-400"
                 }`}
               >
                 {triageLabel(liveTriage)}
               </span>
             </div>
-            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
-              {vehicle.model} • Driver: <strong className="text-slate-700 dark:text-slate-200">{vehicle.driver}</strong> • {vehicle.fleet}
-            </p>
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-xs text-slate-600 dark:text-slate-400 mt-1.5 font-sans">
+              <span className="font-semibold text-slate-800 dark:text-slate-200">{vehicle.model}</span>
+              <span>•</span>
+              <span>Driver: <strong className="text-slate-800 dark:text-slate-200">{vehicle.driver}</strong></span>
+              <span>•</span>
+              <span>Hub: {vehicle.fleet}</span>
+              <span>•</span>
+              <span className="text-cyan-600 dark:text-cyan-400 font-semibold">12.4 kWh LFP Battery</span>
+            </div>
           </div>
 
           {/* Quick Vehicle Search & Filter Controls */}
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2.5">
             <div className="relative w-full sm:w-48">
               <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
-                placeholder="Search plate or driver..."
+                placeholder="Filter by VIN or driver..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-8 pr-2.5 py-1.5 text-xs rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:border-cyan-500 font-mono"
+                className="w-full pl-8 pr-3 py-2 text-xs rounded-lg bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none focus:border-cyan-500 font-sans"
               />
             </div>
 
             {/* Manufacturer OEM Filter */}
-            <div className="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 px-2.5 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-mono">
+            <div className="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-900 px-2.5 py-2 rounded-lg border border-slate-200 dark:border-slate-800 text-xs font-sans">
               <Building2 className="w-3.5 h-3.5 text-slate-400 shrink-0" />
               <select
                 value={manufacturerFilter}
                 onChange={(e) => setManufacturerFilter(e.target.value)}
-                className="bg-transparent text-[11px] font-semibold text-slate-700 dark:text-slate-300 focus:outline-none cursor-pointer pr-1"
-                title="Filter by Vehicle Manufacturer"
+                className="bg-transparent text-xs font-medium text-slate-700 dark:text-slate-300 focus:outline-none cursor-pointer pr-1"
+                title="Filter by OEM"
               >
-                <option value="all" className="bg-white dark:bg-slate-900">All Manufacturers</option>
-                <option value="euler" className="bg-white dark:bg-slate-900">Euler Motors (HiLoad)</option>
-                <option value="tata" className="bg-white dark:bg-slate-900">Tata Motors (Ace EV)</option>
-                <option value="mahindra" className="bg-white dark:bg-slate-900">Mahindra Electric</option>
+                <option value="all" className="bg-white dark:bg-slate-900">All OEMs</option>
+                <option value="euler" className="bg-white dark:bg-slate-900">Euler HiLoad</option>
+                <option value="tata" className="bg-white dark:bg-slate-900">Tata Ace EV</option>
+                <option value="mahindra" className="bg-white dark:bg-slate-900">Mahindra EV</option>
               </select>
             </div>
 
             {/* State Filter */}
-            <div className="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 px-2.5 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-mono">
+            <div className="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-900 px-2.5 py-2 rounded-lg border border-slate-200 dark:border-slate-800 text-xs font-sans">
               <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0" />
               <select
                 value={stateFilter}
                 onChange={(e) => setStateFilter(e.target.value)}
-                className="bg-transparent text-[11px] font-semibold text-slate-700 dark:text-slate-300 focus:outline-none cursor-pointer pr-1"
+                className="bg-transparent text-xs font-medium text-slate-700 dark:text-slate-300 focus:outline-none cursor-pointer pr-1"
                 title="Filter by State"
               >
-                <option value="all" className="bg-white dark:bg-slate-900">All States</option>
+                <option value="all" className="bg-white dark:bg-slate-900">All Regions</option>
                 <option value="DL" className="bg-white dark:bg-slate-900">Delhi (DL)</option>
                 <option value="GJ" className="bg-white dark:bg-slate-900">Gujarat (GJ)</option>
                 <option value="KA" className="bg-white dark:bg-slate-900">Karnataka (KA)</option>
@@ -373,34 +465,24 @@ export const OperationsView: React.FC = () => {
               </select>
             </div>
 
-            {/* Active Vehicle Picker among filtered vehicles */}
-            <div className="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 px-2.5 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-mono">
+            {/* Active Chassis Switcher */}
+            <div className="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-900 px-2.5 py-2 rounded-lg border border-slate-200 dark:border-slate-800 text-xs font-sans">
               <Truck className="w-3.5 h-3.5 text-cyan-500 shrink-0" />
               <select
                 value={vehicle.id}
                 onChange={(e) => setSelectedVehicle(e.target.value)}
-                className="bg-transparent text-[11px] font-bold text-slate-800 dark:text-slate-100 focus:outline-none cursor-pointer max-w-[170px] sm:max-w-[210px] truncate"
-                title="Select from filtered trucks"
+                className="bg-transparent text-xs font-bold text-slate-800 dark:text-cyan-300 focus:outline-none cursor-pointer max-w-[170px] truncate font-mono"
               >
                 {filteredVehicles.length === 0 ? (
-                  <option value="" disabled className="bg-white dark:bg-slate-900">
-                    No matching trucks
-                  </option>
+                  <option value="" disabled className="bg-white dark:bg-slate-900">No trucks</option>
                 ) : (
-                  filteredVehicles.map((v) => {
-                    const isSelected = v.id.toUpperCase() === vehicle.id.toUpperCase();
-                    const displaySoc = isSelected ? soc : v.soc;
-                    return (
-                      <option key={v.id} value={v.id} className="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">
-                        {v.id} — {v.model.split(" ")[0]} ({v.fleet.split(" ")[0]}) • {displaySoc.toFixed(1)}% SOC
-                      </option>
-                    );
-                  })
+                  filteredVehicles.map((v) => (
+                    <option key={v.id} value={v.id} className="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">
+                      {v.id} · {v.soc.toFixed(0)}% SOC
+                    </option>
+                  ))
                 )}
               </select>
-              <span className="text-[10px] font-semibold text-cyan-700 dark:text-cyan-300 bg-cyan-50 dark:bg-cyan-950/60 border border-cyan-200 dark:border-cyan-800/80 px-1.5 py-0.5 rounded">
-                {filteredVehicles.length}
-              </span>
             </div>
 
             <button
@@ -408,323 +490,276 @@ export const OperationsView: React.FC = () => {
                 setViewMode("engineering");
                 setActiveTab("state-est");
               }}
-              className="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-semibold flex items-center gap-1.5 transition-colors shrink-0"
+              className="px-3 py-2 rounded-lg bg-slate-900 dark:bg-slate-800 hover:bg-slate-800 dark:hover:bg-slate-700 text-white text-xs font-semibold flex items-center gap-1.5 border border-slate-700 shrink-0 transition-colors shadow-xs"
             >
-              <Cpu className="w-3.5 h-3.5 text-purple-400" />
-              <span>ML Deep-Dive</span>
+              <Cpu className="w-3.5 h-3.5 text-cyan-400" />
+              <span>Deep Diagnostics</span>
             </button>
           </div>
         </div>
 
-        {filteredVehicles.length === 0 && (
-          <div className="p-3.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-800/80 text-amber-900 dark:text-amber-200 text-xs flex items-center justify-between">
-            <span>No vehicles match the active filter criteria ({manufacturerFilter !== "all" ? manufacturerFilter : ""} {stateFilter !== "all" ? stateFilter : ""}).</span>
-            <button
-              onClick={() => {
-                setManufacturerFilter("all");
-                setStateFilter("all");
-                setStatusFilter("all");
-                setSearchQuery("");
-              }}
-              className="text-xs font-bold underline hover:text-amber-700 cursor-pointer"
-            >
-              Reset All Filters
-            </button>
-          </div>
-        )}
-
-        {/* ─── ACTION DIRECTIVE BANNER (PLAIN ENGLISH) ─── */}
+        {/* ─── ACTION DIRECTIVE STAMP ─── */}
         <div
-          className={`p-4 sm:p-5 rounded-2xl flex items-start gap-4 ${
+          className={`p-4 sm:p-5 rounded-xl flex items-start gap-3.5 border ${
             isCritical
-              ? "bg-rose-50 dark:bg-rose-950/40 border border-rose-300 dark:border-rose-800/80 text-rose-900 dark:text-rose-200"
+              ? "bg-rose-50 dark:bg-rose-950/40 border-rose-300 dark:border-rose-800 text-rose-950 dark:text-rose-200"
               : isWarning
-              ? "bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-800/80 text-amber-900 dark:text-amber-200"
-              : "bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-800/80 text-emerald-900 dark:text-emerald-200"
+              ? "bg-amber-50 dark:bg-amber-950/40 border-amber-300 dark:border-amber-800 text-amber-950 dark:text-amber-200"
+              : "bg-emerald-50 dark:bg-emerald-950/40 border-emerald-300 dark:border-emerald-800 text-emerald-950 dark:text-emerald-200"
           }`}
         >
           {isCritical ? (
-            <AlertOctagon className="w-6 h-6 text-rose-500 flex-shrink-0 mt-0.5" />
+            <AlertOctagon className="w-5 h-5 text-rose-600 flex-shrink-0 mt-0.5" />
           ) : isWarning ? (
-            <AlertTriangle className="w-6 h-6 text-amber-500 flex-shrink-0 mt-0.5" />
+            <AlertTriangle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
           ) : (
-            <CheckCircle2 className="w-6 h-6 text-emerald-500 flex-shrink-0 mt-0.5" />
+            <CheckCircle2 className="w-5 h-5 text-emerald-600 flex-shrink-0 mt-0.5" />
           )}
 
-          <div>
-            <h4 className="font-bold text-sm sm:text-base">
+          <div className="space-y-1">
+            <div className="font-bold text-sm sm:text-base">
               {isCritical
-                ? "DISPATCH AUTHORIZATION: CRITICAL SERVICE HOLD"
+                ? "Dispatch Advisory: Critical Service Required"
                 : isWarning
-                ? "DISPATCH AUTHORIZATION: ROUTE ADVISORY"
-                : "DISPATCH AUTHORIZATION: APPROVED FOR ROUTE"}
-            </h4>
-            <p className="text-xs sm:text-sm mt-1 opacity-90 leading-relaxed">
-
+                ? "Dispatch Advisory: Review Route Conditions"
+                : "Dispatch Approved: Vehicle Cleared for Route Shift"}
+            </div>
+            <p className="leading-relaxed text-xs sm:text-sm text-slate-700 dark:text-slate-300">
               {isCritical
                 ? vehicle.battery_temp > 48
-                  ? `Battery operating temperature is elevated (${vehicle.battery_temp.toFixed(1)}°C). Ground this vehicle for thermal cooling inspection before next dispatch.`
-                  : `Battery capacity shows accelerated degradation (SOH: ${soh.toFixed(1)}%, ${vehicle.charge_cycle_count} cycles). Ground this vehicle for terminal diagnostic inspection before next shift.`
+                  ? `Elevated pack core temperature (${vehicle.battery_temp.toFixed(1)}°C). Vehicle grounded for cooling and thermal airflow inspection prior to dispatch.`
+                  : `Accelerated cell capacity fade detected (SOH: ${soh.toFixed(1)}%, ${vehicle.charge_cycle_count} cycles). Hold vehicle for cell balancing inspection.`
                 : isWarning
                 ? soh < 85.0
-                  ? `Battery capacity shows moderate wear (SOH: ${soh.toFixed(1)}%). Suitable for standard delivery routes up to ${range.toFixed(0)} km.`
+                  ? `Moderate capacity retention wear (SOH: ${soh.toFixed(1)}%). Recommended for standard urban routes up to ${range.toFixed(0)} km.`
                   : soc < 30.0
-                  ? `Battery level is low (${soc.toFixed(0)}%). Recommend quick 30-min top-up before afternoon dispatch runs.`
+                  ? `Usable charge reserve is low (${soc.toFixed(0)}% SOC). Recommend a 30-minute top-up charge prior to route assignment.`
                   : !thermalSafe
-                  ? `Drivetrain thermal gradient detected (Motor: ${(vehicle.motor_temp || 45.0).toFixed(1)}°C vs Pack: ${vehicle.battery_temp.toFixed(1)}°C). Monitor cooling airflow under heavy load.`
-                  : `Operating under thermal advisory (${vehicle.battery_temp.toFixed(1)}°C). Monitor thermal cooling during peak load.`
-                : `Battery level is at ${soc.toFixed(1)}% with ${range.toFixed(0)} km delivery range. Temperatures and cell health are in Grade-A condition.`}
+                  ? `Drivetrain thermal gradient detected (Motor: ${(vehicle.motor_temp || 45.0).toFixed(1)}°C vs Pack: ${vehicle.battery_temp.toFixed(1)}°C). Monitor cooling under heavy cargo.`
+                  : `Operating under thermal advisory (${vehicle.battery_temp.toFixed(1)}°C). Limit continuous high-speed transit.`
+                : `Pack operates normally at ${soc.toFixed(1)}% SOC with ${range.toFixed(0)} km estimated delivery range. Cell voltages, thermal gradient, and driver history are fully certified.`}
             </p>
           </div>
         </div>
 
-
-        {/* ─── STANDARDIZED TELEMETRY CALLOUT: SOC (FUEL) VS. SOH (LIFESPAN) ─── */}
-        <div className="p-4 sm:p-5 rounded-xl bg-slate-50 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 shadow-sm">
-          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-3 pb-3 border-b border-slate-200 dark:border-slate-800">
-            <div className="flex items-center gap-2.5">
-              <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-slate-900 dark:bg-slate-800 text-cyan-400 font-mono font-bold text-xs border border-slate-700">
-                <Info className="w-3.5 h-3.5" />
-              </span>
-              <div>
-                <h4 className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
-                  <span>Electrochemical Telemetry Specification (SAE J1798 / ISO 12405)</span>
-                  <span className="bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-[10px] font-mono px-2 py-0.5 rounded">
-                    Dual-Horizon Metrics
-                  </span>
-                </h4>
-                <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
-                  Standard distinction between <strong>Daily Usable Fuel (SOC)</strong> and <strong>Cumulative Cell Asset Health (SOH)</strong>.
-                </p>
+        {/* ─── 4 MAIN INSTRUMENTS ─── */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* Instrument 1: Usable Fuel (SOC) */}
+          <div className="p-4 sm:p-5 rounded-xl bg-slate-50 dark:bg-slate-900/70 border border-slate-200 dark:border-slate-800 flex flex-col justify-between space-y-3 shadow-xs">
+            <div>
+              <div className="flex justify-between items-center text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">
+                <span className="flex items-center gap-1.5">
+                  <BatteryCharging className="w-4 h-4 text-cyan-500" />
+                  <span>State of Charge</span>
+                </span>
+                <span className="text-cyan-600 dark:text-cyan-400 font-bold">Fuel</span>
               </div>
+              <div className="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white font-mono tracking-tight my-1">
+                {soc.toFixed(1)}%
+              </div>
+              <div className="text-xs text-slate-700 dark:text-slate-300 mt-1">
+                Estimated Range: <strong className="text-cyan-600 dark:text-cyan-400 font-bold">{range.toFixed(0)} km</strong>
+              </div>
+              <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                Usable Energy: {((soc / 100) * 12.4).toFixed(1)} kWh / 12.4 kWh
+              </div>
+            </div>
+
+            <div className="pt-3 border-t border-slate-200 dark:border-slate-800">
+              {/* Segmented Fuel Bar */}
+              <div className="grid grid-cols-10 gap-1 h-2.5">
+                {Array.from({ length: 10 }).map((_, i) => {
+                  const filled = soc >= (i + 1) * 10;
+                  return (
+                    <div
+                      key={i}
+                      className={`h-full rounded-xs transition-colors ${
+                        filled
+                          ? soc > 20
+                            ? "bg-cyan-500"
+                            : "bg-amber-500"
+                          : "bg-slate-200 dark:bg-slate-800"
+                      }`}
+                    />
+                  );
+                })}
+              </div>
+              <div className="flex justify-between text-xs text-slate-500 dark:text-slate-400 mt-2 font-mono">
+                <span>Voltage: {vehicle.voltage.toFixed(1)} V</span>
+                <span>Current: {vehicle.current.toFixed(1)} A</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Instrument 2: Capacity Health (SOH) */}
+          <div className="p-4 sm:p-5 rounded-xl bg-slate-50 dark:bg-slate-900/70 border border-slate-200 dark:border-slate-800 flex flex-col justify-between space-y-3 shadow-xs">
+            <div>
+              <div className="flex justify-between items-center text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">
+                <span className="flex items-center gap-1.5">
+                  <Activity className="w-4 h-4 text-emerald-500" />
+                  <span>State of Health</span>
+                </span>
+                <span className="text-emerald-600 dark:text-emerald-400 font-bold">Health</span>
+              </div>
+              <div className="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white font-mono tracking-tight my-1">
+                {soh.toFixed(1)}%
+              </div>
+              <div className="text-xs text-slate-700 dark:text-slate-300 mt-1">
+                Estimated Life: <strong className="text-emerald-600 dark:text-emerald-400 font-bold">~{estimatedYearsLeft} Years</strong>
+              </div>
+              <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                Retained Capacity: {((soh / 100) * 150).toFixed(1)} Ah / 150 Ah
+              </div>
+            </div>
+
+            <div className="pt-3 border-t border-slate-200 dark:border-slate-800">
+              <div className="w-full bg-slate-200 dark:bg-slate-800 rounded-full h-2.5 overflow-hidden">
+                <div
+                  className="bg-emerald-500 h-full rounded-full transition-all duration-500"
+                  style={{ width: `${Math.max(0, Math.min(100, soh))}%` }}
+                />
+              </div>
+              <div className="flex justify-between text-xs text-slate-500 dark:text-slate-400 mt-2 font-mono">
+                <span>{vehicle.charge_cycle_count} Cycles</span>
+                <span>RUL: {rul} CYC</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Instrument 3: Thermal Gradient */}
+          <div className="p-4 sm:p-5 rounded-xl bg-slate-50 dark:bg-slate-900/70 border border-slate-200 dark:border-slate-800 flex flex-col justify-between space-y-3 shadow-xs">
+            <div>
+              <div className="flex justify-between items-center text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">
+                <span className="flex items-center gap-1.5">
+                  <Thermometer className="w-4 h-4 text-amber-500" />
+                  <span>Battery Temperature</span>
+                </span>
+                <span className="text-amber-500 font-bold">Thermal</span>
+              </div>
+              <div className={`text-3xl sm:text-4xl font-extrabold font-mono tracking-tight my-1 ${vehicle.battery_temp > 45 ? "text-amber-500" : "text-slate-900 dark:text-white"}`}>
+                {vehicle.battery_temp.toFixed(1)}°C
+              </div>
+              <div className="text-xs text-slate-700 dark:text-slate-300 mt-1">
+                Safety Margin: <strong className="text-slate-900 dark:text-slate-100 font-bold">{(45 - vehicle.battery_temp).toFixed(1)}°C Headroom</strong>
+              </div>
+              <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                Motor: {(vehicle.motor_temp || 45.0).toFixed(1)}°C · Inverter: {(vehicle.controller_temp || 40.0).toFixed(1)}°C
+              </div>
+            </div>
+
+            <div className="pt-3 border-t border-slate-200 dark:border-slate-800">
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-slate-500 dark:text-slate-400">Cooling State:</span>
+                <span className={thermalSafe ? "text-emerald-600 dark:text-emerald-400 font-bold" : "text-amber-600 dark:text-amber-400 font-bold"}>
+                  {thermalSafe ? "Optimal" : "Active Forced"}
+                </span>
+              </div>
+              <div className="flex justify-between text-xs text-slate-500 dark:text-slate-400 mt-2 font-mono">
+                <span>Ambient: 28.0°C</span>
+                <span>Runaway: 0.0%</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Instrument 4: Driver Powertrain Stress */}
+          <div className="p-4 sm:p-5 rounded-xl bg-slate-50 dark:bg-slate-900/70 border border-slate-200 dark:border-slate-800 flex flex-col justify-between space-y-3 shadow-xs">
+            <div>
+              <div className="flex justify-between items-center text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">
+                <span className="flex items-center gap-1.5">
+                  <User className="w-4 h-4 text-purple-500" />
+                  <span>Driving Behavior</span>
+                </span>
+                <span className="text-purple-500 font-bold">Stress</span>
+              </div>
+              <div className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight my-1">
+                {driverScore.split(" ")[0]}
+              </div>
+              <div className="text-xs text-slate-700 dark:text-slate-300 mt-1">
+                Throttle Behavior: <strong className={driverScore.includes("Aggressive") ? "text-rose-500" : "text-emerald-500"}>
+                  {driverScore.includes("Aggressive") ? "High Transient" : "Eco-Calibrated"}
+                </strong>
+              </div>
+              <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                Speed: {vehicle.speed.toFixed(0)} km/h · Peak: {Math.abs(vehicle.current).toFixed(0)}A
+              </div>
+            </div>
+
+            <div className="pt-3 border-t border-slate-200 dark:border-slate-800">
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-slate-500 dark:text-slate-400">Lifetime Impact:</span>
+                <span className={driverScore.includes("Aggressive") ? "text-rose-600 dark:text-rose-400 font-bold" : "text-emerald-600 dark:text-emerald-400 font-bold"}>
+                  {driverScore.includes("Aggressive") ? "-1.2 Years" : "+1.8 Years Extended"}
+                </span>
+              </div>
+              <div className="flex justify-between text-xs text-slate-500 dark:text-slate-400 mt-2 font-mono">
+                <span>Harsh Events: {vehicle.status === "critical" ? 8 : 1}/shift</span>
+                <span>Torque: Normal</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* ─── DUAL-HORIZON ELECTROCHEMICAL SPECIFICATION CALLOUT ─── */}
+        <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-900/70 border border-slate-200 dark:border-slate-800 space-y-3">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 border-b border-slate-200 dark:border-slate-800 pb-2.5">
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-cyan-500" />
+              <span className="font-bold text-xs sm:text-sm text-slate-800 dark:text-slate-200">
+                Understanding Battery Health Metrics (SOC vs. SOH)
+              </span>
             </div>
             <MetricExplainer
               metricKey="soc_vs_soh"
-              label="View SAE Derivation & Water Analogy"
+              label="How it works"
               variant="badge"
-              className="text-xs font-semibold py-1.5 px-3 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-slate-700 shadow-xs"
+              className="text-xs font-semibold py-1 px-3 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700"
             />
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-3">
-            {/* Left Box: Fuel (SOC) */}
-            <div className="p-3.5 rounded-lg bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 flex items-start gap-3 shadow-xs">
-              <div className="p-2 rounded-md bg-cyan-50 dark:bg-cyan-950/60 text-cyan-600 dark:text-cyan-400 shrink-0 mt-0.5">
-                <Zap className="w-4 h-4" />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 text-xs">
+            <div className="p-3 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs">
+              <div className="flex items-center justify-between text-cyan-600 dark:text-cyan-400 font-bold text-xs mb-1.5">
+                <span>State of Charge (SOC) · Usable Fuel</span>
+                <span className="font-mono text-sm">{soc.toFixed(1)}%</span>
               </div>
-              <div className="space-y-1">
-                <div className="flex items-center gap-2">
-                  <span className="font-bold text-slate-900 dark:text-white text-sm font-mono">
-                    {soc.toFixed(1)}% State of Charge (SOC)
-                  </span>
-                  <span className="text-[10px] uppercase font-mono font-semibold bg-cyan-50 dark:bg-cyan-950/60 text-cyan-700 dark:text-cyan-300 border border-cyan-200 dark:border-cyan-800/60 px-1.5 py-0.5 rounded">
-                    Operational Fuel
-                  </span>
-                </div>
-                <p className="text-xs text-slate-600 dark:text-slate-300 leading-snug">
-                  Real-time usable energy remaining in the battery pack for current dispatch routes. Depletes dynamically during driving and restores to 100% upon AC/DC charging.
-                </p>
-                <div className="text-[11px] text-slate-400 font-mono pt-0.5">
-                  Scope: Intraday Shift Planning • Reversible variable
-                </div>
-              </div>
+              <p className="text-slate-600 dark:text-slate-400 leading-relaxed">
+                Transient usable energy reserve. Depletes dynamically while driving and restores to 100% on AC/DC charging. Reversible operational metric.
+              </p>
             </div>
 
-            {/* Right Box: Health (SOH) */}
-            <div className="p-3.5 rounded-lg bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 flex items-start gap-3 shadow-xs">
-              <div className="p-2 rounded-md bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5">
-                <Activity className="w-4 h-4" />
+            <div className="p-3 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs">
+              <div className="flex items-center justify-between text-emerald-600 dark:text-emerald-400 font-bold text-xs mb-1.5">
+                <span>State of Health (SOH) · Asset Longevity</span>
+                <span className="font-mono text-sm">{soh.toFixed(1)}%</span>
               </div>
-              <div className="space-y-1">
-                <div className="flex items-center gap-2">
-                  <span className="font-bold text-slate-900 dark:text-white text-sm font-mono">
-                    {soh.toFixed(1)}% State of Health (SOH)
-                  </span>
-                  <span className="text-[10px] uppercase font-mono font-semibold bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/60 px-1.5 py-0.5 rounded">
-                    Capacity Retention
-                  </span>
-                </div>
-                <p className="text-xs text-slate-600 dark:text-slate-300 leading-snug">
-                  Permanent electrochemical capacity retention relative to nominal factory rating (150 Ah). Irreversible loss caused by cyclic solid electrolyte interphase (SEI) aging.
-                </p>
-                <div className="text-[11px] text-slate-400 font-mono pt-0.5">
-                  Scope: 5–8 Year Asset Lifecycle • Irreversible degradation
-                </div>
-              </div>
+              <p className="text-slate-600 dark:text-slate-400 leading-relaxed">
+                Permanent electrochemical capacity relative to the factory baseline (150 Ah). Degrades gradually over 5–8 years due to usage and aging. Irreversible metric.
+              </p>
             </div>
           </div>
         </div>
 
-        {/* ─── 3. FOUR ENTERPRISE HEALTH CARDS ─── */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
-          {/* Card 1: Fuel / Battery Level */}
-          <div className="p-5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 transition-colors space-y-3 flex flex-col justify-between shadow-sm">
-            <div>
-              <div className="flex justify-between items-center mb-1">
-                <span className="text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 flex items-center gap-1.5">
-                  <BatteryCharging className="w-4 h-4 text-cyan-600 dark:text-cyan-400" />
-                  <span>State of Charge (SOC)</span>
-                </span>
-                <MetricExplainer metricKey="soc" currentValue={`${soc.toFixed(1)}%`} label="How it works" />
-              </div>
-              <div className="flex items-center gap-1.5 mb-2">
-                <span className="text-[10px] font-mono font-medium text-cyan-700 dark:text-cyan-300 bg-cyan-50 dark:bg-cyan-950/60 px-2 py-0.5 rounded border border-cyan-200 dark:border-cyan-800/60">
-                  Usable Energy • Reversible
-                </span>
-              </div>
-              <div className="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white font-mono tracking-tight">
-                {soc.toFixed(1)}%
-              </div>
-              <div className="text-xs text-slate-600 dark:text-slate-300 mt-1">
-                Estimated Range: <strong className="text-cyan-600 dark:text-cyan-400 font-mono font-bold">{range.toFixed(0)} km</strong>
-              </div>
-            </div>
-            <div>
-              <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-2 overflow-hidden">
-                <div
-                  className="bg-cyan-600 dark:bg-cyan-500 h-2 rounded-full transition-all duration-500"
-                  style={{ width: `${Math.max(0, Math.min(100, soc))}%` }}
-                />
-              </div>
-              <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-1.5 font-sans leading-tight">
-                Operational energy reserve. Restores to 100% on charge.
-              </p>
-            </div>
-          </div>
-
-          {/* Card 2: Battery Lifespan / Health */}
-          <div className="p-5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 transition-colors space-y-3 flex flex-col justify-between shadow-sm">
-            <div>
-              <div className="flex justify-between items-center mb-1">
-                <span className="text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 flex items-center gap-1.5">
-                  <Activity className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-                  <span>State of Health (SOH)</span>
-                </span>
-                <MetricExplainer metricKey="soh" currentValue={`${soh.toFixed(1)}%`} label="How it works" />
-              </div>
-              <div className="flex items-center gap-1.5 mb-2">
-                <span className="text-[10px] font-mono font-medium text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-200 dark:border-emerald-800/60">
-                  Capacity Retention • Irreversible
-                </span>
-              </div>
-              <div className="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white font-mono tracking-tight">
-                {soh.toFixed(1)}%
-              </div>
-              <div className="flex justify-between items-center text-xs text-slate-600 dark:text-slate-300 mt-1">
-                <span>Estimated Life: <strong className="text-emerald-600 dark:text-emerald-400 font-mono font-bold">~{estimatedYearsLeft} Years</strong></span>
-                <span className="font-mono text-[11px] text-slate-400 font-semibold">({rul} cyc)</span>
-              </div>
-            </div>
-            <div>
-              <div className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 pt-1 border-t border-slate-100 dark:border-slate-800 flex justify-between items-center">
-                <span>Grade: {soh > 92 ? "Grade A (Optimal)" : soh > 82 ? "Grade B (Nominal)" : "Grade C (Degrading)"}</span>
-              </div>
-              <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-1 font-sans leading-tight">
-                Electrochemical retention relative to rated 150 Ah capacity.
-              </p>
-            </div>
-          </div>
-
-          {/* Card 3: Operating Temperature */}
-          <div className="p-5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/80 space-y-3 flex flex-col justify-between">
-            <div>
-              <div className="flex justify-between items-center mb-2">
-                <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
-                  <Thermometer className="w-4 h-4 text-amber-500" />
-                  <span>Operating Temp</span>
-                </span>
-                <MetricExplainer metricKey="thermal" currentValue={`${vehicle.battery_temp.toFixed(1)}°C`} label="How it works" />
-              </div>
-              <div className={`text-3xl sm:text-4xl font-extrabold font-mono tracking-tight ${vehicle.battery_temp > 45 ? "text-amber-500" : "text-slate-900 dark:text-white"}`}>
-                {vehicle.battery_temp.toFixed(1)}°C
-              </div>
-              <div className="text-xs text-slate-600 dark:text-slate-300 mt-1">
-                Cooling: <strong className={thermalSafe ? "text-emerald-600 dark:text-emerald-400" : "text-amber-600 dark:text-amber-400"}>
-                  {thermalSafe ? "Normal (0.00% Risk)" : `Active (${(vehicle.motor_temp || 45.0).toFixed(0)}°C Motor)`}
-                </strong>
-              </div>
-            </div>
-            <div className="text-[11px] font-semibold text-slate-400 pt-1 border-t border-slate-200/60 dark:border-slate-700/60">
-              Thermal Runaway Risk: <strong className={thermalSafe ? "text-emerald-500" : "text-amber-500"}>
-                {thermalSafe ? "0.00% (Safe)" : "Gradient Advisory"}
-              </strong>
-            </div>
-          </div>
-
-          {/* Card 4: Driver Score */}
-          <div className="p-5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/80 space-y-3 flex flex-col justify-between">
-            <div>
-              <div className="flex justify-between items-center mb-2">
-                <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
-                  <User className="w-4 h-4 text-purple-500" />
-                  <span>Driver Behavior</span>
-                </span>
-                <MetricExplainer metricKey="driver_ai" currentValue={driverScore.split(" ")[0]} label="How it works" />
-              </div>
-              <div className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white font-mono tracking-tight">
-                {driverScore.split(" ")[0]}
-              </div>
-              <div className="text-xs text-slate-600 dark:text-slate-300 mt-1">
-                Battery Strain:{" "}
-                <strong
-                  className={
-                    driverScore.includes("Aggressive")
-                      ? "text-rose-600 dark:text-rose-400 font-bold"
-                      : driverScore.includes("Moderate")
-                      ? "text-amber-600 dark:text-amber-400 font-bold"
-                      : "text-emerald-600 dark:text-emerald-400 font-bold"
-                  }
-                >
-                  {driverScore.includes("Aggressive")
-                    ? "Elevated Strain"
-                    : driverScore.includes("Moderate")
-                    ? "Nominal Wear"
-                    : "Low Impact"}
-                </strong>
-              </div>
-            </div>
-            <div className="text-[11px] text-slate-400 pt-1 border-t border-slate-200/60 dark:border-slate-700/60">
-              {driverScore.includes("Aggressive")
-                ? "⚠️ High throttle transients accelerate SEI fade"
-                : driverScore.includes("Moderate")
-                ? "ℹ️ Standard fleet route duty cycle"
-                : "✅ Eco-driving extends pack life (+1.5-2 yrs)"}
-            </div>
-          </div>
-        </div>
-
-
-        {/* ─── AI POWERTRAIN DIAGNOSTIC & ROOT CAUSE (GPT-OSS 120B) ─── */}
+        {/* AI Powertrain Diagnostic Card */}
         <AIInsightsCard
           vehicle={vehicle}
           livePredictions={{ soc, soh, rul, mileage: range }}
           onUrgencyChange={(urg) => setAiUrgency(urg)}
         />
 
-
-        {/* ─── 4. QUICK FLEET SWITCHER TABLE ─── */}
-        <div className="border-t border-slate-200 dark:border-slate-800 pt-6">
-
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
+        {/* ─── 4. QUICK FLEET SWITCHER GRID ─── */}
+        <div className="border-t border-slate-200 dark:border-slate-800 pt-5 space-y-3">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <div>
-              <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+              <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
                 <Truck className="w-4 h-4 text-cyan-500" />
-                <span>Select Vehicle from Fleet (Click to Evaluate ML Models)</span>
+                <span>Quick Fleet Vehicle Switcher</span>
               </h3>
-              <p className="text-[11px] text-slate-500 dark:text-slate-400 font-sans mt-0.5 flex flex-wrap items-center gap-2">
-                <span>Active vehicle displays synchronized multi-zone AI telemetry.</span>
-                <span className="inline-flex items-center gap-1.5 font-mono text-[10px] bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-2 py-0.5 rounded border border-slate-200 dark:border-slate-700">
-                  <span className="w-1.5 h-1.5 rounded-full bg-cyan-500" />
-                  SOC: Usable Fuel
-                </span>
-                <span className="inline-flex items-center gap-1.5 font-mono text-[10px] bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-2 py-0.5 rounded border border-slate-200 dark:border-slate-700">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                  SOH: Asset Life
-                </span>
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                Click any vehicle to switch live telemetry view. Showing {getFilteredVehicles().slice(0, 8).length} of {getFilteredVehicles().length} vehicles.
               </p>
             </div>
-            <span className="text-xs font-mono text-slate-400 shrink-0">
-              Showing {getFilteredVehicles().slice(0, 8).length} of {getFilteredVehicles().length} vehicles
+            <span className="text-xs text-slate-400 font-mono">
+              Live Auto-Refresh
             </span>
           </div>
 
@@ -733,24 +768,49 @@ export const OperationsView: React.FC = () => {
               const isSelected = v.id.toUpperCase() === vehicle.id.toUpperCase();
               const displaySoc = isSelected ? soc : v.soc;
               const displaySoh = isSelected ? soh : v.soh;
+              const triage = getVehicleTriage(v);
               return (
                 <button
                   key={v.id}
                   onClick={() => setSelectedVehicle(v.id)}
-                  className={`p-3 rounded-xl border text-left transition-all font-mono text-xs flex justify-between items-center ${
+                  className={`p-3.5 rounded-xl border text-left transition-all text-xs flex justify-between items-center ${
                     isSelected
-                      ? "bg-cyan-50 dark:bg-cyan-950/60 border-cyan-500 text-cyan-900 dark:text-cyan-200 ring-2 ring-cyan-500/30"
-                      : "bg-slate-50 dark:bg-slate-800/40 border-slate-200 dark:border-slate-700/60 hover:bg-slate-100 dark:hover:bg-slate-800"
+                      ? "bg-slate-900 text-white border-cyan-500 ring-2 ring-cyan-500/30 shadow-sm"
+                      : "bg-slate-50 dark:bg-slate-900/70 border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800"
                   }`}
                 >
-                  <div>
-                    <div className="font-bold">{v.id}</div>
-                    <div className="text-[10px] text-slate-400 font-sans">{v.driver}</div>
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2 font-bold font-mono text-xs">
+                      <span className={`w-2 h-2 rounded-full ${triage === 'CRITICAL' ? 'bg-rose-500' : triage === 'WARNING' ? 'bg-amber-500' : 'bg-emerald-500'}`} />
+                      <span>{v.id}</span>
+                    </div>
+                    <div className={`text-xs truncate max-w-[100px] ${isSelected ? "text-slate-300" : "text-slate-500 dark:text-slate-400"}`}>
+                      {v.driver}
+                    </div>
                   </div>
-                  <div className="text-right">
-                    <div className="font-bold">{displaySoc.toFixed(1)}% SOC <span className="text-[9px] font-sans font-normal text-slate-400">(Fuel)</span></div>
-                    <div className={`text-[10px] ${getVehicleTriage(v) === 'CRITICAL' ? 'text-rose-500' : getVehicleTriage(v) === 'WARNING' ? 'text-amber-500' : 'text-emerald-500'}`}>
-                      {displaySoh.toFixed(1)}% SOH <span className="text-[9px] font-sans font-normal text-slate-400">(Life)</span> • {triageLabel(getVehicleTriage(v))}
+                  <div className="text-right font-mono">
+                    <div className="font-bold text-xs">
+                      {displaySoc.toFixed(0)}%{" "}
+                      <span className={`text-[10px] ${isSelected ? "text-cyan-300" : "text-cyan-600 dark:text-cyan-400"}`}>
+                        SOC
+                      </span>
+                    </div>
+                    <div
+                      className={`text-xs font-semibold ${
+                        triage === "CRITICAL"
+                          ? isSelected
+                            ? "text-rose-300"
+                            : "text-rose-600 dark:text-rose-400"
+                          : triage === "WARNING"
+                          ? isSelected
+                            ? "text-amber-300"
+                            : "text-amber-600 dark:text-amber-400"
+                          : isSelected
+                          ? "text-emerald-300"
+                          : "text-emerald-600 dark:text-emerald-400"
+                      }`}
+                    >
+                      {displaySoh.toFixed(1)}% SOH
                     </div>
                   </div>
                 </button>
@@ -763,3 +823,4 @@ export const OperationsView: React.FC = () => {
   );
 };
 export default OperationsView;
+

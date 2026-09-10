@@ -220,6 +220,85 @@ body {
   -webkit-text-fill-color: transparent;
 }
 
+/* ─── BESPOKE AUTOMOTIVE WORKSTATION ENGINEERING SUITE ─── */
+.tech-surface {
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 0.875rem;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+  position: relative;
+}
+.dark .tech-surface {
+  background: #0D111A;
+  border: 1px solid #1E293B;
+  box-shadow: 0 2px 10px 0 rgba(0, 0, 0, 0.4);
+}
+
+.tech-surface-raised {
+  background: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  border-radius: 0.875rem;
+}
+.dark .tech-surface-raised {
+  background: #141A29;
+  border: 1px solid #243048;
+}
+
+.tech-panel-header {
+  border-bottom: 1px solid #E2E8F0;
+  background: rgba(241, 245, 249, 0.7);
+}
+.dark .tech-panel-header {
+  border-bottom: 1px solid #1E293B;
+  background: rgba(15, 23, 42, 0.7);
+}
+
+.hairline-border {
+  border: 1px solid rgba(226, 232, 240, 0.95);
+}
+.dark .hairline-border {
+  border: 1px solid rgba(30, 41, 59, 0.95);
+}
+
+.telemetry-tag {
+  font-family: var(--font-sans-ui);
+  font-size: 0.75rem; /* 12px */
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.ruler-ticks {
+  background-image: linear-gradient(to right, rgba(148, 163, 184, 0.3) 1px, transparent 1px);
+  background-size: 10% 100%;
+}
+.dark .ruler-ticks {
+  background-image: linear-gradient(to right, rgba(100, 116, 139, 0.25) 1px, transparent 1px);
+  background-size: 10% 100%;
+}
+
+.led-indicator {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 9999px;
+  display: inline-block;
+}
+.led-indicator-green {
+  background-color: #10B981;
+  box-shadow: 0 0 8px rgba(16, 185, 129, 0.7);
+}
+.led-indicator-amber {
+  background-color: #F59E0B;
+  box-shadow: 0 0 8px rgba(245, 158, 11, 0.7);
+}
+.led-indicator-red {
+  background-color: #EF4444;
+  box-shadow: 0 0 8px rgba(239, 68, 68, 0.7);
+}
+.led-indicator-cyan {
+  background-color: #06B6D4;
+  box-shadow: 0 0 8px rgba(6, 182, 212, 0.7);
+}
+
 /* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 6px;

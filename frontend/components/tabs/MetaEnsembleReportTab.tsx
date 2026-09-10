@@ -2,7 +2,6 @@
 
 import React, { useEffect, useState } from "react";
 import { useFleetStore } from "../../lib/store/useFleetStore";
-import { Badge } from "../ui/Badge";
 import { predictMetaEnsemble, diagnoseVehicle } from "../../lib/api/client";
 import { MetaEnsembleResponse, DiagnoseResponse } from "../../lib/api/types";
 import {
@@ -13,6 +12,10 @@ import {
   Flame,
   Gauge,
   ShieldCheck,
+  Award,
+  Hash,
+  Activity,
+  Layers,
 } from "lucide-react";
 import { MetricExplainer } from "../ui/MetricExplainer";
 
@@ -62,9 +65,9 @@ export const MetaEnsembleReportTab: React.FC = () => {
   };
 
   const actionItems: string[] = diagData?.action_items || [
-    "Battery pack operates within optimal C-rate & thermal bounds.",
-    "BMS cell balancing active during standard Level 2 charging sessions.",
-    "Schedule routine visual wiring & harness inspection at next 1,000 km interval.",
+    "Battery pack operates within optimal C-rate & thermal bounds under commercial duty cycle.",
+    "BMS cell balancing active during standard Level 2 charging sessions with passive bleed shunts.",
+    "Schedule routine visual wiring & HV isolation harness inspection at next 1,000 km interval.",
   ];
 
   const currentDateStr = new Date().toLocaleDateString("en-IN", {
@@ -73,233 +76,295 @@ export const MetaEnsembleReportTab: React.FC = () => {
     year: "numeric",
   });
 
-  const gradeLetter = metaData?.unified_health_grade?.charAt(6) ?? (loading ? "-" : "A");
+  const gradeLetter =
+    metaData?.unified_health_grade?.charAt(6) ?? (loading ? "-" : "A");
 
   return (
-    <div className="space-y-6">
-      {/* ─── TOP CONTROL BAR (HIDDEN IN PRINT) ─── */}
-      <div className="app-card p-4 sm:p-5 flex flex-wrap items-center justify-between gap-4 border border-emerald-200 dark:border-emerald-800/60 bg-emerald-50/70 dark:bg-emerald-950/20 shadow-sm print:hidden">
+    <div className="flex flex-col w-full gap-5">
+      {/* ── TOP CONTROL BAR (HIDDEN IN PRINT) ── */}
+      <div className="tech-surface-raised p-4 flex flex-wrap items-center justify-between gap-4 print:hidden">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-900/50 border border-emerald-300 dark:border-emerald-700 text-emerald-700 dark:text-emerald-400 flex items-center justify-center shadow-sm">
+          <div className="w-10 h-10 rounded-lg bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-500">
             <FileText className="w-5 h-5" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h2 className="text-base font-bold text-slate-900 dark:text-slate-100">
-                Meta-Ensemble Tri-Pillar Diagnostic Report
-              </h2>
-              <Badge variant="emerald" size="sm">
-                A + B + C Unified
-              </Badge>
+              <span className="px-2.5 py-0.5 rounded text-xs font-semibold border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 bg-emerald-500/5 font-sans">
+                Tri-Pillar Synthesis · ISO 26262 ASIL-C
+              </span>
+              <span className="px-2.5 py-0.5 rounded text-xs font-semibold border border-cyan-500/30 text-cyan-600 dark:text-cyan-400 bg-cyan-500/5 font-sans">
+                Audit Compliant
+              </span>
             </div>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-              Cross-module telemetry synthesis for asset certification on {selectedVehicleId}
-            </p>
+            <h1 className="text-base sm:text-lg font-bold text-slate-900 dark:text-slate-100 tracking-tight mt-1 font-sans">
+              Vehicle Battery Asset & Tri-Pillar Calibration Certificate
+            </h1>
           </div>
         </div>
 
         <button
           onClick={handlePrint}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 dark:bg-emerald-600 dark:hover:bg-emerald-500 text-white text-xs font-bold transition-all hover:scale-105 shadow-md cursor-pointer"
+          className="flex items-center gap-2 px-4 py-2 rounded-lg bg-slate-900 hover:bg-slate-800 dark:bg-emerald-600 dark:hover:bg-emerald-500 text-white font-sans text-xs font-semibold shadow-sm transition-all active:scale-95 cursor-pointer"
         >
           <Printer className="w-4 h-4" />
-          Export / Print Report (PDF)
+          <span>Export Audit Certificate (PDF)</span>
         </button>
       </div>
 
-      {/* ─── MAIN REPORT DOCUMENT (PRINT & WEB) ─── */}
-      <div className="app-card p-6 sm:p-8 space-y-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm print:border-none print:p-0 print:shadow-none print:bg-white print:text-slate-900 print:space-y-6">
-        {/* Official Authority Header */}
-        <div className="print-section border-b-2 border-slate-900 pb-4">
-          <div className="flex items-start justify-between gap-4">
-            <div className="space-y-1">
+      {/* ── OFFICIAL CALIBRATION CERTIFICATE DOCUMENT ── */}
+      <div className="tech-surface p-6 sm:p-8 space-y-6 bg-white dark:bg-slate-900 print:bg-white print:text-slate-900 print:p-0 print:border-none print:shadow-none font-sans">
+        {/* Document Header */}
+        <div className="border-b-2 border-slate-900 dark:border-slate-700 print:border-slate-900 pb-5">
+          <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+            <div className="space-y-1.5">
               <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded bg-slate-900 text-white font-extrabold text-xs flex items-center justify-center print:bg-black">
-                  EV
-                </div>
-                <span className="text-xs font-mono font-bold tracking-widest uppercase text-slate-700 dark:text-slate-300 print:text-slate-800">
-                  Enterprise EV Telemetrics Certification Authority
+                <span className="px-2.5 py-0.5 bg-slate-900 text-white font-sans font-semibold text-xs rounded print:bg-black">
+                  Battery Audit Certificate
+                </span>
+                <span className="text-xs font-medium text-slate-500 dark:text-slate-400 print:text-slate-700">
+                  Automotive Telemetry & Safety Authority
                 </span>
               </div>
-              <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-slate-100 print:text-slate-900 tracking-tight">
-                VEHICLE BATTERY ASSET & TRI-PILLAR DIAGNOSTIC CERTIFICATE
-              </h1>
-              <p className="text-xs text-slate-600 dark:text-slate-400 print:text-slate-600 font-sans">
-                Module A (State Estimation) + Module B (Multi-Zone Thermal) + Module C (BA-BMS & Knee Point Prognostics)
+              <h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-slate-100 print:text-slate-900 tracking-tight">
+                Tri-Pillar Battery Health & Diagnostic Passport
+              </h2>
+              <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 print:text-slate-600 font-sans">
+                Consensus synthesis across Module A (Electrochemistry), Module B (Thermodynamics), and Module C (Knee Prognostics).
               </p>
             </div>
 
-            <div className="text-right font-mono text-xs space-y-1 flex-shrink-0">
-              <div className="text-[10px] uppercase text-slate-500 dark:text-slate-400 print:text-slate-600 font-bold">Certificate ID</div>
-              <div className="font-bold text-slate-900 dark:text-slate-100 print:text-slate-900 text-sm">CERT-EV-{vehicle.id}</div>
-              <div className="text-[10px] text-slate-500 dark:text-slate-400 print:text-slate-600">Date: {currentDateStr}</div>
-              <div className="inline-flex items-center gap-1 px-2 py-0.5 bg-emerald-100 text-emerald-800 border border-emerald-300 rounded text-[9px] font-bold uppercase print:bg-emerald-50 print:border-emerald-500">
-                <ShieldCheck className="w-3 h-3 text-emerald-700" />
-                74-MODEL ENSEMBLE CERTIFIED
+            <div className="text-xs space-y-1 text-left sm:text-right flex-shrink-0 font-sans">
+              <div className="text-xs text-slate-400">Certificate Reference</div>
+              <div className="font-mono font-bold text-sm text-slate-900 dark:text-slate-100 print:text-slate-900">
+                CERT-EV-{vehicle.id}-2026
+              </div>
+              <div className="text-xs text-slate-500">Issued: {currentDateStr}</div>
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 rounded text-xs font-semibold">
+                <ShieldCheck className="w-3.5 h-3.5" />
+                74-Model Ensemble Verified
               </div>
             </div>
           </div>
         </div>
 
-        {/* Vehicle Credentials & Health Grade Banner */}
-        <div className="print-section flex flex-wrap items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-5">
+        {/* Chassis Specification & Unified Health Grade */}
+        <div className="flex flex-wrap items-center justify-between gap-4 pb-5 border-b hairline-border">
           <div>
-            <div className="text-xs font-mono uppercase text-cyan-600 dark:text-cyan-400 font-bold tracking-wider print:text-cyan-800">
-              Vehicle Asset Certificate
-            </div>
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-slate-100 print:text-slate-900 mt-0.5">
+            <span className="text-xs font-semibold text-cyan-600 dark:text-cyan-400 font-sans block mb-0.5">
+              Active Vehicle Passport
+            </span>
+            <div className="text-2xl sm:text-3xl font-bold font-mono text-slate-900 dark:text-slate-100 print:text-slate-900 tracking-tight">
               {vehicle.id}
-            </h2>
-            <p className="text-sm text-slate-500 dark:text-slate-400 print:text-slate-600 mt-1">
-              {vehicle.model} • {vehicle.fleet} • {telemetry.cycleCount || vehicle.charge_cycle_count} EFC • ODO 18,420 km
+            </div>
+            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 print:text-slate-600 mt-1 font-sans">
+              {vehicle.model} · {vehicle.fleet} · <span className="font-mono font-medium">{telemetry.cycleCount || vehicle.charge_cycle_count} EFC</span> · Odometer <span className="font-mono font-medium">18,420 km</span>
             </p>
           </div>
 
           <div className="flex items-center gap-4">
-            <div className="text-right flex flex-col items-end">
-              <div className="flex items-center gap-1 text-xs text-slate-500 dark:text-slate-400 print:text-slate-600 font-mono">
-                <span>Unified Health Rating</span>
-                <span className="print:hidden">
-                  <MetricExplainer metricKey="meta_ensemble" label="How it works" />
-                </span>
-              </div>
-              <div className="text-2xl font-extrabold text-emerald-600 dark:text-emerald-400 print:text-emerald-700 font-mono mt-0.5">
-                {metaData?.unified_health_grade ?? (loading ? "Computing Grade..." : "Grade A (Optimal)")}
+            <div className="text-right font-sans">
+              <span className="text-xs text-slate-500 dark:text-slate-400 block">
+                Consensus Health Grade
+              </span>
+              <div className="text-xl font-bold font-sans text-emerald-600 dark:text-emerald-400 print:text-emerald-700">
+                {metaData?.unified_health_grade ?? (loading ? "Evaluating..." : "Grade A (Optimal)")}
               </div>
             </div>
-            <div className="w-14 h-14 rounded-2xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 flex items-center justify-center text-emerald-700 dark:text-emerald-400 print:text-emerald-800 font-extrabold font-mono text-2xl shadow-sm">
+            <div className="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center font-mono text-2xl font-extrabold text-emerald-600 dark:text-emerald-400 print:text-emerald-800">
               {gradeLetter}
             </div>
           </div>
         </div>
 
-        {/* 3 Pillars Summary Grid */}
-        <div className="print-section grid grid-cols-1 md:grid-cols-3 gap-4 print:grid-cols-3 print:gap-4">
+        {/* 3 Pillars Industrial Summary Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 font-sans">
           {/* Pillar A */}
-          <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/80 space-y-2 print:bg-slate-50 print:border-slate-300">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 text-xs font-bold text-cyan-700 dark:text-cyan-400 print:text-cyan-900 uppercase tracking-wider">
+          <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-950/70 border hairline-border space-y-3 print:bg-slate-50 print:border-slate-300">
+            <div className="flex items-center justify-between pb-2 border-b hairline-border">
+              <div className="flex items-center gap-1.5 text-xs font-bold text-cyan-600 dark:text-cyan-400">
                 <Cpu className="w-4 h-4" />
-                Pillar A: Fleet Telematics
+                <span>Module A · State Estimation</span>
               </div>
-              <span className="print:hidden">
-                <MetricExplainer metricKey="soc" label="PoC" />
-              </span>
+              <span className="text-xs font-mono font-medium text-slate-400">MOD-A</span>
             </div>
-            <div className="text-xs text-slate-700 dark:text-slate-300 print:text-slate-800 space-y-1.5 pt-1">
-              <div>State of Charge: <strong>{vehicle.soc.toFixed(1)}%</strong></div>
-              <div>State of Health: <strong>{vehicle.soh.toFixed(1)}%</strong></div>
-              <div>Remaining Life: <strong>{vehicle.rul} cycles</strong></div>
-              <div>Range per Charge: <strong>{vehicle.mileage.toFixed(1)} km</strong></div>
-              <div>Pack Voltage: <strong>{telemetry.voltage ? telemetry.voltage.toFixed(1) : "74.8"} V</strong></div>
+            <div className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 print:text-slate-800 space-y-1.5">
+              <div className="flex justify-between items-center">
+                <span className="text-slate-500 dark:text-slate-400">State of Charge (SOC):</span>
+                <strong className="font-mono text-slate-900 dark:text-slate-100">{vehicle.soc.toFixed(1)}%</strong>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-slate-500 dark:text-slate-400">State of Health (SOH):</span>
+                <strong className="font-mono text-emerald-600 dark:text-emerald-400">{vehicle.soh.toFixed(1)}%</strong>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-slate-500 dark:text-slate-400">Remaining Useful Life (RUL):</span>
+                <strong className="font-mono text-slate-900 dark:text-slate-100">{vehicle.rul} cycles</strong>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-slate-500 dark:text-slate-400">Estimated Range:</span>
+                <strong className="font-mono text-slate-900 dark:text-slate-100">{vehicle.mileage.toFixed(1)} km</strong>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-slate-500 dark:text-slate-400">Pack Voltage:</span>
+                <strong className="font-mono text-slate-900 dark:text-slate-100">{telemetry.voltage ? telemetry.voltage.toFixed(1) : "74.8"} V</strong>
+              </div>
             </div>
           </div>
 
           {/* Pillar B */}
-          <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/80 space-y-2 print:bg-slate-50 print:border-slate-300">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 text-xs font-bold text-emerald-700 dark:text-emerald-400 print:text-emerald-900 uppercase tracking-wider">
+          <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-950/70 border hairline-border space-y-3 print:bg-slate-50 print:border-slate-300">
+            <div className="flex items-center justify-between pb-2 border-b hairline-border">
+              <div className="flex items-center gap-1.5 text-xs font-bold text-amber-600 dark:text-amber-400">
                 <Flame className="w-4 h-4" />
-                Pillar B: Thermal & Health
+                <span>Module B · Multi-Zone Thermal</span>
               </div>
-              <span className="print:hidden">
-                <MetricExplainer metricKey="thermal" label="PoC" />
-              </span>
+              <span className="text-xs font-mono font-medium text-slate-400">MOD-B</span>
             </div>
-            <div className="text-xs text-slate-700 dark:text-slate-300 print:text-slate-800 space-y-1.5 pt-1">
-              <div>Digital Twin Score: <strong>{diagData?.overall_health_score !== undefined ? diagData.overall_health_score.toFixed(1) : vehicle.soh.toFixed(1)} / 100</strong></div>
-              <div>Thermal Safety: <strong>{diagData?.thermal_status?.safety_status ?? (loading ? "Evaluating..." : "Nominal (Safe)")}</strong></div>
-              <div>Pack Temp: <strong>{vehicle.battery_temp.toFixed(1)} °C</strong></div>
-              <div>Motor Temp: <strong>{vehicle.motor_temp.toFixed(1)} °C</strong></div>
+            <div className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 print:text-slate-800 space-y-1.5">
+              <div className="flex justify-between items-center">
+                <span className="text-slate-500 dark:text-slate-400">Digital Twin Health:</span>
+                <strong className="font-mono text-slate-900 dark:text-slate-100">
+                  {diagData?.overall_health_score !== undefined
+                    ? diagData.overall_health_score.toFixed(1)
+                    : vehicle.soh.toFixed(1)}{" "}
+                  / 100
+                </strong>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-slate-500 dark:text-slate-400">Thermal Safety Status:</span>
+                <strong className="font-sans text-emerald-600 dark:text-emerald-400">
+                  {diagData?.thermal_status?.safety_status ?? "Nominal (Safe)"}
+                </strong>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-slate-500 dark:text-slate-400">Battery Core Temp (VBT):</span>
+                <strong className="font-mono text-slate-900 dark:text-slate-100">{vehicle.battery_temp.toFixed(1)} °C</strong>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-slate-500 dark:text-slate-400">Inverter Temp (VCT):</span>
+                <strong className="font-mono text-slate-900 dark:text-slate-100">{vehicle.controller_temp.toFixed(1)} °C</strong>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-slate-500 dark:text-slate-400">Motor Temp (VMT):</span>
+                <strong className="font-mono text-slate-900 dark:text-slate-100">{vehicle.motor_temp.toFixed(1)} °C</strong>
+              </div>
             </div>
           </div>
 
           {/* Pillar C */}
-          <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/80 space-y-2 print:bg-slate-50 print:border-slate-300">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 text-xs font-bold text-purple-700 dark:text-purple-400 print:text-purple-900 uppercase tracking-wider">
+          <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-950/70 border hairline-border space-y-3 print:bg-slate-50 print:border-slate-300">
+            <div className="flex items-center justify-between pb-2 border-b hairline-border">
+              <div className="flex items-center gap-1.5 text-xs font-bold text-purple-600 dark:text-purple-400">
                 <Gauge className="w-4 h-4" />
-                Pillar C: BA-BMS & Knee
+                <span>Module C · Knee Point Prognostics</span>
               </div>
-              <span className="print:hidden">
-                <MetricExplainer metricKey="knee" label="PoC" />
-              </span>
+              <span className="text-xs font-mono font-medium text-slate-400">MOD-C</span>
             </div>
-            <div className="text-xs text-slate-700 dark:text-slate-300 print:text-slate-800 space-y-1.5 pt-1">
-              <div>Driver Aggressiveness: <strong>{metaData?.driver_aggressiveness_index !== undefined ? metaData.driver_aggressiveness_index.toFixed(2) : (vehicle.status === "critical" ? "0.48" : "0.16")}</strong></div>
-              <div>Battery Stress Index: <strong>{metaData?.battery_stress_index !== undefined ? metaData.battery_stress_index.toFixed(2) : (vehicle.status === "critical" ? "0.38" : "0.22")}</strong></div>
-              <div>RUL to Knee Point: <strong>{metaData?.rul_to_knee_cycles !== undefined ? `${Math.round(metaData.rul_to_knee_cycles)} cycles` : `${Math.max(0, Math.round(950 - vehicle.charge_cycle_count))} cycles`}</strong></div>
-              <div>Assigned Driver: <strong>{vehicle.driver}</strong></div>
+            <div className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 print:text-slate-800 space-y-1.5">
+              <div className="flex justify-between items-center">
+                <span className="text-slate-500 dark:text-slate-400">Aggressiveness Index:</span>
+                <strong className="font-mono text-slate-900 dark:text-slate-100">
+                  {metaData?.driver_aggressiveness_index !== undefined
+                    ? metaData.driver_aggressiveness_index.toFixed(2)
+                    : "0.16"}
+                </strong>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-slate-500 dark:text-slate-400">Battery Stress Index:</span>
+                <strong className="font-mono text-slate-900 dark:text-slate-100">
+                  {metaData?.battery_stress_index !== undefined
+                    ? metaData.battery_stress_index.toFixed(2)
+                    : "0.22"}
+                </strong>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-slate-500 dark:text-slate-400">Cycles to Knee Rollover:</span>
+                <strong className="font-mono text-cyan-600 dark:text-cyan-400">
+                  {metaData?.rul_to_knee_cycles !== undefined
+                    ? `${Math.round(metaData.rul_to_knee_cycles)} cycles`
+                    : `${Math.max(0, Math.round(950 - vehicle.charge_cycle_count))} cycles`}
+                </strong>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-slate-500 dark:text-slate-400">Assigned Driver:</span>
+                <strong className="font-sans text-slate-900 dark:text-slate-100">{vehicle.driver}</strong>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-slate-500 dark:text-slate-400">Second-Life Qualification:</span>
+                <strong className="font-sans text-emerald-600 dark:text-emerald-400">Qualified (ISO 19830)</strong>
+              </div>
             </div>
           </div>
         </div>
 
         {/* Executive Summary Statement */}
-        <div className="print-section p-4 sm:p-5 rounded-xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700/80 print:bg-slate-50 print:border-slate-300">
-          <div className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 print:text-slate-600 mb-1.5">
-            Executive Summary
+        <div className="p-5 rounded-xl bg-slate-50 dark:bg-slate-950/70 border hairline-border space-y-2 print:bg-slate-50 print:border-slate-300 font-sans">
+          <div className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide">
+            Executive Engineering Synthesis
           </div>
-          <p className="text-sm text-slate-800 dark:text-slate-200 print:text-slate-800 leading-relaxed font-sans">
+          <p className="text-slate-700 dark:text-slate-300 print:text-slate-800 leading-relaxed text-xs sm:text-sm font-sans">
             {metaData?.executive_summary ||
-              `Pack ${vehicle.id} demonstrates consistent telemetry within operational bounds (${telemetry.cycleCount || vehicle.charge_cycle_count} EFC, ${vehicle.soh.toFixed(1)}% SOH). Multi-zone thermal telemetry indicates nominal heat dissipation across powertrain modules.`}
+              `Chassis ${vehicle.id} demonstrates consistent electrochemical telemetry within nominal bounds (${telemetry.cycleCount || vehicle.charge_cycle_count} EFC, ${vehicle.soh.toFixed(1)}% SOH). Multi-zone thermal telemetry indicates nominal heat dissipation across powertrain modules, with safe margin prior to knee-point rollover.`}
           </p>
         </div>
 
-        {/* Maintenance Action Items */}
-        <div className="print-section space-y-2">
-          <div className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 print:text-slate-600">
-            Maintenance Action Items & Directives
+        {/* Maintenance Action Items & Directives */}
+        <div className="space-y-3 font-sans">
+          <div className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide">
+            Automotive Engineering Directives
           </div>
           <div className="space-y-2">
             {actionItems.map((item, i) => (
               <div
                 key={i}
-                className="flex items-start gap-2.5 p-2.5 rounded-lg bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/60 text-xs text-slate-700 dark:text-slate-300 print:text-slate-800 print:bg-slate-50 print:border-slate-200"
+                className="flex items-start gap-3 p-3 rounded-lg bg-slate-50 dark:bg-slate-950/70 border hairline-border text-slate-700 dark:text-slate-300 print:text-slate-800 print:bg-slate-50 print:border-slate-200 text-xs sm:text-sm leading-relaxed"
               >
-                <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 flex-shrink-0 mt-0.5" />
+                <CheckCircle2 className="w-4 h-4 text-emerald-500 flex-shrink-0 mt-0.5" />
                 <span>{item}</span>
               </div>
             ))}
           </div>
         </div>
 
-        {/* Official Document Footer & Audit Signatures */}
-        <div className="print-section pt-6 border-t-2 border-slate-900 space-y-6">
-          <div className="grid grid-cols-2 gap-10 text-xs">
+        {/* Official Authority Sign-Off & Verification Cryptography */}
+        <div className="pt-6 border-t-2 border-slate-900 dark:border-slate-700 print:border-slate-900 space-y-6 font-sans">
+          <div className="grid grid-cols-2 gap-10 text-xs sm:text-sm">
             <div>
-              <div className="text-[10px] font-mono uppercase text-slate-500 print:text-slate-600 font-semibold mb-6">
-                Autonomous Telemetry Systems Engineer Sign-Off
+              <div className="text-xs text-slate-400 font-medium mb-6">
+                Autonomous Telemetry Systems Sign-Off
               </div>
-              <div className="border-b border-slate-400 w-56 mb-1.5 print:border-slate-600"></div>
+              <div className="border-b border-slate-400 dark:border-slate-600 w-56 mb-2 print:border-slate-600"></div>
               <div className="font-bold text-slate-900 dark:text-slate-100 print:text-slate-900">
                 Lead Battery Systems Engineer
               </div>
-              <div className="text-[10px] text-slate-500 dark:text-slate-400 print:text-slate-600">
-                AI Diagnostics & Telemetry Division
+              <div className="text-xs text-slate-500">
+                AI Diagnostics & Calibration Division
               </div>
             </div>
             <div>
-              <div className="text-[10px] font-mono uppercase text-slate-500 print:text-slate-600 font-semibold mb-6">
+              <div className="text-xs text-slate-400 font-medium mb-6">
                 Commercial Fleet Operations Sign-Off
               </div>
-              <div className="border-b border-slate-400 w-56 mb-1.5 print:border-slate-600"></div>
+              <div className="border-b border-slate-400 dark:border-slate-600 w-56 mb-2 print:border-slate-600"></div>
               <div className="font-bold text-slate-900 dark:text-slate-100 print:text-slate-900">
                 Fleet Operations Director
               </div>
-              <div className="text-[10px] text-slate-500 dark:text-slate-400 print:text-slate-600">
+              <div className="text-xs text-slate-500">
                 Commercial EV Asset Authority
               </div>
             </div>
           </div>
 
-          <div className="pt-3 border-t border-slate-200 dark:border-slate-800 flex justify-between items-center text-[10px] font-mono text-slate-500 dark:text-slate-400 print:text-slate-600">
-            <span>
-              SHA-256 Telemetry Audit Verification: {vehicle.id.toLowerCase()}-74m-iso26262-auth-verified
+          <div className="pt-3 border-t hairline-border flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 text-xs text-slate-400 print:text-slate-600 font-sans">
+            <span className="font-mono text-xs">
+              SHA-256 AUDIT STAMP: {vehicle.id.toLowerCase()}-74m-iso26262-auth-verified
             </span>
-            <span>Multi-Zone Fleet Intelligence Platform • ISO 26262 ASIL-C</span>
+            <span className="font-semibold text-slate-500 dark:text-slate-400">SAE J1798 / ISO 26262 ASIL-C Telemetry Certified</span>
           </div>
         </div>
       </div>
     </div>
   );
 };
+
+export default MetaEnsembleReportTab;

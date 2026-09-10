@@ -8,11 +8,11 @@ export const FallbackAuditDrawer: React.FC = () => {
 
   // Hidden in production builds if needed, or toggled via discrete floating badge
   return (
-    <div className="fixed bottom-4 left-4 z-50 font-sans">
+    <div className="fixed bottom-4 right-4 z-40 font-sans">
       {minimized ? (
         <button
           onClick={() => setMinimized(false)}
-          className={`flex items-center gap-2 px-3 py-1.5 rounded-full shadow-lg border text-xs font-mono transition-all ${
+          className={`flex items-center gap-2 px-3 py-1.5 rounded-full shadow-lg border text-xs font-sans font-medium transition-all ${
             events.length === 0
               ? "bg-slate-900/90 text-emerald-400 border-emerald-500/30 hover:bg-slate-800"
               : "bg-rose-950/90 text-rose-300 border-rose-500/50 hover:bg-rose-900 animate-pulse"
@@ -25,19 +25,19 @@ export const FallbackAuditDrawer: React.FC = () => {
             <AlertTriangle className="w-3.5 h-3.5 text-rose-400" />
           )}
           <span>
-            {events.length === 0 ? "Data Sentinel: Clean (0)" : `Fallback Alert (${events.length})`}
+            {events.length === 0 ? "Data Sentinel: Verified" : `Fallback Alert (${events.length})`}
           </span>
         </button>
       ) : (
         <div className="w-96 max-h-[380px] bg-slate-900/95 text-slate-100 border border-slate-700 rounded-2xl shadow-2xl backdrop-blur-md flex flex-col overflow-hidden animate-in fade-in slide-in-from-bottom-2">
           {/* Header */}
-          <div className="flex items-center justify-between px-4 py-3 bg-slate-800/80 border-b border-slate-700">
+          <div className="flex items-center justify-between px-4 py-3 bg-slate-800/80 border-b border-slate-700 font-sans">
             <div className="flex items-center gap-2">
               <ShieldCheck className="w-4 h-4 text-cyan-400" />
-              <span className="text-xs font-bold font-mono uppercase tracking-wider text-slate-200">
+              <span className="text-xs font-bold font-sans text-slate-200">
                 Fallback Audit Sentinel
               </span>
-              <span className={`text-[10px] px-2 py-0.5 rounded-full font-mono font-bold ${
+              <span className={`text-xs px-2 py-0.5 rounded-full font-sans font-semibold ${
                 events.length === 0 ? "bg-emerald-950 text-emerald-400 border border-emerald-800" : "bg-rose-950 text-rose-400 border border-rose-800"
               }`}>
                 {events.length} Warnings

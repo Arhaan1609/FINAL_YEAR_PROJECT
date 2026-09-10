@@ -1,9 +1,9 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useFleetStore } from "../../lib/store/useFleetStore";
-import { Sparkles, Sun, Moon, ArrowLeft, Activity, Compass } from "lucide-react";
+import { Sparkles, Sun, Moon, ArrowLeft, Activity, Compass, Radio } from "lucide-react";
 import { getVehicleTriage, triageLabel } from "../../lib/triage";
 
 export const Header: React.FC = () => {
@@ -14,8 +14,6 @@ export const Header: React.FC = () => {
     selectedVehicleId,
     setSelectedVehicle,
     selectedLiveTriage,
-    isMock,
-    setIsMock,
     copilotOpen,
     setCopilotOpen,
     viewMode,
@@ -28,106 +26,144 @@ export const Header: React.FC = () => {
     searchQuery,
   } = useFleetStore();
 
+  const [clockStr, setClockStr] = useState<string>("");
+
+  useEffect(() => {
+    const updateTime = () => {
+      const now = new Date();
+      setClockStr(now.toISOString().substring(11, 19) + " UTC");
+    };
+    updateTime();
+    const interval = setInterval(updateTime, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
   const filteredVehicles = getFilteredVehicles();
-  const isFiltered = stateFilter !== "all" || manufacturerFilter !== "all" || statusFilter !== "all" || searchQuery.trim().length > 0;
-  const displayVehicles = isFiltered && filteredVehicles.length > 0 ? filteredVehicles : vehicles;
-  const selectedVehicle = vehicles.find((v) => v.id === selectedVehicleId) || vehicles[0];
+  const isFiltered =
+    stateFilter !== "all" ||
+    manufacturerFilter !== "all" ||
+    statusFilter !== "all" ||
+    searchQuery.trim().length > 0;
+  const displayVehicles =
+    isFiltered && filteredVehicles.length > 0 ? filteredVehicles : vehicles;
+  const selectedVehicle =
+    vehicles.find((v) => v.id === selectedVehicleId) || vehicles[0];
 
   return (
-    <header className="h-14 border-b border-slate-200 dark:border-slate-800 bg-white/95 dark:bg-[#0A0D14]/95 backdrop-blur-md px-6 flex items-center justify-between sticky top-0 z-30 transition-colors print:hidden">
-      {/* Left: Brand Identity & Landing Link */}
-      <div className="flex items-center gap-4">
+    <header className="h-16 border-b border-slate-200 dark:border-slate-800 bg-white/95 dark:bg-[#090D16]/95 backdrop-blur-md px-4 sm:px-6 flex items-center justify-between sticky top-0 z-30 transition-colors print:hidden font-sans">
+      {/* Left: Brand Identity & Navigation */}
+      <div className="flex items-center gap-3 sm:gap-4">
         <Link
           href="/"
-          className="flex items-center gap-1.5 text-xs font-semibold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 transition-colors"
+          className="flex items-center gap-1.5 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors px-2.5 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700"
+          title="Return to Landing Page"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
           <span className="hidden sm:inline">Landing</span>
         </Link>
 
-        <div className="h-4 w-px bg-slate-200 dark:bg-slate-800" />
+        <div className="h-5 w-px bg-slate-200 dark:bg-slate-800" />
 
-        <div className="flex items-center gap-2.5">
-          <div className="w-6 h-6 rounded-lg bg-emerald-600 flex items-center justify-center text-white font-extrabold text-[11px] shadow-sm">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-lg bg-emerald-600 dark:bg-emerald-500 flex items-center justify-center text-white font-bold text-xs shadow-sm">
             EV
           </div>
-          <span className="text-sm font-bold text-slate-900 dark:text-slate-100 tracking-tight whitespace-nowrap">
-            EV Battery Intelligence
-          </span>
-          <span className="hidden lg:inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-mono font-medium bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-            74 Models Live
-          </span>
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="text-sm sm:text-base font-bold text-slate-900 dark:text-white tracking-tight">
+                EV Battery Intelligence
+              </span>
+              <span className="hidden sm:inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+                Live Fleet
+              </span>
+            </div>
+            <p className="hidden md:block text-xs text-slate-500 dark:text-slate-400">
+              Multi-zone predictive diagnostics & state estimation
+            </p>
+          </div>
         </div>
       </div>
 
-      {/* Center: Clean Minimalist VIN Selector (Synced with Active Filters) */}
-      <div className="hidden md:flex items-center gap-2 bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 px-3 py-1 rounded-lg">
-        <span className="text-[10px] font-mono uppercase font-semibold text-slate-400">
-          VIN{isFiltered ? ` (${displayVehicles.length})` : ""}:
+      {/* Center: Vehicle Chassis Selector */}
+      <div className="hidden md:flex items-center gap-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 px-3 py-1.5 rounded-lg shadow-xs">
+        <Radio className="w-3.5 h-3.5 text-cyan-600 dark:text-cyan-400" />
+        <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">
+          Chassis:
         </span>
         <select
           value={selectedVehicleId}
           onChange={(e) => setSelectedVehicle(e.target.value)}
-          className="bg-transparent text-xs font-mono font-bold text-slate-800 dark:text-slate-200 focus:outline-none cursor-pointer pr-1"
+          className="bg-transparent text-xs font-semibold text-slate-900 dark:text-slate-100 focus:outline-none cursor-pointer pr-1 font-sans"
         >
           {displayVehicles.map((v) => {
             const isSelected = v.id === selectedVehicleId;
             const staticTriage = getVehicleTriage(v);
-            const triage = isSelected && selectedLiveTriage ? selectedLiveTriage : staticTriage;
+            const triage =
+              isSelected && selectedLiveTriage ? selectedLiveTriage : staticTriage;
             return (
-              <option key={v.id} value={v.id} className="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-200">
-                {v.id} — {v.model.split(" ")[0]} ({triageLabel(triage)}) • {v.fleet.split(" ")[0]}
+              <option
+                key={v.id}
+                value={v.id}
+                className="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100"
+              >
+                {v.id} · {v.model.split(" ")[0]} ({triageLabel(triage)})
               </option>
             );
           })}
         </select>
-        {selectedLiveTriage && selectedVehicle && selectedLiveTriage !== getVehicleTriage(selectedVehicle) && (
-          <span
-            className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 dark:bg-amber-950/80 dark:text-amber-300 border border-amber-300 dark:border-amber-800 whitespace-nowrap"
-            title={`Registry was '${triageLabel(getVehicleTriage(selectedVehicle))}', but live ML telemetry evaluated accelerated degradation and escalated to '${triageLabel(selectedLiveTriage)}'`}
-          >
-            Live ML: {triageLabel(selectedLiveTriage)}
-          </span>
-        )}
+        {selectedLiveTriage &&
+          selectedVehicle &&
+          selectedLiveTriage !== getVehicleTriage(selectedVehicle) && (
+            <span className="text-[11px] font-semibold px-2 py-0.5 rounded bg-amber-100 text-amber-800 dark:bg-amber-950/80 dark:text-amber-300 border border-amber-300 dark:border-amber-800 whitespace-nowrap">
+              {triageLabel(selectedLiveTriage)}
+            </span>
+          )}
       </div>
 
-      {/* Right: Controls & Copilot Button */}
-      <div className="flex items-center gap-2.5">
-        {/* Latency badge */}
-        <div className="hidden xl:flex items-center gap-1.5 text-[11px] font-mono text-slate-500 dark:text-slate-400">
+      {/* Right: Telemetry Clock, Orientation Guide & Actions */}
+      <div className="flex items-center gap-2 sm:gap-3">
+        {/* UTC Clock */}
+        <div className="hidden lg:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-800 text-xs font-mono text-slate-600 dark:text-slate-300">
           <Activity className="w-3.5 h-3.5 text-emerald-500" />
-          <span>12ms</span>
+          <span>{clockStr || "Syncing..."}</span>
         </div>
 
         {/* Theme toggle */}
         <button
           onClick={toggleTheme}
-          className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all"
+          className="p-2 rounded-lg border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all"
           title={`Switch to ${theme === "light" ? "Dark" : "Light"} mode`}
         >
-          {theme === "light" ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4 text-amber-400" />}
+          {theme === "light" ? (
+            <Moon className="w-4 h-4" />
+          ) : (
+            <Sun className="w-4 h-4 text-amber-400" />
+          )}
         </button>
 
-        {/* Page Guide Button for New & Non-Tech Employees */}
+        {/* Page Guide Button */}
         <button
-          onClick={() => openBriefing(viewMode === "operations" ? "operations" : activeTab)}
-          className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-300 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 text-xs font-semibold hover:bg-emerald-100 dark:hover:bg-emerald-900/60 transition-all shadow-sm"
-          title="What does this page do? Click for plain-English orientation and action guide"
+          onClick={() =>
+            openBriefing(viewMode === "operations" ? "operations" : activeTab)
+          }
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 text-xs font-semibold transition-all shadow-xs"
+          title="Overview and explanation for this view"
         >
-          <Compass className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-          <span className="hidden sm:inline font-sans">Page Guide</span>
+          <Compass className="w-3.5 h-3.5 text-cyan-600 dark:text-cyan-400" />
+          <span className="hidden sm:inline">Guide</span>
         </button>
 
         {/* Copilot button */}
         <button
           onClick={() => setCopilotOpen(!copilotOpen)}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 text-xs font-semibold hover:opacity-90 transition-all shadow-sm"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-900 dark:bg-emerald-600 text-white text-xs font-semibold hover:opacity-90 transition-all shadow-xs"
         >
-          <Sparkles className="w-3.5 h-3.5 text-emerald-400 dark:text-emerald-600" />
-          <span>Copilot</span>
+          <Sparkles className="w-3.5 h-3.5 text-emerald-400 dark:text-white" />
+          <span>AI Copilot</span>
         </button>
       </div>
     </header>
   );
 };
+
+export default Header;

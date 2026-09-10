@@ -54,7 +54,7 @@ export const CanOscilloscope: React.FC<CanOscilloscopeProps> = ({
     ctx.clearRect(0, 0, width, height);
 
     // Draw Grid Lines
-    ctx.strokeStyle = "rgba(148, 163, 184, 0.12)";
+    ctx.strokeStyle = "rgba(148, 163, 184, 0.10)";
     ctx.lineWidth = 1;
     for (let x = 0; x < width; x += 30) {
       ctx.beginPath();
@@ -101,34 +101,38 @@ export const CanOscilloscope: React.FC<CanOscilloscopeProps> = ({
   }, [dataPoints, current]);
 
   return (
-    <div className="w-full rounded-xl p-4 bg-white dark:bg-[#0D111A] border border-slate-200 dark:border-slate-800 shadow-xs flex flex-col justify-between">
-      <div className="flex items-center justify-between mb-2.5">
+    <div className="tech-surface p-4 flex flex-col justify-between space-y-3 font-sans">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
         <div className="flex items-center gap-2">
-          <Activity className="w-3.5 h-3.5 text-cyan-600 dark:text-cyan-400" />
-          <h4 className="text-xs font-semibold text-slate-900 dark:text-slate-100">
+          <Activity className="w-4 h-4 text-cyan-600 dark:text-cyan-400 shrink-0" />
+          <h4 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-100 font-sans">
             Real-Time CAN Oscilloscope (100ms)
           </h4>
         </div>
 
-        <div className="flex items-center gap-3 text-[10px] font-mono">
-          <div className="flex items-center gap-1">
-            <span className="w-1.5 h-1.5 rounded-full bg-cyan-600" />
-            <span className="text-slate-600 dark:text-slate-400">{voltage.toFixed(1)}V</span>
+        <div className="flex items-center gap-2.5 text-xs font-sans">
+          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-cyan-500/10 border border-cyan-500/30">
+            <span className="w-2 h-2 rounded-full bg-cyan-500 shrink-0" />
+            <span className="text-slate-600 dark:text-slate-400 font-medium">Voltage:</span>
+            <span className="font-bold font-mono text-cyan-700 dark:text-cyan-300">{voltage.toFixed(1)} V</span>
           </div>
-          <div className="flex items-center gap-1">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-600" />
-            <span className="text-slate-600 dark:text-slate-400">{current.toFixed(1)}A</span>
+          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-500/10 border border-emerald-500/30">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
+            <span className="text-slate-600 dark:text-slate-400 font-medium">Current:</span>
+            <span className="font-bold font-mono text-emerald-700 dark:text-emerald-300">{current.toFixed(1)} A</span>
           </div>
         </div>
       </div>
 
       {/* Waveform Canvas */}
-      <div className="relative w-full h-24 rounded-lg overflow-hidden bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800/80">
+      <div className="relative w-full h-24 rounded-lg overflow-hidden bg-slate-950 border border-slate-800">
         <canvas ref={canvasRef} width={500} height={96} className="w-full h-full object-cover" />
-        <div className="absolute top-1 right-1.5 text-[8px] font-mono text-slate-400">
+        <div className="absolute top-1.5 right-2 text-xs font-mono text-slate-400 bg-slate-900/80 px-1.5 py-0.5 rounded">
           CAN 2.0B • 500 kbps
         </div>
       </div>
     </div>
   );
 };
+
+export default CanOscilloscope;

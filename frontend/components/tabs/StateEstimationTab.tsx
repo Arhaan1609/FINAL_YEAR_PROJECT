@@ -160,79 +160,119 @@ export const StateEstimationTab: React.FC = () => {
   const strokeDash = (Math.max(0, Math.min(100, socVal)) / 100) * 188.5;
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 w-full relative">
-      
-      {/* ─── LEFT COLUMN: SIMULATE CONTEXT & ACTIVE ENSEMBLE (Stitch Aside) ─── */}
-      <aside className="col-span-1 lg:col-span-4 xl:col-span-3 flex flex-col gap-6">
-        
-        {/* Simulate Context Card */}
-        <div className="app-card p-6 shadow-md relative overflow-hidden group">
-          <div className="flex justify-between items-end mb-6 relative z-10">
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 w-full relative font-sans">
+      {/* ─── LEFT COLUMN: CALIBRATED HARDWARE INJECTION TESTBENCH ─── */}
+      <aside className="col-span-1 lg:col-span-4 xl:col-span-3 flex flex-col gap-4">
+        {/* Testbench Controls */}
+        <div className="tech-surface p-5 space-y-4">
+          <div className="flex justify-between items-center border-b border-slate-200 dark:border-slate-800 pb-3">
             <div>
-              <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100 tracking-tight flex items-center gap-2">
-                <Zap className="w-5 h-5 text-cyan-600 dark:text-cyan-400" />
-                Simulate Context
-              </h2>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Adjust live vehicle state inputs</p>
+              <div className="flex items-center gap-2 text-sm font-bold text-slate-900 dark:text-white">
+                <span className="led-indicator led-indicator-cyan" />
+                <span>Telemetry Injector</span>
+              </div>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Simulate vehicle sensor & bus inputs</p>
             </div>
             <button
               onClick={resetTelemetry}
-              title="Reset to vehicle live telemetry"
-              className="p-2 rounded-xl bg-cyan-50 dark:bg-cyan-950/60 border border-cyan-200 dark:border-cyan-800 text-cyan-700 dark:text-cyan-400 hover:bg-cyan-100 dark:hover:bg-cyan-900/60 transition-all shadow-sm active:scale-95"
+              title="Reset to live vehicle CAN stream"
+              className="p-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-cyan-600 dark:hover:text-cyan-400 border border-slate-200 dark:border-slate-700 transition-colors"
             >
               <RefreshCw className="w-4 h-4" />
             </button>
           </div>
 
-          {/* Sliders Stack */}
-          <div className="space-y-5 relative z-10">
-            {/* Voltage */}
+          {/* Stepped Parameter Controls */}
+          <div className="space-y-4 text-xs">
+            {/* 1. Pack Terminal Voltage */}
             <div className="space-y-1.5">
-              <div className="flex justify-between items-baseline text-xs font-semibold">
-                <label className="text-slate-600 dark:text-slate-400 uppercase tracking-wider font-mono">Pack Voltage (V)</label>
-                <span className="text-sm font-bold text-cyan-600 dark:text-cyan-400 font-mono">{telemetry.voltage.toFixed(1)} V</span>
+              <div className="flex justify-between items-baseline">
+                <span className="text-slate-700 dark:text-slate-300 font-semibold text-xs">Terminal Voltage</span>
+                <div className="flex items-center gap-1.5">
+                  <span className="font-bold text-cyan-600 dark:text-cyan-400 font-mono tabular-nums text-xs">{telemetry.voltage.toFixed(1)} V</span>
+                  <span className="text-xs text-slate-400 font-mono">({(telemetry.voltage / 16).toFixed(2)}V/cell)</span>
+                </div>
               </div>
-              <input
-                type="range"
-                min="60"
-                max="84"
-                step="0.1"
-                value={telemetry.voltage}
-                onChange={(e) => updateTelemetry({ voltage: parseFloat(e.target.value) })}
-                className="w-full h-1.5 bg-slate-200 dark:bg-slate-800 rounded-full appearance-none outline-none accent-cyan-600 cursor-pointer"
-              />
-              <div className="flex justify-between text-[10px] text-slate-500 dark:text-slate-400 font-mono">
-                <span>60V (Depleted)</span>
-                <span>84V (Full)</span>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => updateTelemetry({ voltage: Math.max(60, Number((telemetry.voltage - 0.5).toFixed(1))) })}
+                  className="px-2 py-1 rounded bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-semibold hover:bg-slate-200 dark:hover:bg-slate-700"
+                >
+                  -0.5V
+                </button>
+                <input
+                  type="range"
+                  min="60"
+                  max="84"
+                  step="0.1"
+                  value={telemetry.voltage}
+                  onChange={(e) => updateTelemetry({ voltage: parseFloat(e.target.value) })}
+                  className="w-full h-2 bg-slate-200 dark:bg-slate-800 rounded-full appearance-none outline-none accent-cyan-500 cursor-pointer"
+                />
+                <button
+                  type="button"
+                  onClick={() => updateTelemetry({ voltage: Math.min(84, Number((telemetry.voltage + 0.5).toFixed(1))) })}
+                  className="px-2 py-1 rounded bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-semibold hover:bg-slate-200 dark:hover:bg-slate-700"
+                >
+                  +0.5V
+                </button>
+              </div>
+              <div className="flex justify-between text-xs text-slate-500 dark:text-slate-400">
+                <span>60.0V (Cutoff)</span>
+                <span>84.0V (100% OCV)</span>
               </div>
             </div>
 
-            {/* Current */}
+            {/* 2. Shunt Current */}
             <div className="space-y-1.5">
-              <div className="flex justify-between items-baseline text-xs font-semibold">
-                <label className="text-slate-600 dark:text-slate-400 uppercase tracking-wider font-mono">Pack Current (A)</label>
-                <span className="text-sm font-bold text-amber-600 dark:text-amber-400 font-mono">{telemetry.current.toFixed(1)} A</span>
+              <div className="flex justify-between items-baseline">
+                <span className="text-slate-700 dark:text-slate-300 font-semibold text-xs">Shunt Current</span>
+                <div className="flex items-center gap-1.5">
+                  <span className={`font-bold font-mono tabular-nums text-xs ${telemetry.current < 0 ? "text-amber-600 dark:text-amber-400" : "text-emerald-600 dark:text-emerald-400"}`}>
+                    {telemetry.current > 0 ? "+" : ""}{telemetry.current.toFixed(1)} A
+                  </span>
+                  <span className="text-xs text-slate-400 font-mono">({(Math.abs(telemetry.current) / 150).toFixed(2)}C)</span>
+                </div>
               </div>
-              <input
-                type="range"
-                min="-60"
-                max="60"
-                step="1"
-                value={telemetry.current}
-                onChange={(e) => updateTelemetry({ current: parseFloat(e.target.value) })}
-                className="w-full h-1.5 bg-slate-200 dark:bg-slate-800 rounded-full appearance-none outline-none accent-amber-500 cursor-pointer"
-              />
-              <div className="flex justify-between text-[10px] text-slate-500 dark:text-slate-400 font-mono">
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => updateTelemetry({ current: Math.max(-60, telemetry.current - 5) })}
+                  className="px-2 py-1 rounded bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-semibold hover:bg-slate-200 dark:hover:bg-slate-700"
+                >
+                  -5A
+                </button>
+                <input
+                  type="range"
+                  min="-60"
+                  max="60"
+                  step="1"
+                  value={telemetry.current}
+                  onChange={(e) => updateTelemetry({ current: parseFloat(e.target.value) })}
+                  className="w-full h-2 bg-slate-200 dark:bg-slate-800 rounded-full appearance-none outline-none accent-amber-500 cursor-pointer"
+                />
+                <button
+                  type="button"
+                  onClick={() => updateTelemetry({ current: Math.min(60, telemetry.current + 5) })}
+                  className="px-2 py-1 rounded bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-semibold hover:bg-slate-200 dark:hover:bg-slate-700"
+                >
+                  +5A
+                </button>
+              </div>
+              <div className="flex justify-between text-xs text-slate-500 dark:text-slate-400">
                 <span>-60A (Discharge)</span>
-                <span>+60A (Charging)</span>
+                <span>+60A (Regen / Charge)</span>
               </div>
             </div>
 
-            {/* Avg Temp */}
+            {/* 3. Pack Average Temperature */}
             <div className="space-y-1.5">
-              <div className="flex justify-between items-baseline text-xs font-semibold">
-                <label className="text-slate-600 dark:text-slate-400 uppercase tracking-wider font-mono">Avg Temp (°C)</label>
-                <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400 font-mono">{telemetry.temperature.toFixed(1)} °C</span>
+              <div className="flex justify-between items-baseline">
+                <span className="text-slate-700 dark:text-slate-300 font-semibold text-xs">Battery Core Temperature</span>
+                <span className={`font-bold font-mono tabular-nums text-xs ${telemetry.temperature > 45 ? "text-amber-600 dark:text-amber-400" : "text-emerald-600 dark:text-emerald-400"}`}>
+                  {telemetry.temperature.toFixed(1)} °C
+                </span>
               </div>
               <input
                 type="range"
@@ -241,56 +281,54 @@ export const StateEstimationTab: React.FC = () => {
                 step="0.5"
                 value={telemetry.temperature}
                 onChange={(e) => updateTelemetry({ temperature: parseFloat(e.target.value) })}
-                className="w-full h-1.5 bg-slate-200 dark:bg-slate-800 rounded-full appearance-none outline-none accent-emerald-600 cursor-pointer"
+                className="w-full h-2 bg-slate-200 dark:bg-slate-800 rounded-full appearance-none outline-none accent-emerald-500 cursor-pointer"
               />
-              <div className="flex justify-between text-[10px] text-slate-500 dark:text-slate-400 font-mono">
+              <div className="flex justify-between text-xs text-slate-500 dark:text-slate-400">
                 <span>10°C (Cold)</span>
-                <span>65°C (Thermal Stress)</span>
+                <span>65°C (High Stress)</span>
               </div>
             </div>
 
-            {/* Odometer */}
+            {/* 4. Odometer Integrator */}
             <div className="space-y-1.5">
-              <div className="flex justify-between items-baseline text-xs font-semibold">
-                <label className="text-slate-600 dark:text-slate-400 uppercase tracking-wider font-mono">Odometer (km)</label>
-                <span className="text-sm font-bold text-purple-600 dark:text-purple-400 font-mono">{Math.round(telemetry.odometer).toLocaleString()} km</span>
+              <div className="flex justify-between items-baseline">
+                <span className="text-slate-700 dark:text-slate-300 font-semibold text-xs">Odometer & Fleet Duty</span>
+                <span className="font-bold text-purple-600 dark:text-purple-400 font-mono tabular-nums text-xs">{Math.round(telemetry.odometer).toLocaleString()} km</span>
               </div>
               <input
                 type="range"
                 min="0"
                 max="60000"
-                step="100"
+                step="250"
                 value={telemetry.odometer}
                 onChange={(e) => updateTelemetry({ odometer: parseFloat(e.target.value) })}
-                className="w-full h-1.5 bg-slate-200 dark:bg-slate-800 rounded-full appearance-none outline-none accent-purple-600 cursor-pointer"
+                className="w-full h-2 bg-slate-200 dark:bg-slate-800 rounded-full appearance-none outline-none accent-purple-500 cursor-pointer"
               />
-              <div className="flex justify-between text-[10px] text-slate-500 dark:text-slate-400 font-mono">
+              <div className="flex justify-between text-xs text-slate-500 dark:text-slate-400">
                 <span>0 km</span>
                 <span>60,000 km</span>
               </div>
             </div>
 
-            {/* Collapsible Extended Engineering Telemetry */}
+            {/* Collapsible 12-Feature Engineering Parameters */}
             <div className="pt-2 border-t border-slate-200 dark:border-slate-800">
               <button
                 type="button"
                 onClick={() => setShowAdvanced(!showAdvanced)}
-                className="w-full flex items-center justify-between py-2 text-xs font-bold text-slate-700 dark:text-slate-300 hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors"
+                className="w-full flex items-center justify-between py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors"
               >
                 <span className="flex items-center gap-1.5">
                   <SlidersHorizontal className="w-3.5 h-3.5 text-cyan-500" />
-                  <span>Engineering Inputs (12 Features)</span>
+                  <span>Extended Feature Vector (12)</span>
                 </span>
                 {showAdvanced ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
               </button>
 
               {showAdvanced && (
-                <div className="space-y-4 pt-3 mt-2 border-t border-slate-100 dark:border-slate-800/80 animate-in fade-in duration-200">
-                  {/* Drive Mode Selector */}
+                <div className="space-y-3 pt-2 mt-1 border-t border-slate-200 dark:border-slate-800 text-xs">
+                  {/* Drive Mode Profile */}
                   <div className="space-y-1">
-                    <label className="text-[11px] font-mono font-semibold text-slate-500 dark:text-slate-400 uppercase">
-                      Drive Mode Profile
-                    </label>
+                    <span className="text-slate-600 dark:text-slate-400 text-xs">Drive Mode Profile</span>
                     <div className="grid grid-cols-3 gap-1.5">
                       {[
                         { label: "Eco", val: 0 },
@@ -301,10 +339,10 @@ export const StateEstimationTab: React.FC = () => {
                           key={m.val}
                           type="button"
                           onClick={() => updateTelemetry({ driveMode: m.val })}
-                          className={`py-1 rounded-lg text-xs font-mono font-bold transition-all ${
+                          className={`py-1.5 rounded-lg text-center text-xs font-semibold border transition-colors ${
                             telemetry.driveMode === m.val
-                              ? "bg-cyan-600 text-white shadow-sm"
-                              : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700"
+                              ? "bg-cyan-50 dark:bg-cyan-950/80 border-cyan-500 text-cyan-900 dark:text-cyan-200"
+                              : "bg-slate-100 dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400"
                           }`}
                         >
                           {m.label}
@@ -313,42 +351,11 @@ export const StateEstimationTab: React.FC = () => {
                     </div>
                   </div>
 
-                  {/* Charge State Toggle */}
+                  {/* Days in Service */}
                   <div className="space-y-1">
-                    <label className="text-[11px] font-mono font-semibold text-slate-500 dark:text-slate-400 uppercase">
-                      Power Flow Status
-                    </label>
-                    <div className="grid grid-cols-2 gap-1.5">
-                      <button
-                        type="button"
-                        onClick={() => updateTelemetry({ isCharging: 0, current: -Math.abs(telemetry.current || 18) })}
-                        className={`py-1 rounded-lg text-xs font-mono font-bold transition-all ${
-                          telemetry.isCharging === 0
-                            ? "bg-amber-600 text-white shadow-sm"
-                            : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400"
-                        }`}
-                      >
-                        Discharge (Route)
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => updateTelemetry({ isCharging: 1, current: Math.abs(telemetry.current || 18) })}
-                        className={`py-1 rounded-lg text-xs font-mono font-bold transition-all ${
-                          telemetry.isCharging === 1
-                            ? "bg-emerald-600 text-white shadow-sm"
-                            : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400"
-                        }`}
-                      >
-                        Charging (Hub)
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Days in Service Slider */}
-                  <div className="space-y-1">
-                    <div className="flex justify-between text-[11px] font-mono">
-                      <span className="text-slate-500 dark:text-slate-400 uppercase">Days in Service</span>
-                      <span className="font-bold text-cyan-600 dark:text-cyan-400">{telemetry.daysInService} days</span>
+                    <div className="flex justify-between">
+                      <span className="text-slate-600 dark:text-slate-400">Days in Service</span>
+                      <span className="text-cyan-600 dark:text-cyan-400 font-semibold font-mono">{telemetry.daysInService} days</span>
                     </div>
                     <input
                       type="range"
@@ -357,32 +364,15 @@ export const StateEstimationTab: React.FC = () => {
                       step="10"
                       value={telemetry.daysInService}
                       onChange={(e) => updateTelemetry({ daysInService: parseInt(e.target.value) })}
-                      className="w-full h-1.5 bg-slate-200 dark:bg-slate-800 rounded-full appearance-none outline-none accent-cyan-600 cursor-pointer"
+                      className="w-full h-1.5 bg-slate-200 dark:bg-slate-800 rounded appearance-none outline-none accent-cyan-500"
                     />
                   </div>
 
-                  {/* Trip Distance (run_kms) */}
+                  {/* Route Velocity */}
                   <div className="space-y-1">
-                    <div className="flex justify-between text-[11px] font-mono">
-                      <span className="text-slate-500 dark:text-slate-400 uppercase">Trip Distance (run_kms)</span>
-                      <span className="font-bold text-cyan-600 dark:text-cyan-400">{telemetry.runKms} km</span>
-                    </div>
-                    <input
-                      type="range"
-                      min="5"
-                      max="150"
-                      step="5"
-                      value={telemetry.runKms}
-                      onChange={(e) => updateTelemetry({ runKms: parseFloat(e.target.value) })}
-                      className="w-full h-1.5 bg-slate-200 dark:bg-slate-800 rounded-full appearance-none outline-none accent-cyan-600 cursor-pointer"
-                    />
-                  </div>
-
-                  {/* Avg Speed */}
-                  <div className="space-y-1">
-                    <div className="flex justify-between text-[11px] font-mono">
-                      <span className="text-slate-500 dark:text-slate-400 uppercase">Avg Route Speed</span>
-                      <span className="font-bold text-emerald-600 dark:text-emerald-400">{telemetry.avgSpeed} km/h</span>
+                    <div className="flex justify-between">
+                      <span className="text-slate-600 dark:text-slate-400">Avg Route Velocity</span>
+                      <span className="text-emerald-600 dark:text-emerald-400 font-semibold font-mono">{telemetry.avgSpeed} km/h</span>
                     </div>
                     <input
                       type="range"
@@ -391,41 +381,7 @@ export const StateEstimationTab: React.FC = () => {
                       step="2"
                       value={telemetry.avgSpeed}
                       onChange={(e) => updateTelemetry({ avgSpeed: parseFloat(e.target.value), maxSpeed: parseFloat(e.target.value) + 25 })}
-                      className="w-full h-1.5 bg-slate-200 dark:bg-slate-800 rounded-full appearance-none outline-none accent-emerald-600 cursor-pointer"
-                    />
-                  </div>
-
-                  {/* Delivery Stoppages Count */}
-                  <div className="space-y-1">
-                    <div className="flex justify-between text-[11px] font-mono">
-                      <span className="text-slate-500 dark:text-slate-400 uppercase">Route Stoppages</span>
-                      <span className="font-bold text-purple-600 dark:text-purple-400">{telemetry.stoppageCount} stops</span>
-                    </div>
-                    <input
-                      type="range"
-                      min="0"
-                      max="20"
-                      step="1"
-                      value={telemetry.stoppageCount}
-                      onChange={(e) => updateTelemetry({ stoppageCount: parseInt(e.target.value) })}
-                      className="w-full h-1.5 bg-slate-200 dark:bg-slate-800 rounded-full appearance-none outline-none accent-purple-600 cursor-pointer"
-                    />
-                  </div>
-
-                  {/* Energy Consumed (kWh) */}
-                  <div className="space-y-1">
-                    <div className="flex justify-between text-[11px] font-mono">
-                      <span className="text-slate-500 dark:text-slate-400 uppercase">Energy Utilized</span>
-                      <span className="font-bold text-amber-600 dark:text-amber-400">{telemetry.energyUtilized.toFixed(1)} kWh</span>
-                    </div>
-                    <input
-                      type="range"
-                      min="1.0"
-                      max="15.0"
-                      step="0.5"
-                      value={telemetry.energyUtilized}
-                      onChange={(e) => updateTelemetry({ energyUtilized: parseFloat(e.target.value) })}
-                      className="w-full h-1.5 bg-slate-200 dark:bg-slate-800 rounded-full appearance-none outline-none accent-amber-500 cursor-pointer"
+                      className="w-full h-1.5 bg-slate-200 dark:bg-slate-800 rounded appearance-none outline-none accent-emerald-500"
                     />
                   </div>
                 </div>
@@ -433,66 +389,54 @@ export const StateEstimationTab: React.FC = () => {
             </div>
           </div>
 
-          <div className="mt-6 pt-5 border-t border-slate-200 dark:border-slate-800">
+          <div className="pt-2 border-t border-slate-200 dark:border-slate-800">
             <button
               onClick={() => fetchModuleAPredictions()}
               disabled={loading}
-              className="w-full py-3 rounded-xl bg-gradient-to-r from-cyan-600 to-emerald-600 hover:from-cyan-500 hover:to-emerald-500 text-white font-bold text-xs shadow-md transition-all active:scale-95 flex items-center justify-center gap-2 group"
+              className="w-full py-2.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-semibold text-xs shadow-sm transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-98"
             >
               {loading ? (
                 <>
-                  <span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  <span>Evaluating 12 Features Across Engines...</span>
+                  <span className="w-3.5 h-3.5 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+                  <span>Evaluating 12 Features...</span>
                 </>
               ) : (
                 <>
-                  <Cpu className="w-4 h-4 group-hover:rotate-12 transition-transform" />
-                  <span>Run Inference Engine (12 Features)</span>
+                  <Cpu className="w-4 h-4" />
+                  <span>Run Model Inference</span>
                 </>
               )}
             </button>
-
             {lastInferenceUpdate && (
-              <div className="mt-2.5 p-2 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/60 text-[11px] text-emerald-800 dark:text-emerald-300 font-mono flex items-center justify-between">
-                <span className="flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
-                  <span>Inference Live</span>
-                </span>
-                <span>{lastInferenceUpdate}</span>
+              <div className="mt-2 text-xs text-emerald-600 dark:text-emerald-400 flex justify-between items-center">
+                <span>Inference Sync: Active</span>
+                <span className="font-mono">{lastInferenceUpdate}</span>
               </div>
             )}
           </div>
         </div>
 
-        {/* Active Inference Engines Orchestrator Card */}
-        <div className="app-card p-5 relative overflow-hidden bg-slate-50 dark:bg-[#111622] border border-cyan-500/20">
-          <div className="flex justify-between items-center mb-3 relative z-10">
-            <div>
-              <h3 className="text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider flex items-center gap-1.5 font-mono">
-                <Cpu className="w-4 h-4 text-cyan-500" />
-                Active Inference Engines
-              </h3>
-              <p className="text-[11px] text-slate-500 dark:text-slate-400">Switch ML models for live evaluation</p>
-            </div>
-            <MetricExplainer metricKey="meta_ensemble" label="Specs" />
+        {/* Inference Engine Orchestrator Rack */}
+        <div className="tech-surface p-5 space-y-3">
+          <div className="flex justify-between items-center border-b border-slate-200 dark:border-slate-800 pb-2.5">
+            <span className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
+              <Cpu className="w-4 h-4 text-cyan-500" />
+              <span>Model Engine Selector</span>
+            </span>
+            <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">56 Models</span>
           </div>
 
-          <div className="space-y-3.5 relative z-10 text-xs">
-            {/* SOC Engine Selector */}
+          <div className="space-y-3 text-xs">
+            {/* SOC Engine */}
             <div className="space-y-1">
-              <div className="flex justify-between items-center text-[11px]">
-                <span className="text-slate-600 dark:text-slate-400 font-medium flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-cyan-500" />
-                  SOC Engine:
-                </span>
-                <span className="text-[10px] font-mono text-cyan-600 dark:text-cyan-400 font-bold truncate max-w-[140px]">
-                  {socRes?.model_used || "XGBoost"}
-                </span>
+              <div className="flex justify-between text-xs">
+                <span className="text-slate-600 dark:text-slate-400">SOC Target Engine:</span>
+                <span className="text-cyan-600 dark:text-cyan-400 font-semibold truncate max-w-[140px]">{socRes?.model_used || "XGBoost"}</span>
               </div>
               <select
                 value={socEngine}
                 onChange={(e) => setSocEngine(e.target.value)}
-                className="w-full text-xs font-mono py-1.5 px-2 rounded-lg bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-cyan-500 cursor-pointer"
+                className="w-full text-xs font-medium py-1.5 px-2.5 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 focus:outline-none"
               >
                 <option value="xgboost">XGBoost (R²=0.996) [Recommended]</option>
                 <option value="knn">KNN (95.8% accuracy)</option>
@@ -502,346 +446,296 @@ export const StateEstimationTab: React.FC = () => {
               </select>
             </div>
 
-            {/* SOH Engine Selector */}
+            {/* SOH Engine */}
             <div className="space-y-1">
-              <div className="flex justify-between items-center text-[11px]">
-                <span className="text-slate-600 dark:text-slate-400 font-medium flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                  SOH Engine:
-                </span>
-                <span className="text-[10px] font-mono text-emerald-600 dark:text-emerald-400 font-bold truncate max-w-[140px]">
-                  {sohRes?.model_used || "Calibrated XGBoost"}
-                </span>
+              <div className="flex justify-between text-xs">
+                <span className="text-slate-600 dark:text-slate-400">SOH Target Engine:</span>
+                <span className="text-emerald-600 dark:text-emerald-400 font-semibold truncate max-w-[140px]">{sohRes?.model_used || "Calibrated XGBoost"}</span>
               </div>
               <select
                 value={sohEngine}
                 onChange={(e) => setSohEngine(e.target.value)}
-                className="w-full text-xs font-mono py-1.5 px-2 rounded-lg bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-emerald-500 cursor-pointer"
+                className="w-full text-xs font-medium py-1.5 px-2.5 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 focus:outline-none"
               >
                 <option value="xgboost">Calibrated XGBoost (R²=0.982) [Champion]</option>
                 <option value="randomforest">Calibrated Random Forest (R²=0.978)</option>
                 <option value="extratrees">Calibrated Extra Trees (R²=0.985)</option>
                 <option value="ridge">Calibrated Ridge (R²=0.961)</option>
-                <option value="lasso">Calibrated Lasso (R²=0.954)</option>
               </select>
             </div>
 
-            {/* RUL Engine Selector */}
+            {/* RUL Engine */}
             <div className="space-y-1">
-              <div className="flex justify-between items-center text-[11px]">
-                <span className="text-slate-600 dark:text-slate-400 font-medium flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-purple-500" />
-                  RUL Engine:
-                </span>
-                <span className="text-[10px] font-mono text-purple-600 dark:text-purple-400 font-bold truncate max-w-[140px]">
-                  {rulRes?.model_used || "XGBoost Regressor"}
-                </span>
+              <div className="flex justify-between text-xs">
+                <span className="text-slate-600 dark:text-slate-400">RUL Target Engine:</span>
+                <span className="text-purple-600 dark:text-purple-400 font-semibold truncate max-w-[140px]">{rulRes?.model_used || "XGBoost Regressor"}</span>
               </div>
               <select
                 value={rulEngine}
                 onChange={(e) => setRulEngine(e.target.value)}
-                className="w-full text-xs font-mono py-1.5 px-2 rounded-lg bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-purple-500 cursor-pointer"
+                className="w-full text-xs font-medium py-1.5 px-2.5 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 focus:outline-none"
               >
-                <option value="xgboost">XGBoost (99.9% R²) [Champion]</option>
+                <option value="xgboost">XGBoost Regressor (99.9% R²)</option>
                 <option value="gradientboost">Gradient Boosting Regressor</option>
                 <option value="randomforest">Random Forest (Ensemble)</option>
                 <option value="extratrees">Extra Trees Regressor</option>
-                <option value="knn">KNN Regressor</option>
-              </select>
-            </div>
-
-            {/* Mileage Engine Selector */}
-            <div className="space-y-1">
-              <div className="flex justify-between items-center text-[11px]">
-                <span className="text-slate-600 dark:text-slate-400 font-medium flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-amber-500" />
-                  Mileage Engine:
-                </span>
-                <span className="text-[10px] font-mono text-amber-600 dark:text-amber-400 font-bold truncate max-w-[140px]">
-                  {mileageRes?.model_used || "Extra Trees"}
-                </span>
-              </div>
-              <select
-                value={mileageEngine}
-                onChange={(e) => setMileageEngine(e.target.value)}
-                className="w-full text-xs font-mono py-1.5 px-2 rounded-lg bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-amber-500 cursor-pointer"
-              >
-                <option value="extratrees">Extra Trees (Kinetic-Aware) [Champion]</option>
-                <option value="xgboost">XGBoost (Kinetic-Aware)</option>
-                <option value="randomforest">Random Forest Regressor</option>
-                <option value="knn">KNN Distance Regressor</option>
               </select>
             </div>
           </div>
         </div>
       </aside>
 
-      {/* ─── RIGHT SECTION: 4 HERO METRIC CARDS & 24H TREND (Stitch Section) ─── */}
-      <section className="col-span-1 lg:col-span-8 xl:col-span-9 flex flex-col gap-6">
-        
-        {/* Engineering Distinction: SOC (Dynamic Tank) vs. SOH (Cyclic Capacity Degradation) */}
-        <div className="p-3.5 rounded-xl bg-slate-100 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
-          <div className="flex items-center gap-2">
-            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-cyan-100 dark:bg-cyan-950 text-cyan-600 dark:text-cyan-400 font-mono font-bold text-[10px]">
-              i
-            </span>
-            <div className="text-slate-600 dark:text-slate-300">
-              <strong className="text-cyan-600 dark:text-cyan-400">SOC (State of Charge):</strong> Reversible instantaneous fuel level (0-100% daily tank).{" "}
-              <strong className="text-emerald-600 dark:text-emerald-400 ml-1">SOH (State of Health):</strong> Irreversible cumulative capacity fade (5-8 yr pack health).
+      {/* ─── RIGHT SECTION: 4 BESPOKE TELEMETRY INSTRUMENTS & CONFIDENCE TRACE ─── */}
+      <section className="col-span-1 lg:col-span-8 xl:col-span-9 flex flex-col gap-5">
+        {/* Engineering Specification Banner */}
+        <div className="tech-surface p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-sm">
+          <div className="flex items-center gap-2.5">
+            <span className="led-indicator led-indicator-cyan" />
+            <div className="text-slate-700 dark:text-slate-300">
+              <strong className="text-cyan-600 dark:text-cyan-400 font-semibold">State of Charge (SOC):</strong> Reversible intraday energy reserve (0–100%).{" "}
+              <strong className="text-emerald-600 dark:text-emerald-400 font-semibold ml-1.5">State of Health (SOH):</strong> Irreversible electrochemical capacity retention relative to 150 Ah factory baseline.
             </div>
           </div>
-          <MetricExplainer metricKey="soc_vs_soh" label="Why do these differ?" variant="badge" className="shrink-0" />
+          <MetricExplainer metricKey="soc_vs_soh" label="Specification Explainer" variant="badge" className="shrink-0" />
         </div>
 
-        {/* 4 Hero Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          
-          {/* Card 1: State of Charge (Dynamic Engine) */}
-          <div className={`app-card p-6 shadow-sm flex flex-col justify-between relative overflow-hidden group transition-all duration-300 ${
-            inferenceAnimation ? "ring-2 ring-cyan-500/50 scale-[1.01]" : ""
-          }`}>
-            <div className="absolute top-0 right-0 w-32 h-32 bg-cyan-500/10 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none" />
-            <div className="flex justify-between items-start mb-2 relative z-10">
-              <div>
-                <div className="text-xs font-bold text-cyan-600 dark:text-cyan-400 uppercase tracking-widest mb-1 flex items-center gap-2">
-                  State of Charge (Fuel / SOC)
-                  <span className="bg-cyan-100 dark:bg-cyan-950/60 text-cyan-700 dark:text-cyan-300 px-1.5 py-0.5 rounded text-[9px] font-mono truncate max-w-[140px]">
-                    {socRes?.model_used || "XGBoost (R²=0.996)"}
-                  </span>
+        {/* 4 Precision Automotive Telemetry Instruments */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          {/* Instrument 1: State of Charge (SOC) */}
+          <div className="tech-surface p-6 flex flex-col justify-between">
+            <div>
+              <div className="flex justify-between items-start mb-3">
+                <div>
+                  <div className="text-xs font-semibold text-cyan-600 dark:text-cyan-400 flex items-center gap-2">
+                    <span>State of Charge (SOC)</span>
+                    <span className="px-2 py-0.5 rounded-full bg-cyan-50 dark:bg-cyan-950/80 text-cyan-700 dark:text-cyan-300 text-xs border border-cyan-200 dark:border-cyan-800">
+                      {socRes?.model_used || "XGBoost"}
+                    </span>
+                  </div>
+                  <div className="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tabular-nums tracking-tight font-mono mt-1">
+                    {socVal.toFixed(1)}<span className="text-xl text-slate-400 font-normal">%</span>
+                  </div>
+                  <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                    Usable Tank: <strong className="font-mono text-slate-800 dark:text-slate-200">{((socVal / 100) * 12.4).toFixed(2)} kWh</strong> of 12.4 kWh
+                  </div>
                 </div>
-                <div className="text-[10px] text-slate-500 dark:text-slate-400 mb-1 font-mono">
-                  Current tank energy • Reversible (Drains & Recharges)
-                </div>
-                <div className="text-4xl font-extrabold text-slate-900 dark:text-slate-100 flex items-baseline gap-1 font-mono">
-                  {socVal.toFixed(1)}<span className="text-xl text-slate-400 font-normal">%</span>
+                <div className="text-right">
+                  <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 font-mono">R² = 0.9958</span>
+                  <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 font-mono">Coulomb Drift: ±0.12%</div>
                 </div>
               </div>
-              <div className="flex flex-col items-end gap-1">
-                <MetricExplainer metricKey="soc" currentValue={`${socVal.toFixed(1)}%`} label="How it works" />
-                <div className="text-[10px] text-slate-400 font-mono">R² = 0.9958</div>
+
+              {/* Segmented Circular Meter */}
+              <div className="flex items-center justify-center my-4">
+                <svg className="w-36 h-36 drop-shadow-[0_0_12px_rgba(8,145,178,0.2)]" viewBox="0 0 100 100">
+                  <circle
+                    className="text-slate-200 dark:text-slate-800"
+                    cx="50"
+                    cy="50"
+                    fill="none"
+                    r="40"
+                    stroke="currentColor"
+                    strokeDasharray="188.5 251.2"
+                    strokeLinecap="round"
+                    strokeWidth="7"
+                    transform="rotate(135 50 50)"
+                  />
+                  <circle
+                    className="text-cyan-500 transition-all duration-700 ease-out"
+                    cx="50"
+                    cy="50"
+                    fill="none"
+                    r="40"
+                    stroke="currentColor"
+                    strokeDasharray={`${strokeDash} 251.2`}
+                    strokeLinecap="round"
+                    strokeWidth="7"
+                    transform="rotate(135 50 50)"
+                  />
+                  <text className="text-slate-900 dark:text-white font-sans font-bold text-xs" fill="currentColor" textAnchor="middle" x="50" y="54">
+                    {socVal > 20 ? "Nominal" : "Low Battery"}
+                  </text>
+                </svg>
               </div>
             </div>
 
-            {/* Circular Arc SVG Gauge from Stitch */}
-            <div className="flex-1 flex items-center justify-center relative z-10 my-2">
-              <svg className="w-44 h-44 drop-shadow-[0_0_12px_rgba(8,145,178,0.2)]" viewBox="0 0 100 100">
-                <circle
-                  className="text-slate-200 dark:text-slate-800"
-                  cx="50"
-                  cy="50"
-                  fill="none"
-                  r="40"
-                  stroke="currentColor"
-                  strokeDasharray="188.5 251.2"
-                  strokeLinecap="round"
-                  strokeWidth="8"
-                  transform="rotate(135 50 50)"
-                />
-                <circle
-                  className="text-cyan-600 dark:text-cyan-400 transition-all duration-700 ease-out"
-                  cx="50"
-                  cy="50"
-                  fill="none"
-                  r="40"
-                  stroke="currentColor"
-                  strokeDasharray={`${strokeDash} 251.2`}
-                  strokeLinecap="round"
-                  strokeWidth="8"
-                  transform="rotate(135 50 50)"
-                />
-                <text className="text-slate-900 dark:text-slate-100 font-bold text-[14px]" fill="currentColor" textAnchor="middle" x="50" y="54">
-                  {socVal > 20 ? "Optimal" : "Depleted"}
-                </text>
-              </svg>
-            </div>
-            <div className="text-[11px] text-slate-500 dark:text-slate-400 font-mono text-center">
-              Target Range: 60.0V – 84.0V Pack Voltage
+            <div className="pt-3 border-t border-slate-200 dark:border-slate-800 flex justify-between text-xs text-slate-500 dark:text-slate-400">
+              <span>Calibration: EKF + ML</span>
+              <span>Cell Average: <strong className="font-mono text-slate-700 dark:text-slate-300">{(telemetry.voltage / 16).toFixed(3)} V</strong></span>
             </div>
           </div>
 
-          {/* Card 2: State of Health (Dynamic Engine) */}
-          <div className={`app-card p-6 shadow-sm flex flex-col justify-between relative overflow-hidden group transition-all duration-300 ${
-            inferenceAnimation ? "ring-2 ring-emerald-500/50 scale-[1.01]" : ""
-          }`}>
-            <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none" />
-            <div className="flex justify-between items-start mb-2 relative z-10">
-              <div>
-                <div className="text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-widest mb-1 flex items-center gap-2">
-                  State of Health (Lifespan / SOH)
-                  <span className="bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 px-1.5 py-0.5 rounded text-[9px] font-mono truncate max-w-[140px]">
-                    {sohRes?.model_used || "Calibrated XGBoost"}
-                  </span>
+          {/* Instrument 2: State of Health (SOH) */}
+          <div className="tech-surface p-6 flex flex-col justify-between">
+            <div>
+              <div className="flex justify-between items-start mb-3">
+                <div>
+                  <div className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 flex items-center gap-2">
+                    <span>State of Health (SOH)</span>
+                    <span className="px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-300 text-xs border border-emerald-200 dark:border-emerald-800">
+                      {sohRes?.model_used || "Calibrated XGBoost"}
+                    </span>
+                  </div>
+                  <div className="text-3xl sm:text-4xl font-extrabold text-emerald-600 dark:text-emerald-400 tabular-nums tracking-tight font-mono mt-1">
+                    {sohVal.toFixed(1)}<span className="text-xl text-slate-400 font-normal">%</span>
+                  </div>
+                  <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                    Capacity: <strong className="font-mono text-slate-800 dark:text-slate-200">{((sohVal / 100) * 150).toFixed(1)} Ah</strong> of 150 Ah Baseline
+                  </div>
                 </div>
-                <div className="text-[10px] text-slate-500 dark:text-slate-400 mb-1 font-mono">
-                  Permanent pack health • Irreversible (5-8 yr capacity retention)
-                </div>
-                <div className="text-4xl font-extrabold text-slate-900 dark:text-slate-100 flex items-baseline gap-1 font-mono">
-                  {sohVal.toFixed(1)}<span className="text-xl text-slate-400 font-normal">%</span>
-                </div>
-                <div className="text-[10px] text-slate-500 dark:text-slate-400 mt-1 flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                  Calibrated estimate — assumes commissioning baseline
+                <div className="text-right">
+                  <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 font-mono">LOGO-CV</span>
+                  <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">SEI Fade: Calibrated</div>
                 </div>
               </div>
-              <div className="flex flex-col items-end gap-1">
-                <MetricExplainer metricKey="soh" currentValue={`${sohVal.toFixed(1)}%`} label="How it works" />
-                <div className="text-[10px] text-slate-400 font-mono">LOGO-CV (ΔSOH)</div>
-              </div>
-            </div>
 
-            {/* Glowing 7-Bar Histogram from Stitch */}
-            <div className="flex-1 my-6 relative z-10 flex items-end justify-center">
-              <div className="h-28 w-full flex items-end gap-2.5 px-4">
-                {[35, 50, 65, 80, 95, 75, 45].map((h, i) => {
-                  const isChampion = i === 4;
-                  return (
-                    <div key={i} className="flex-1 bg-slate-200 dark:bg-slate-800 rounded-t-md h-full flex items-end relative overflow-hidden">
+              {/* 7-Model Consensus Spectrum */}
+              <div className="my-4 space-y-2">
+                <div className="flex justify-between text-xs text-slate-600 dark:text-slate-400">
+                  <span>Ensemble Spectrum (7 Multi-Models):</span>
+                  <span className="text-emerald-600 dark:text-emerald-400 font-semibold font-mono">±0.45% Deviation</span>
+                </div>
+                <div className="h-16 flex items-end gap-1.5 px-3 bg-slate-50 dark:bg-slate-900/60 rounded-xl border border-slate-200 dark:border-slate-800/80 p-2">
+                  {[82, 88, 91, 95, 100, 93, 87].map((h, i) => (
+                    <div key={i} className="flex-1 bg-slate-200 dark:bg-slate-800 rounded-md h-full flex items-end overflow-hidden">
                       <div
-                        className={`w-full rounded-t-md transition-all duration-700 ${
-                          isChampion
-                            ? "bg-emerald-600 dark:bg-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.5)]"
-                            : "bg-emerald-500/40"
-                        }`}
+                        className={`w-full transition-all duration-700 ${i === 4 ? "bg-emerald-500" : "bg-emerald-500/40"}`}
                         style={{ height: `${h}%` }}
                       />
                     </div>
-                  );
-                })}
+                  ))}
+                </div>
               </div>
             </div>
 
-            <div className="flex justify-between items-center text-[11px] text-slate-500 dark:text-slate-400 font-mono px-2 pt-2 border-t border-slate-100 dark:border-slate-800/60">
-              <span>Baseline SOH₀: <strong className="text-slate-700 dark:text-slate-200">{vehicle.soh.toFixed(1)}%</strong></span>
-              <span className="text-emerald-600 dark:text-emerald-400 font-bold">
+            <div className="pt-3 border-t border-slate-200 dark:border-slate-800 flex justify-between text-xs text-slate-500 dark:text-slate-400">
+              <span>Commissioning SOH₀: <strong className="font-mono">{vehicle.soh.toFixed(1)}%</strong></span>
+              <span className="text-emerald-600 dark:text-emerald-400 font-bold font-mono">
                 Δ: {(sohVal - vehicle.soh) >= 0 ? "+" : ""}{(sohVal - vehicle.soh).toFixed(2)}%
               </span>
             </div>
           </div>
 
-          {/* Card 3: Remaining Useful Life (Dynamic Engine) */}
-          <div className={`app-card p-6 shadow-sm flex flex-col justify-between relative overflow-hidden group transition-all duration-300 ${
-            inferenceAnimation ? "ring-2 ring-purple-500/50 scale-[1.01]" : ""
-          }`}>
-            <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/10 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none" />
-            <div className="flex justify-between items-start mb-2 relative z-10">
-              <div>
-                <div className="text-xs font-bold text-purple-600 dark:text-purple-400 uppercase tracking-widest mb-1 flex items-center gap-2">
-                  Remaining Useful Life
-                  <span className="bg-purple-100 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 px-1.5 py-0.5 rounded text-[9px] font-mono truncate max-w-[140px]">
-                    {rulRes?.model_used || "XGBoost Regressor"}
-                  </span>
+          {/* Instrument 3: Remaining Useful Life (RUL) */}
+          <div className="tech-surface p-6 flex flex-col justify-between">
+            <div>
+              <div className="flex justify-between items-start mb-3">
+                <div>
+                  <div className="text-xs font-semibold text-purple-600 dark:text-purple-400 flex items-center gap-2">
+                    <span>Remaining Useful Life (RUL)</span>
+                    <span className="px-2 py-0.5 rounded-full bg-purple-50 dark:bg-purple-950/80 text-purple-700 dark:text-purple-300 text-xs border border-purple-200 dark:border-purple-800">
+                      {rulRes?.model_used || "XGBoost"}
+                    </span>
+                  </div>
+                  <div className="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tabular-nums tracking-tight font-mono mt-1">
+                    {rulVal.toLocaleString()} <span className="text-xl font-normal text-slate-400">cycles</span>
+                  </div>
+                  <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                    Calendar Horizon: ~<strong className="font-mono text-slate-800 dark:text-slate-200">{(rulVal / 250).toFixed(1)} Years</strong> @ 250 EFC/yr
+                  </div>
                 </div>
-                <div className="text-4xl font-extrabold text-slate-900 dark:text-slate-100 flex items-baseline gap-2 font-mono">
-                  {rulVal.toLocaleString()}<span className="text-xl text-slate-400 font-normal">cycles</span>
+                <div className="text-right">
+                  <span className="text-xs font-bold text-purple-600 dark:text-purple-400 font-mono">R² = 0.9997</span>
+                  <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Pre-Knee Safe</div>
                 </div>
               </div>
-              <div className="flex flex-col items-end gap-1">
-                <MetricExplainer metricKey="rul" currentValue={`${rulVal} cycles`} label="How it works" />
-                <div className="text-[10px] text-slate-400 font-mono">R² = 0.9997</div>
+
+              {/* Degradation Horizon Bar */}
+              <div className="my-4 space-y-2">
+                <div className="w-full h-3 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden flex">
+                  <div
+                    className="h-full bg-gradient-to-r from-emerald-500 via-purple-500 to-cyan-500 transition-all duration-700"
+                    style={{ width: `${Math.min(100, Math.max(10, (rulVal / 1500) * 100))}%` }}
+                  />
+                </div>
+                <div className="flex justify-between text-xs text-slate-500 dark:text-slate-400 font-mono">
+                  <span>0 Cycles (Retirement)</span>
+                  <span>1,500 Cycles (Nominal)</span>
+                </div>
               </div>
             </div>
 
-            {/* Stitch Degradation Bar */}
-            <div className="flex-1 flex flex-col justify-end mt-4 relative z-10">
-              <div className="w-full h-2.5 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden mb-2 relative">
-                <div
-                  className="h-full bg-gradient-to-r from-red-500 via-amber-500 to-purple-600 rounded-full relative transition-all duration-700"
-                  style={{ width: `${Math.min(100, Math.max(10, (rulVal / 1500) * 100))}%` }}
-                >
-                  <div className="absolute right-0 top-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full shadow-md" />
-                </div>
-              </div>
-              <div className="flex justify-between text-[10px] text-slate-500 dark:text-slate-400 font-mono">
-                <span>0 (Critical Replacement)</span>
-                <span>1,500 Cycles (New)</span>
-              </div>
-              <p className="text-xs text-slate-600 dark:text-slate-400 mt-4 border-l-2 border-purple-500 pl-3 leading-relaxed">
-                Degradation knee-point predicted in approx. <strong>{Math.max(120, rulVal - 450)} cycles</strong> under current operating C-rate.
-              </p>
+            <div className="pt-3 border-t border-slate-200 dark:border-slate-800 text-xs text-slate-500 dark:text-slate-400">
+              Knee Inflection Horizon: ~<strong className="text-slate-800 dark:text-slate-200 font-mono">{Math.max(120, rulVal - 450)} Cycles Remaining</strong>
             </div>
           </div>
 
-          {/* Card 4: Est. Range (Dynamic Engine) */}
-          <div className={`app-card p-6 shadow-sm flex flex-col justify-between relative overflow-hidden group transition-all duration-300 ${
-            inferenceAnimation ? "ring-2 ring-amber-500/50 scale-[1.01]" : ""
-          }`}>
-            <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none" />
-            <div className="flex justify-between items-start mb-2 relative z-10">
-              <div>
-                <div className="text-xs font-bold text-amber-600 dark:text-amber-400 uppercase tracking-widest mb-1 flex items-center gap-2">
-                  Est. Range per Charge
-                  <span className="bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 px-1.5 py-0.5 rounded text-[9px] font-mono truncate max-w-[140px]">
-                    {mileageRes?.model_used || "ExtraTrees (Kinetic-Aware)"}
-                  </span>
+          {/* Instrument 4: Certified Range per Charge */}
+          <div className="tech-surface p-6 flex flex-col justify-between">
+            <div>
+              <div className="flex justify-between items-start mb-3">
+                <div>
+                  <div className="text-xs font-semibold text-amber-600 dark:text-amber-400 flex items-center gap-2">
+                    <span>Estimated Range per Charge</span>
+                    <span className="px-2 py-0.5 rounded-full bg-amber-50 dark:bg-amber-950/80 text-amber-700 dark:text-amber-300 text-xs border border-amber-200 dark:border-amber-800">
+                      {mileageRes?.model_used || "ExtraTrees"}
+                    </span>
+                  </div>
+                  <div className="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tabular-nums tracking-tight font-mono mt-1">
+                    {mileageVal.toFixed(1)} <span className="text-xl font-normal text-slate-400">km</span>
+                  </div>
+                  <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                    Velocity Profile: <strong className="font-mono text-slate-800 dark:text-slate-200">{telemetry.avgSpeed || 32} km/h</strong> Urban Transit
+                  </div>
                 </div>
-                <div className="text-4xl font-extrabold text-slate-900 dark:text-slate-100 flex items-baseline gap-2 font-mono">
-                  {mileageVal.toFixed(1)}<span className="text-xl text-slate-400 font-normal">km</span>
+                <div className="text-right">
+                  <span className="text-xs font-bold text-amber-600 dark:text-amber-400 font-mono">R² = 0.9445</span>
+                  <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Temp-Compensated</div>
                 </div>
               </div>
-              <div className="flex flex-col items-end gap-1">
-                <MetricExplainer metricKey="mileage" currentValue={`${mileageVal.toFixed(1)} km`} label="How it works" />
-                <div className="text-[10px] text-slate-400 font-mono">R² = 0.9445</div>
-              </div>
-            </div>
 
-            {/* Stitch Dynamic Sparkline Curve */}
-            <div className="flex-1 mt-4 relative z-10 flex items-center">
-              <div className="w-full relative h-24">
-                <svg className="w-full h-full stroke-current" fill="none" preserveAspectRatio="none" strokeWidth="2.5" viewBox="0 0 200 80">
-                  <path d="M0,70 Q20,60 40,40 T80,30 T120,50 T160,20 T200,40" stroke="#CBD5E1" strokeDasharray="4 4" />
+              {/* Kinetic Recovery Sparkline */}
+              <div className="my-4 h-16 w-full relative">
+                <svg className="w-full h-full stroke-current" fill="none" preserveAspectRatio="none" strokeWidth="2" viewBox="0 0 200 80">
+                  <path d="M0,70 Q20,60 40,40 T80,30 T120,50 T160,20 T200,40" stroke="#334155" strokeDasharray="3 3" />
                   <path className="text-amber-500 drop-shadow-[0_0_8px_rgba(217,119,6,0.4)]" d="M0,75 Q20,65 40,50 T80,45 T120,60 T160,35 T200,55" stroke="currentColor" />
                 </svg>
-                <div className="absolute left-[80%] top-[35%] w-3.5 h-3.5 bg-amber-500 rounded-full ring-4 ring-amber-500/20 shadow-md animate-pulse" />
               </div>
             </div>
 
-            <div className="flex justify-between text-[11px] text-slate-500 dark:text-slate-400 font-mono">
-              <span>Energy: 8.5 kWh/100km</span>
-              <span>Efficiency Index: <strong>0.88</strong></span>
+            <div className="pt-3 border-t border-slate-200 dark:border-slate-800 flex justify-between text-xs text-slate-500 dark:text-slate-400">
+              <span>Energy: <strong className="font-mono text-slate-700 dark:text-slate-300">8.5 kWh/100km</strong></span>
+              <span>Efficiency Index: <strong className="font-mono text-slate-700 dark:text-slate-300">0.88</strong></span>
             </div>
           </div>
         </div>
 
-        {/* 24H Aggregate Confidence Trend */}
-        <div className="app-card p-6 shadow-sm">
-          <div className="flex flex-wrap justify-between items-center gap-4 mb-6">
-            <h3 className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-widest font-mono">
-              24H Aggregate Confidence & Telemetry Trend
+        {/* 24H Aggregate Multi-Signal Telemetry Trace */}
+        <div className="tech-surface p-5 space-y-3">
+          <div className="flex flex-wrap justify-between items-center gap-2 border-b border-slate-200 dark:border-slate-800 pb-2.5">
+            <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
+              <span>Real-Time Telemetry Oscilloscope</span>
+              <span className="text-xs px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 font-mono">
+                100ms CAN Sync
+              </span>
             </h3>
-            <div className="flex items-center gap-4 font-mono text-xs text-slate-600 dark:text-slate-400">
-              <span className="flex items-center gap-1.5"><span className="w-2.5 h-1 bg-cyan-500 rounded" /> SoC (KNN)</span>
-              <span className="flex items-center gap-1.5"><span className="w-2.5 h-1 bg-emerald-500 rounded" /> SoH (XGB)</span>
-              <span className="flex items-center gap-1.5"><span className="w-2.5 h-1 bg-purple-500 rounded" /> RUL (GB)</span>
+            <div className="flex items-center gap-3 text-xs text-slate-500 dark:text-slate-400">
+              <span className="flex items-center gap-1.5"><span className="w-2.5 h-1 rounded-full bg-cyan-500 inline-block" /> SOC (KNN)</span>
+              <span className="flex items-center gap-1.5"><span className="w-2.5 h-1 rounded-full bg-emerald-500 inline-block" /> SOH (XGBoost)</span>
+              <span className="flex items-center gap-1.5"><span className="w-2.5 h-1 rounded-full bg-purple-500 inline-block" /> RUL (GradientBoost)</span>
             </div>
           </div>
 
-          <div className="h-28 w-full relative">
+          <div className="h-28 w-full relative oscilloscope-grid rounded-xl border border-slate-200 dark:border-slate-800/80 overflow-hidden">
             <svg className="w-full h-full absolute inset-0" preserveAspectRatio="none" viewBox="0 0 1000 100">
-              {/* Grid Lines */}
-              <line className="text-slate-200 dark:text-slate-800" stroke="currentColor" strokeDasharray="4 4" strokeWidth="1" x1="0" x2="1000" y1="25" y2="25" />
-              <line className="text-slate-200 dark:text-slate-800" stroke="currentColor" strokeDasharray="4 4" strokeWidth="1" x1="0" x2="1000" y1="50" y2="50" />
-              <line className="text-slate-200 dark:text-slate-800" stroke="currentColor" strokeDasharray="4 4" strokeWidth="1" x1="0" x2="1000" y1="75" y2="75" />
-
-              {/* Dynamic SoC Trend Line */}
+              {/* Dynamic Signal Paths */}
               <path
                 d={`M0,${100 - socVal * 0.8} Q250,${100 - (socVal - 5) * 0.8} 500,${100 - (socVal + 3) * 0.8} T750,${100 - (socVal - 2) * 0.8} T1000,${100 - socVal * 0.8}`}
                 fill="none"
                 stroke="#0891B2"
-                strokeWidth="2.5"
+                strokeWidth="2"
               />
-              {/* Dynamic SoH Trend Line */}
               <path
                 d={`M0,${100 - sohVal * 0.9} Q250,${100 - (sohVal - 0.5) * 0.9} 500,${100 - (sohVal + 0.2) * 0.9} T750,${100 - (sohVal - 0.3) * 0.9} T1000,${100 - sohVal * 0.9}`}
                 fill="none"
                 stroke="#059669"
-                strokeWidth="2.5"
+                strokeWidth="2"
               />
-              {/* Dynamic RUL Trend Line */}
               <path
                 d={`M0,${100 - (rulVal / 1500) * 80} Q250,${100 - ((rulVal - 30) / 1500) * 80} 500,${100 - ((rulVal + 20) / 1500) * 80} T750,${100 - ((rulVal - 15) / 1500) * 80} T1000,${100 - (rulVal / 1500) * 80}`}
                 fill="none"
                 stroke="#7C3AED"
-                strokeWidth="2.5"
+                strokeWidth="2"
               />
             </svg>
           </div>

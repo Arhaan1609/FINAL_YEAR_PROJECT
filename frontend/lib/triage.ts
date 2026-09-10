@@ -106,9 +106,9 @@ export function getVehicleTriage(v: { status: string }): TriageLevel {
 // ─── Label helpers ────────────────────────────────────────────────────────────
 
 export function triageLabel(level: TriageLevel): string {
-  if (level === "CRITICAL") return "SERVICE HOLD";
-  if (level === "WARNING")  return "ROUTE ADVISORY";
-  return "APPROVED FOR DISPATCH";
+  if (level === "CRITICAL") return "Service Hold";
+  if (level === "WARNING")  return "Route Advisory";
+  return "Ready to Dispatch";
 }
 
 export function triageBadgeClass(level: TriageLevel): string {
