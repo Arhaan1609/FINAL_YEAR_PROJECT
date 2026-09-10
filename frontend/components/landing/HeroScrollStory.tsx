@@ -200,8 +200,8 @@ export const HeroScrollStory: React.FC = () => {
               />
             </div>
 
-            <p className="text-xs sm:text-base text-slate-300 font-normal leading-relaxed max-w-xl">
-              Enterprise battery intelligence for commercial EV fleets. Real-time state estimation, multi-zone thermal runaway prevention with a 99.7% F1 score, and predictive degradation prognostics powered by 74 production AI models.
+            <p className="text-xs sm:text-base text-slate-300 font-normal leading-relaxed max-w-2xl">
+              Enterprise battery intelligence platform for commercial EV fleets. Evaluates live battery charge and health, simulates thermodynamic cross-coupling between the powertrain and battery pack to prevent fire hazards before physical sensors trigger, and forecasts sudden aging collapse hundreds of cycles ahead using 74 production AI models.
             </p>
 
             {/* Quick Action CTAs */}
@@ -236,8 +236,8 @@ export const HeroScrollStory: React.FC = () => {
                 <div className="text-sm sm:text-base font-extrabold font-mono text-emerald-400">74 Pipelines</div>
               </div>
               <div className="px-3 py-1.5 border-r border-white/10">
-                <div className="text-[10px] font-mono text-slate-400 uppercase">Thermal F1</div>
-                <div className="text-sm sm:text-base font-extrabold font-mono text-purple-400">99.71%</div>
+                <div className="text-[10px] font-mono text-slate-400 uppercase">Thermal Twin</div>
+                <div className="text-sm sm:text-base font-extrabold font-mono text-purple-400">3-Zone Mesh</div>
               </div>
               <div className="px-3 py-1.5">
                 <div className="text-[10px] font-mono text-slate-400 uppercase">REST API</div>
@@ -276,9 +276,14 @@ export const HeroScrollStory: React.FC = () => {
               <h3 className="text-base sm:text-lg font-bold text-white leading-snug">
                 Sub-Second CAN Telematics Ingestion
               </h3>
-              <p className="text-xs text-slate-300 font-normal leading-relaxed">
-                Streams 28 high-frequency CAN telemetry channels at 500 kbps, monitoring dynamic discharge currents and localized voltage sag for instant battery state estimation.
-              </p>
+              <div className="space-y-1.5 text-xs font-normal leading-relaxed">
+                <p className="text-slate-300">
+                  <span className="font-semibold text-emerald-400">What it does:</span> Continuously ingests 28 high-frequency CAN telemetry channels every 100 milliseconds, monitoring dynamic discharge currents, cell voltage sag, and power draws directly from the vehicle ECU.
+                </p>
+                <p className="text-slate-400">
+                  <span className="font-semibold text-cyan-400">How it helps:</span> Standard dashboards rely on simple Coulomb counting that drifts over time, leading to phantom mileage drops. This pipeline corrects sensor drift in real time, giving fleet dispatchers and drivers trustworthy battery percentages so vehicles never stall mid-delivery.
+                </p>
+              </div>
             </div>
           </div>
 
@@ -303,7 +308,7 @@ export const HeroScrollStory: React.FC = () => {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-slate-500">Champion SOC Regressor:</span>
-                  <span className="font-bold text-emerald-400">KNN (99.58% R²)</span>
+                  <span className="font-bold text-emerald-400">KNN + Coulomb Sync</span>
                 </div>
               </div>
             </div>
@@ -328,14 +333,19 @@ export const HeroScrollStory: React.FC = () => {
                   <Flame className="w-3 h-3" />
                   PILLAR B • THERMODYNAMICS
                 </span>
-                <span className="text-[10px] font-mono text-emerald-400 font-bold">F1 = 0.9971</span>
+                <span className="text-[10px] font-mono text-emerald-400 font-bold">Cross-Zone Heat Mesh</span>
               </div>
               <h3 className="text-base sm:text-lg font-bold text-white leading-snug">
                 3-Zone Cyber-Physical Thermal Safety Twin
               </h3>
-              <p className="text-xs text-slate-300 font-light leading-relaxed">
-                Synchronously tracks heat flux between the 12.4 kWh battery pack, inverter MOSFETs, and motor stator to eliminate thermal runaway.
-              </p>
+              <div className="space-y-1.5 text-xs font-normal leading-relaxed">
+                <p className="text-slate-300">
+                  <span className="font-semibold text-amber-400">What it does:</span> Simulates thermodynamic heat exchange between the 12.4 kWh battery pack, inverter MOSFETs, and powertrain motor using physical heat transfer equations.
+                </p>
+                <p className="text-slate-400">
+                  <span className="font-semibold text-emerald-400">How it helps:</span> Under heavy cargo loads in 45°C summer traffic, electric motors exceed 85°C and transfer heat directly into adjacent battery modules. This digital twin forecasts internal cell heating minutes before physical sensors react, automatically triggering cooling and de-rating to prevent fire hazards and battery damage.
+                </p>
+              </div>
             </div>
           </div>
 
@@ -390,9 +400,14 @@ export const HeroScrollStory: React.FC = () => {
               <h3 className="text-base sm:text-lg font-bold text-white leading-snug">
                 Forecasting Non-Linear Aging Knee Inflection
               </h3>
-              <p className="text-xs text-slate-300 font-normal leading-relaxed">
-                Pinpoints the critical inflection point where gradual cell degradation accelerates into rapid capacity loss, enabling pre-emptive maintenance hundreds of cycles ahead.
-              </p>
+              <div className="space-y-1.5 text-xs font-normal leading-relaxed">
+                <p className="text-slate-300">
+                  <span className="font-semibold text-purple-400">What it does:</span> Analyzes long-term degradation curves, driver acceleration harshness, and electrochemical stress to identify the exact cycle where gradual cell aging suddenly accelerates into rapid capacity collapse.
+                </p>
+                <p className="text-slate-400">
+                  <span className="font-semibold text-cyan-400">How it helps:</span> LFP batteries degrade gradually for hundreds of cycles before hitting a steep "aging cliff" where capacity drops 4x faster due to lithium plating. Detecting this knee point 800+ cycles in advance lets fleet managers rotate trucks to lighter routes, schedule timely pack refurbishment, and protect high second-life resale value.
+                </p>
+              </div>
             </div>
           </div>
 
