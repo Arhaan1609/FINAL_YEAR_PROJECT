@@ -1,0 +1,39 @@
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+
+# Large raw & processed telemetry datasets (>100MB rejected by GitHub)
+data/raw/
+data/processed/
+
+# Results numpy arrays
+results/*.npy
+results/eval_data/
+
+# Runtime Logs
+logs/
+
+# Frontend dependencies and Next.js builds
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+# Environment variables & API keys
+.env
+.env.*
+*.env
+frontend/.env
+frontend/.env.local
+frontend/.env*.local
+
+# Virtual environments & IDE
+.venv/
+venv/
+ENV/
+.idea/
+.vscode/
+*.log
+*.tsbuildinfo
+**/chrome_temp/
+*.pma
+docs/*Comprehensive*

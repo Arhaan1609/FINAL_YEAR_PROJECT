@@ -1,0 +1,5 @@
+task,model,mean_error,std_error,max_error,p95_error
+SOC,KNN,-0.053,1.4356,71.7329,2.6571
+SOH,XGBoost,0.004,1.138,17.6899,2.3015
+RUL,GradientBoosting,0.0089,1.4702,18.8668,2.706
+Mileage,XGBoost,-0.0278,7.587,75.9311,14.6457

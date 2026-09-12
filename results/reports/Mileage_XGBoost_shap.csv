@@ -1,0 +1,17 @@
+feature,importance
+run_kms,16.127417
+energy_efficiency,12.110187
+city_encoded,3.8521771
+energy_utilized,2.2024443
+max_speed,1.8250477
+speed_ratio,0.48371997
+avg_speed,0.383195
+hour,0.14564086
+day_of_week,0.07856655
+is_peak,0.07064958
+month,0.027232729
+trip_duration_hrs,0.0
+trip_intensity,0.0
+stoppage_count,0.0
+stoppage_density,0.0
+is_weekend,0.0

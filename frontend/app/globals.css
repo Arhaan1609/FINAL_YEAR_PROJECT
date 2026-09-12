@@ -1,0 +1,386 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400;1,600&family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=JetBrains+Mono:wght@400;500;600;700;800&family=Fira+Code:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Pristine Light Theme Tokens (Stripe / Apple Pro Standard) */
+  --bg-page: #F8FAFC;
+  --bg-card: #FFFFFF;
+  --bg-card-hover: #F1F5F9;
+  --border-subtle: #E2E8F0;
+  --border-glow: #CBD5E1;
+  --text-primary: #0F172A;
+  --text-secondary: #475569;
+  --text-muted: #94A3B8;
+
+  --accent-safe: #059669;
+  --accent-telemetry: #0891B2;
+  --accent-warning: #D97706;
+  --accent-critical: #DC2626;
+  --accent-purple: #7C3AED;
+
+  --font-mono-nums: 'JetBrains Mono', 'Fira Code', monospace;
+  --font-sans-ui: 'Plus Jakarta Sans', 'Inter', -apple-system, sans-serif;
+
+  --primary-container: #E0F2FE;
+  --secondary-container: #EDE9FE;
+  --tertiary-container: #FEF3C7;
+  --error-container: #FEE2E2;
+  --surface-variant: #E2E8F0;
+  --surface-container-low: #F8FAFC;
+  --surface-container-high: #F1F5F9;
+  --surface-container-highest: #E2E8F0;
+
+  --accent-emerald: #059669;
+  --accent-cyan: #0891B2;
+  --accent-amber: #D97706;
+  --accent-crimson: #DC2626;
+}
+
+[data-theme="dark"], .dark {
+  /* Obsidian Deep Cyber Dark Theme (Palantir / Tesla Telematics Standard) */
+  --bg-page: #07090E;
+  --bg-card: #0D111A;
+  --bg-card-hover: #141A29;
+  --border-subtle: #1E293B;
+  --border-glow: #334155;
+  --text-primary: #F8FAFC;
+  --text-secondary: #94A3B8;
+  --text-muted: #64748B;
+
+  --accent-safe: #10B981;
+  --accent-telemetry: #06B6D4;
+  --accent-warning: #F59E0B;
+  --accent-critical: #EF4444;
+  --accent-purple: #8B5CF6;
+
+  --font-mono-nums: 'JetBrains Mono', 'Fira Code', monospace;
+  --font-sans-ui: 'Plus Jakarta Sans', 'Inter', -apple-system, sans-serif;
+
+  --primary-container: #00285D;
+  --secondary-container: #2C0051;
+  --tertiary-container: #461F00;
+  --error-container: #490005;
+  --surface-variant: #1E293B;
+  --surface-container-low: #0A0E17;
+  --surface-container-high: #161D2E;
+  --surface-container-highest: #222C44;
+
+  --accent-emerald: #10B981;
+  --accent-cyan: #06B6D4;
+  --accent-amber: #F59E0B;
+  --accent-crimson: #EF4444;
+}
+
+body {
+  background: var(--bg-page);
+  color: var(--text-primary);
+  font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  overflow-x: hidden;
+  transition: background-color 0.2s ease, color 0.2s ease;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.stat-value, .telemetry-num, .tabular-nums {
+  font-family: var(--font-mono-nums);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ─── Standardized Typographic Scale & Hierarchy System ─── */
+.display-header {
+  font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+  font-size: clamp(2rem, 3.5vw, 3rem); /* 32px to 48px */
+  font-weight: 800;
+  letter-spacing: -0.02em; /* -2% tracking */
+  line-height: 1.15;
+}
+
+.section-title {
+  font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+  font-size: clamp(1.125rem, 1.5vw, 1.375rem); /* 18px to 22px */
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--text-primary);
+}
+
+.metric-value {
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.body-standard {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.9375rem; /* 15px */
+  font-weight: 400;
+  line-height: 1.5;
+  color: var(--text-secondary);
+}
+
+.data-point-label {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.8125rem; /* 13px */
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.data-point-value {
+  font-family: 'JetBrains Mono', monospace;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+
+.micro-badge {
+  font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+  font-size: 0.6875rem; /* 11px */
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em; /* +4% tracking */
+}
+
+/* Glass & Card Utilities */
+.app-card {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.04), 0 6px 16px -2px rgba(0, 0, 0, 0.03);
+  border-radius: 1rem;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.app-card:hover {
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.08);
+  border-color: var(--border-glow);
+}
+
+.dark .app-card {
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.4);
+}
+
+.dark .app-card:hover {
+  box-shadow: 0 8px 30px -4px rgba(0, 0, 0, 0.6);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+/* Telemetry HUD Card */
+.telemetry-hud-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 1rem;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(248, 250, 252, 0.85));
+  border: 1px solid #E2E8F0;
+  box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.04);
+  transition: all 0.2s ease;
+}
+.dark .telemetry-hud-card {
+  background: linear-gradient(135deg, rgba(13, 17, 26, 0.95), rgba(7, 9, 14, 0.9));
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 4px 24px -2px rgba(0, 0, 0, 0.5);
+}
+.telemetry-hud-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px -4px rgba(0, 0, 0, 0.08);
+}
+.dark .telemetry-hud-card:hover {
+  box-shadow: 0 10px 30px -4px rgba(0, 0, 0, 0.7);
+  border-color: rgba(255, 255, 255, 0.16);
+}
+
+/* Cyber & DeepTech Grid Textures */
+.cyber-grid {
+  background-size: 32px 32px;
+  background-image: 
+    linear-gradient(to right, rgba(148, 163, 184, 0.09) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(148, 163, 184, 0.09) 1px, transparent 1px);
+}
+.dark .cyber-grid {
+  background-image: 
+    linear-gradient(to right, rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+}
+
+.oscilloscope-grid {
+  background-size: 20px 20px;
+  background-image: 
+    linear-gradient(to right, rgba(6, 182, 212, 0.08) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(6, 182, 212, 0.08) 1px, transparent 1px);
+}
+
+.text-gradient-emerald {
+  background: linear-gradient(135deg, #059669 0%, #0891B2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.dark .text-gradient-emerald {
+  background: linear-gradient(135deg, #10B981 0%, #06B6D4 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* ─── BESPOKE AUTOMOTIVE WORKSTATION ENGINEERING SUITE ─── */
+.tech-surface {
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 0.875rem;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+  position: relative;
+}
+.dark .tech-surface {
+  background: #0D111A;
+  border: 1px solid #1E293B;
+  box-shadow: 0 2px 10px 0 rgba(0, 0, 0, 0.4);
+}
+
+.tech-surface-raised {
+  background: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  border-radius: 0.875rem;
+}
+.dark .tech-surface-raised {
+  background: #141A29;
+  border: 1px solid #243048;
+}
+
+.tech-panel-header {
+  border-bottom: 1px solid #E2E8F0;
+  background: rgba(241, 245, 249, 0.7);
+}
+.dark .tech-panel-header {
+  border-bottom: 1px solid #1E293B;
+  background: rgba(15, 23, 42, 0.7);
+}
+
+.hairline-border {
+  border: 1px solid rgba(226, 232, 240, 0.95);
+}
+.dark .hairline-border {
+  border: 1px solid rgba(30, 41, 59, 0.95);
+}
+
+.telemetry-tag {
+  font-family: var(--font-sans-ui);
+  font-size: 0.75rem; /* 12px */
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.ruler-ticks {
+  background-image: linear-gradient(to right, rgba(148, 163, 184, 0.3) 1px, transparent 1px);
+  background-size: 10% 100%;
+}
+.dark .ruler-ticks {
+  background-image: linear-gradient(to right, rgba(100, 116, 139, 0.25) 1px, transparent 1px);
+  background-size: 10% 100%;
+}
+
+.led-indicator {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 9999px;
+  display: inline-block;
+}
+.led-indicator-green {
+  background-color: #10B981;
+  box-shadow: 0 0 8px rgba(16, 185, 129, 0.7);
+}
+.led-indicator-amber {
+  background-color: #F59E0B;
+  box-shadow: 0 0 8px rgba(245, 158, 11, 0.7);
+}
+.led-indicator-red {
+  background-color: #EF4444;
+  box-shadow: 0 0 8px rgba(239, 68, 68, 0.7);
+}
+.led-indicator-cyan {
+  background-color: #06B6D4;
+  box-shadow: 0 0 8px rgba(6, 182, 212, 0.7);
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+  border-radius: 9999px;
+}
+.dark ::-webkit-scrollbar-thumb {
+  background: #1E293B;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94A3B8;
+}
+
+/* ─── OFFICIAL PRINT & PDF EXPORT STYLES ─── */
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 15mm 15mm;
+  }
+
+  html, body {
+    background: #FFFFFF !important;
+    color: #0F172A !important;
+    font-size: 10.5pt !important;
+    line-height: 1.5 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  /* Completely suppress website navigation chrome, headers, sidebars, banners, buttons, and popovers */
+  header,
+  aside,
+  nav,
+  button,
+  [role="button"],
+  .print\:hidden,
+  [data-print-hide="true"],
+  #offline-banner,
+  .offline-banner,
+  [role="dialog"] {
+    display: none !important;
+    visibility: hidden !important;
+  }
+
+  /* Expand main container to fill printable page cleanly without scrollbars or clipping */
+  main {
+    padding: 0 !important;
+    margin: 0 !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    overflow: visible !important;
+    min-height: 0 !important;
+  }
+
+  /* Ensure individual sections never get awkwardly sliced across page boundaries */
+  .print-section {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+
+  /* Crisp cards on paper */
+  .glass-card,
+  .app-card {
+    background: #FFFFFF !important;
+    border: 1px solid #CBD5E1 !important;
+    box-shadow: none !important;
+    border-radius: 8px !important;
+  }
+
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+}
+

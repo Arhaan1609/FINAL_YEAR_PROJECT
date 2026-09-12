@@ -1,0 +1,103 @@
+"use client";
+
+import React, { useState, useEffect } from "react";
+import Link from "next/link";
+import { useFleetStore } from "../../lib/store/useFleetStore";
+import { Sun, Moon, ArrowRight, Terminal } from "lucide-react";
+
+export const LandingNavbar: React.FC = () => {
+  const { theme, toggleTheme } = useFleetStore();
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => {
+      setScrolled(window.scrollY > 20);
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  return (
+    <header
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+        scrolled
+          ? "bg-slate-950/85 dark:bg-[#07090E]/90 backdrop-blur-xl border-b border-slate-800/80 shadow-lg py-3"
+          : "bg-slate-950/60 backdrop-blur-md border-b border-white/10 py-3.5"
+      }`}
+    >
+      <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
+        {/* Brand Logo & Live Model Pill */}
+        <Link href="/" className="flex items-center gap-3 group">
+          <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-cyan-500 via-emerald-500 to-emerald-400 flex items-center justify-center text-slate-950 font-extrabold text-sm shadow-md shadow-emerald-500/20 group-hover:scale-105 transition-transform">
+            EV
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="font-extrabold text-base sm:text-lg tracking-tight font-heading text-white drop-shadow-sm">
+                EV Battery Intelligence
+              </span>
+              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-mono font-semibold bg-emerald-950/80 border border-emerald-500/40 text-emerald-300">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                74 Models Live
+              </span>
+            </div>
+            <p className="text-[11px] text-slate-400 font-mono hidden sm:block">
+              Commercial Fleet AI Platform • Sub-Second Telemetry Ingestion
+            </p>
+          </div>
+        </Link>
+
+        {/* Center Quick Navigation Links */}
+        <nav className="hidden lg:flex items-center gap-7 text-xs font-semibold text-slate-300">
+          <a href="#sandbox" className="hover:text-cyan-400 transition-colors flex items-center gap-1.5">
+            <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
+            Live Model Sandbox
+          </a>
+          <a href="#architecture" className="hover:text-emerald-400 transition-colors">
+            Tri-Pillar Architecture
+          </a>
+          <a href="#roi" className="hover:text-emerald-400 transition-colors">
+            Fleet ROI Simulator
+          </a>
+          <a href="#comparison" className="hover:text-emerald-400 transition-colors">
+            Vs Legacy BMS
+          </a>
+        </nav>
+
+        {/* Right CTAs */}
+        <div className="flex items-center gap-3">
+          {/* Theme Switcher */}
+          <button
+            onClick={toggleTheme}
+            className="p-2.5 rounded-xl border border-slate-700/80 bg-slate-900/80 text-slate-200 hover:bg-slate-800 transition-all shadow-sm"
+            title={`Switch to ${theme === "light" ? "Dark" : "Light"} mode`}
+          >
+            {theme === "light" ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
+          </button>
+
+          {/* Swagger Docs Link */}
+          <a
+            href="http://localhost:8000/docs"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hidden md:inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-slate-700/80 bg-slate-900/80 text-slate-200 text-xs font-mono font-medium hover:border-cyan-500/50 hover:text-cyan-300 transition-all"
+          >
+            <Terminal className="w-3.5 h-3.5 text-cyan-400" />
+            <span>FastAPI Docs</span>
+          </a>
+
+          {/* Primary Dashboard Launch CTA */}
+          <Link
+            href="/dashboard"
+            className="inline-flex items-center gap-2 px-4 sm:px-5 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white font-bold text-xs shadow-md shadow-emerald-600/25 hover:shadow-lg hover:shadow-emerald-600/40 transition-all hover:scale-105 active:scale-95 cursor-pointer"
+          >
+            <span>Launch Dashboard</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </Link>
+        </div>
+      </div>
+    </header>
+  );
+};
+
+export default LandingNavbar;
