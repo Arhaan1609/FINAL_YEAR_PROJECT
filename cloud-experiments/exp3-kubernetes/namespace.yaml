@@ -1,0 +1,10 @@
+# ──────────────────────────────────────────────────────────────
+# Namespace for EV Battery Intelligence experiments
+# ──────────────────────────────────────────────────────────────
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ev-battery
+  labels:
+    app.kubernetes.io/part-of: ev-battery-intelligence
+    experiment: cloud-computing

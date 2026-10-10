@@ -1,0 +1,14 @@
+# ──────────────────────────────────────────────────────────────
+# ConfigMap — shared configuration for EV Battery services
+# ──────────────────────────────────────────────────────────────
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ev-battery-config
+  namespace: ev-battery
+  labels:
+    app.kubernetes.io/part-of: ev-battery-intelligence
+data:
+  PYTHONUNBUFFERED: "1"
+  BACKEND_HOST: "0.0.0.0"
+  BACKEND_PORT: "8000"

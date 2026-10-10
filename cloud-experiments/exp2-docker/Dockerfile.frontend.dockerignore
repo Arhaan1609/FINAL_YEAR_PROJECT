@@ -1,0 +1,51 @@
+# Git
+.git/
+.gitignore
+
+# Python caches
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+
+# IDE
+.idea/
+.vscode/
+
+# Secrets / Environment files
+.env
+.env.*
+*.env
+frontend/.env
+frontend/.env.local
+frontend/.env*.local
+
+# Frontend build artifacts & deps (built inside container)
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+
+# Large raw & processed data (not needed at runtime)
+data/raw/
+data/processed/
+
+# Results / logs
+results/*.npy
+results/eval_data/
+logs/
+*.log
+*.tsbuildinfo
+
+# Cloud experiments themselves
+cloud-experiments/
+
+# Misc
+USELESS/
+docs/*Comprehensive*
+**/chrome_temp/
+*.pma

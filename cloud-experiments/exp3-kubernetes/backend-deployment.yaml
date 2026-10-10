@@ -1,0 +1,64 @@
+# ──────────────────────────────────────────────────────────────
+# Backend Deployment — FastAPI + ML Models
+# ──────────────────────────────────────────────────────────────
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ev-battery-backend
+  namespace: ev-battery
+  labels:
+    app: ev-battery-backend
+    app.kubernetes.io/part-of: ev-battery-intelligence
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ev-battery-backend
+  template:
+    metadata:
+      labels:
+        app: ev-battery-backend
+    spec:
+      containers:
+        - name: backend
+          image: evbattery/ev-battery-backend:latest
+          imagePullPolicy: Never   # Use local Docker Desktop images
+          ports:
+            - containerPort: 8000
+              name: http
+          envFrom:
+            - configMapRef:
+                name: ev-battery-config
+          resources:
+            requests:
+              memory: "2Gi"
+              cpu: "1000m"
+            limits:
+              memory: "4Gi"
+              cpu: "4000m"
+          # Liveness: restart if /health fails after startup
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 150
+            periodSeconds: 30
+            timeoutSeconds: 10
+            failureThreshold: 3
+          # Readiness: route traffic only when healthy
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 120
+            periodSeconds: 15
+            timeoutSeconds: 10
+            failureThreshold: 5
+          # Startup: give models time to load (up to 5 min)
+          startupProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            failureThreshold: 30

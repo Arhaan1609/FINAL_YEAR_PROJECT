@@ -1,0 +1,21 @@
+# ──────────────────────────────────────────────────────────────
+# Frontend Service — expose Next.js via NodePort
+# ──────────────────────────────────────────────────────────────
+apiVersion: v1
+kind: Service
+metadata:
+  name: ev-battery-frontend
+  namespace: ev-battery
+  labels:
+    app: ev-battery-frontend
+    app.kubernetes.io/part-of: ev-battery-intelligence
+spec:
+  type: NodePort
+  selector:
+    app: ev-battery-frontend
+  ports:
+    - port: 3000
+      targetPort: 3000
+      nodePort: 30300
+      protocol: TCP
+      name: http

@@ -1,0 +1,43 @@
+# ──────────────────────────────────────────────────────────────
+# Resource configurations for right-sizing experiments
+# Three tiers: over-provisioned, intermediate, right-sized
+# ──────────────────────────────────────────────────────────────
+
+# Over-provisioned: generous resources (wasteful but safe)
+over_provisioned:
+  backend:
+    memory_limit: "6Gi"
+    memory_request: "4Gi"
+    cpu_limit: "6000m"
+    cpu_request: "2000m"
+  frontend:
+    memory_limit: "1Gi"
+    memory_request: "512Mi"
+    cpu_limit: "2000m"
+    cpu_request: "500m"
+
+# Intermediate: moderate resources (balanced)
+intermediate:
+  backend:
+    memory_limit: "4Gi"
+    memory_request: "2Gi"
+    cpu_limit: "4000m"
+    cpu_request: "1000m"
+  frontend:
+    memory_limit: "512Mi"
+    memory_request: "256Mi"
+    cpu_limit: "1000m"
+    cpu_request: "250m"
+
+# Right-sized: minimal resources that still pass benchmarks
+right_sized:
+  backend:
+    memory_limit: "3Gi"
+    memory_request: "1.5Gi"
+    cpu_limit: "2000m"
+    cpu_request: "500m"
+  frontend:
+    memory_limit: "384Mi"
+    memory_request: "192Mi"
+    cpu_limit: "500m"
+    cpu_request: "125m"

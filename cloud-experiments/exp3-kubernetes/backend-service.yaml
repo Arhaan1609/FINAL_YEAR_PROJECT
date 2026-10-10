@@ -1,0 +1,21 @@
+# ──────────────────────────────────────────────────────────────
+# Backend Service — expose FastAPI within the cluster + NodePort
+# ──────────────────────────────────────────────────────────────
+apiVersion: v1
+kind: Service
+metadata:
+  name: ev-battery-backend
+  namespace: ev-battery
+  labels:
+    app: ev-battery-backend
+    app.kubernetes.io/part-of: ev-battery-intelligence
+spec:
+  type: NodePort
+  selector:
+    app: ev-battery-backend
+  ports:
+    - port: 8000
+      targetPort: 8000
+      nodePort: 30800
+      protocol: TCP
+      name: http

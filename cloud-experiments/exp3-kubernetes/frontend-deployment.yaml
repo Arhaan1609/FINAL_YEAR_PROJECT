@@ -1,0 +1,49 @@
+# ──────────────────────────────────────────────────────────────
+# Frontend Deployment — Next.js
+# ──────────────────────────────────────────────────────────────
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ev-battery-frontend
+  namespace: ev-battery
+  labels:
+    app: ev-battery-frontend
+    app.kubernetes.io/part-of: ev-battery-intelligence
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ev-battery-frontend
+  template:
+    metadata:
+      labels:
+        app: ev-battery-frontend
+    spec:
+      containers:
+        - name: frontend
+          image: evbattery/ev-battery-frontend:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 3000
+              name: http
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+            limits:
+              memory: "512Mi"
+              cpu: "1000m"
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 3000
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            timeoutSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 3000
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            timeoutSeconds: 5

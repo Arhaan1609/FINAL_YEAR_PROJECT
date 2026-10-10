@@ -1,0 +1,47 @@
+# ──────────────────────────────────────────────────────────────
+# Dockerfile.backend — EV Battery Intelligence FastAPI Backend
+# Build context: project root (../../)
+# ──────────────────────────────────────────────────────────────
+FROM python:3.11-slim
+
+LABEL maintainer="EV Battery Intelligence Team"
+LABEL description="FastAPI backend with tri-pillar ML models (Modules A+B+C)"
+
+# Prevent Python from buffering stdout/stderr
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONDONTWRITEBYTECODE=1
+
+WORKDIR /app
+
+# Install system dependencies for scipy, scikit-learn, etc.
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    gcc g++ libgomp1 \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Python dependencies first (cache layer)
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy application code and models
+COPY api/ ./api/
+COPY modules/ ./modules/
+COPY models/ ./models/
+COPY cli.py .
+COPY run_all.py .
+COPY retrain_all.py .
+
+# Copy database if it exists (SQLite fallback)
+COPY fleet_intelligence.db .
+
+# Copy scripts and results dirs (may be referenced by modules)
+COPY scripts/ ./scripts/
+COPY results/ ./results/
+
+EXPOSE 8000
+
+# Health check using the /health endpoint
+HEALTHCHECK --interval=30s --timeout=10s --start-period=120s --retries=3 \
+    CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')" || exit 1
+
+# Start uvicorn — models are loaded during FastAPI lifespan
+CMD ["uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "8000"]

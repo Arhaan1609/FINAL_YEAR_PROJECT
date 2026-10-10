@@ -1,0 +1,4 @@
+config_name,instance_type,vcpu,memory_gb,hourly_rate_usd,monthly_rate_usd,cost_per_1000_requests_usd,cost_per_run_usd,avg_latency_ms,p95_latency_ms,throughput_rps,failed_requests,description
+over-provisioned,m6i.2xlarge,8,32,0.384,280.32,0.001974,0.000197,18.5,28.4,54.04,0,"8 vCPU, 32 GB — significantly over-provisioned"
+intermediate,m6i.xlarge,4,16,0.192,140.16,0.001024,0.000102,19.2,29.1,52.08,0,"4 vCPU, 16 GB — balanced general-purpose"
+right-sized,m6i.large,2,8,0.096,70.08,0.000547,5.5e-05,20.5,31.0,48.78,0,"2 vCPU, 8 GB — minimal viable"
